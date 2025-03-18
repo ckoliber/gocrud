@@ -66,8 +66,6 @@ func (where Where[Model]) Schema(r huma.Registry) *huma.Schema {
 		},
 	}
 
-	schema
-
 	fmt.Println(schema.Ref)
 
 	// schema.OneOf = append(schema.OneOf,

@@ -1,8 +1,6 @@
 package gocrud
 
 import (
-	"fmt"
-
 	"github.com/ckoliber/gocrud/internal/get"
 	"github.com/ckoliber/gocrud/internal/put"
 	"github.com/ckoliber/gocrud/internal/post"
