@@ -44,7 +44,7 @@ package main
 
 import (
     "github.com/danielgtaylor/huma/v2"
-	"github.com/danielgtaylor/huma/v2/adapters/humago"
+    "github.com/danielgtaylor/huma/v2/adapters/humago"
 
     "github.com/ckoliber/gocrud"
 )
