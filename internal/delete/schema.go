@@ -11,7 +11,7 @@ type OutputOne[Model any] struct {
 }
 
 type InputBulk[Model any] struct {
-	Where utils.Where[Model] `path:"where" doc:"Where"`
+	Where utils.Where[Model] `path:"where,deepObject" doc:"Where"`
 }
 
 type OutputBulk[Model any] struct {
