@@ -1,11 +1,10 @@
 package api
 
-import (
-	"context"
-)
+import "context"
 
 type PatchBulkInput[Model any] struct {
-	Where Where[Model] `path:"where,deepObject" doc:"Where"`
+	Where Where[Model] `query:"where" doc:"Get where" example:"{}"`
+	Body  Model
 }
 type PatchBulkOutput[Model any] struct {
 	Body []Model

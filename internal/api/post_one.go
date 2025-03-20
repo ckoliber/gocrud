@@ -3,7 +3,7 @@ package api
 import "context"
 
 type PostOneInput[Model any] struct {
-	ID string `path:"id" maxLength:"30" doc:"ID"`
+	Body Model
 }
 type PostOneOutput[Model any] struct {
 	Body Model

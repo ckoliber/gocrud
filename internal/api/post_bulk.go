@@ -1,11 +1,9 @@
 package api
 
-import (
-	"context"
-)
+import "context"
 
 type PostBulkInput[Model any] struct {
-	Where Where[Model] `path:"where,deepObject" doc:"Where"`
+	Body []Model
 }
 type PostBulkOutput[Model any] struct {
 	Body []Model

@@ -8,29 +8,10 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 )
 
-type Order[Model any] struct {
-	Value map[string]any
-}
+type Order[Model any] map[string]string
 
 func (order *Order[Model]) UnmarshalText(text []byte) error {
-	return json.Unmarshal(text, &order.Value)
-}
-
-func (order *Order[Model]) Receiver() reflect.Value {
-	return reflect.ValueOf(order).Elem().Field(0)
-}
-
-func (order Order[Model]) Resolve(ctx huma.Context) []error {
-	// if i != 0 && i%3 == 0 {
-	// 	return []error{&huma.ErrorDetail{
-	// 		Location: prefix.String(),
-	// 		Message:  "Value cannot be a multiple of three",
-	// 		Value:    i,
-	// 	}}
-	// }
-	fmt.Println(order)
-	fmt.Println("Resolve")
-	return nil
+	return json.Unmarshal(text, (*map[string]string)(order))
 }
 
 // Schema returns a schema representing this value on the wire.
@@ -55,9 +36,9 @@ func (order *Order[Model]) Schema(r huma.Registry) *huma.Schema {
 }
 
 func (order *Order[Model]) ToSQL() (result []string) {
-	// for key, val := range *order {
-	// 	result = append(result, fmt.Sprintf("%s %s", key, val))
-	// }
+	for key, val := range *order {
+		result = append(result, fmt.Sprintf("%s %s", key, val))
+	}
 
 	return result
 }

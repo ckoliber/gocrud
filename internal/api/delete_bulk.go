@@ -1,11 +1,9 @@
 package api
 
-import (
-	"context"
-)
+import "context"
 
 type DeleteBulkInput[Model any] struct {
-	Where Where[Model] `path:"where,deepObject" doc:"Where"`
+	Where Where[Model] `query:"where" doc:"Get where" example:"{}"`
 }
 type DeleteBulkOutput[Model any] struct {
 	Body []Model

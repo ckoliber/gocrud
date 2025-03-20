@@ -3,7 +3,7 @@ package api
 import "context"
 
 type DeleteOneInput[Model any] struct {
-	ID string `path:"id" maxLength:"30" doc:"ID"`
+	ID string `path:"id" doc:"Entity identifier"`
 }
 type DeleteOneOutput[Model any] struct {
 	Body Model

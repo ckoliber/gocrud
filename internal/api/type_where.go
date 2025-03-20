@@ -1,7 +1,7 @@
 package api
 
 import (
-	"fmt"
+	"encoding/json"
 	"reflect"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -9,9 +9,8 @@ import (
 
 type Where[Model any] map[string]any
 
-func (where *Where[Model]) Resolve(ctx huma.Context) error {
-	fmt.Println("Resolve")
-	return nil
+func (where *Where[Model]) UnmarshalText(text []byte) error {
+	return json.Unmarshal(text, (*map[string]any)(where))
 }
 
 // Schema returns a schema representing this value on the wire.
@@ -19,7 +18,7 @@ func (where *Where[Model]) Resolve(ctx huma.Context) error {
 func (where *Where[Model]) Schema(r huma.Registry) *huma.Schema {
 	name := "Where" + huma.DefaultSchemaNamer(reflect.TypeFor[Model](), "")
 	schema := &huma.Schema{
-		// Ref:        "#/components/schemas/" + name,
+		Ref:  "#/components/schemas/" + name,
 		Type: huma.TypeObject,
 		Properties: map[string]*huma.Schema{
 			"_not": {
@@ -46,7 +45,6 @@ func (where *Where[Model]) Schema(r huma.Registry) *huma.Schema {
 		field := modelType.Field(i)
 		schema.Properties[field.Tag.Get("json")] = &huma.Schema{
 			Type: huma.TypeString,
-			Enum: []any{"ASC", "DESC"},
 		}
 	}
 
@@ -55,6 +53,6 @@ func (where *Where[Model]) Schema(r huma.Registry) *huma.Schema {
 }
 
 func (where *Where[Model]) ToSQL() (string, error) {
-	fmt.Println(where)
+	// TODO: Implement
 	return "", nil
 }

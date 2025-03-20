@@ -3,7 +3,7 @@ package api
 import "context"
 
 type GetOneInput[Model any] struct {
-	ID string `path:"id" maxLength:"30" doc:"ID"`
+	ID string `path:"id" doc:"Entity identifier"`
 }
 type GetOneOutput[Model any] struct {
 	Body Model

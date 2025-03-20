@@ -30,7 +30,7 @@ func Register[Model any](_api huma.API) {
 		Method:      http.MethodGet,
 		Summary:     fmt.Sprintf("GET One %s", name),
 		Description: fmt.Sprintf("GET One %s", name),
-		Tags:        []string{"GET", "One", name},
+		// Tags:        []string{"GET", "One", name},
 	}, api.GetOne[Model])
 	huma.Register(_api, huma.Operation{
 		OperationID: fmt.Sprintf("get-bulk-%s", key),
@@ -38,7 +38,7 @@ func Register[Model any](_api huma.API) {
 		Method:      http.MethodGet,
 		Summary:     fmt.Sprintf("GET Bulk %s", name),
 		Description: fmt.Sprintf("GET Bulk %s", name),
-		Tags:        []string{"GET", "Bulk", name},
+		// Tags:        []string{"GET", "Bulk", name},
 	}, api.GetBulk[Model])
 
 	// Register PUT operations
@@ -48,7 +48,7 @@ func Register[Model any](_api huma.API) {
 		Method:      http.MethodPut,
 		Summary:     fmt.Sprintf("PUT One %s", name),
 		Description: fmt.Sprintf("PUT One %s", name),
-		Tags:        []string{"PUT", "One", name},
+		// Tags:        []string{"PUT", "One", name},
 	}, api.PutOne[Model])
 	huma.Register(_api, huma.Operation{
 		OperationID: fmt.Sprintf("put-bulk-%s", key),
@@ -56,7 +56,7 @@ func Register[Model any](_api huma.API) {
 		Method:      http.MethodPut,
 		Summary:     fmt.Sprintf("PUT Bulk %s", name),
 		Description: fmt.Sprintf("PUT Bulk %s", name),
-		Tags:        []string{"PUT", "Bulk", name},
+		// Tags:        []string{"PUT", "Bulk", name},
 	}, api.PutBulk[Model])
 
 	// Register POST operations
@@ -66,7 +66,7 @@ func Register[Model any](_api huma.API) {
 		Method:      http.MethodPost,
 		Summary:     fmt.Sprintf("POST One %s", name),
 		Description: fmt.Sprintf("POST One %s", name),
-		Tags:        []string{"POST", "One", name},
+		// Tags:        []string{"POST", "One", name},
 	}, api.PostOne[Model])
 	huma.Register(_api, huma.Operation{
 		OperationID: fmt.Sprintf("post-bulk-%s", key),
@@ -74,7 +74,7 @@ func Register[Model any](_api huma.API) {
 		Method:      http.MethodPost,
 		Summary:     fmt.Sprintf("POST Bulk %s", name),
 		Description: fmt.Sprintf("POST Bulk %s", name),
-		Tags:        []string{"POST", "Bulk", name},
+		// Tags:        []string{"POST", "Bulk", name},
 	}, api.PostBulk[Model])
 
 	// Register PATCH operations
@@ -84,7 +84,7 @@ func Register[Model any](_api huma.API) {
 		Method:      http.MethodPatch,
 		Summary:     fmt.Sprintf("PATCH One %s", name),
 		Description: fmt.Sprintf("PATCH One %s", name),
-		Tags:        []string{"PATCH", "One", name},
+		// Tags:        []string{"PATCH", "One", name},
 	}, api.PatchOne[Model])
 	huma.Register(_api, huma.Operation{
 		OperationID: fmt.Sprintf("patch-bulk-%s", key),
@@ -92,7 +92,7 @@ func Register[Model any](_api huma.API) {
 		Method:      http.MethodPatch,
 		Summary:     fmt.Sprintf("PATCH Bulk %s", name),
 		Description: fmt.Sprintf("PATCH Bulk %s", name),
-		Tags:        []string{"PATCH", "Bulk", name},
+		// Tags:        []string{"PATCH", "Bulk", name},
 	}, api.PatchBulk[Model])
 
 	// Register DELETE operations
@@ -102,7 +102,7 @@ func Register[Model any](_api huma.API) {
 		Method:      http.MethodDelete,
 		Summary:     fmt.Sprintf("DELETE One %s", name),
 		Description: fmt.Sprintf("DELETE One %s", name),
-		Tags:        []string{"DELETE", "One", name},
+		// Tags:        []string{"DELETE", "One", name},
 	}, api.DeleteOne[Model])
 	huma.Register(_api, huma.Operation{
 		OperationID: fmt.Sprintf("delete-bulk-%s", key),
@@ -110,6 +110,6 @@ func Register[Model any](_api huma.API) {
 		Method:      http.MethodDelete,
 		Summary:     fmt.Sprintf("DELETE Bulk %s", name),
 		Description: fmt.Sprintf("DELETE Bulk %s", name),
-		Tags:        []string{"DELETE", "Bulk", name},
+		// Tags:        []string{"DELETE", "Bulk", name},
 	}, api.DeleteBulk[Model])
 }

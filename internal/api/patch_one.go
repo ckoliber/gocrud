@@ -3,7 +3,8 @@ package api
 import "context"
 
 type PatchOneInput[Model any] struct {
-	ID string `path:"id" maxLength:"30" doc:"ID"`
+	ID   string `path:"id" doc:"Entity identifier"`
+	Body Model
 }
 type PatchOneOutput[Model any] struct {
 	Body Model
