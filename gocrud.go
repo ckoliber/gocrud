@@ -71,7 +71,7 @@ func Register[Model any](_api huma.API) {
 	huma.Register(_api, huma.Operation{
 		OperationID: fmt.Sprintf("post-bulk-%s", key),
 		Path:        fmt.Sprintf("/%s", key),
-		Method:      http.MethodPut,
+		Method:      http.MethodPost,
 		Summary:     fmt.Sprintf("POST Bulk %s", name),
 		Description: fmt.Sprintf("POST Bulk %s", name),
 		Tags:        []string{"POST", "Bulk", name},
