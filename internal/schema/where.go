@@ -1,4 +1,4 @@
-package api
+package schema
 
 import (
 	"encoding/json"
@@ -18,7 +18,6 @@ func (where *Where[Model]) UnmarshalText(text []byte) error {
 func (where *Where[Model]) Schema(r huma.Registry) *huma.Schema {
 	name := "Where" + huma.DefaultSchemaNamer(reflect.TypeFor[Model](), "")
 	schema := &huma.Schema{
-		Ref:  "#/components/schemas/" + name,
 		Type: huma.TypeObject,
 		Properties: map[string]*huma.Schema{
 			"_not": {
@@ -45,6 +44,7 @@ func (where *Where[Model]) Schema(r huma.Registry) *huma.Schema {
 		field := modelType.Field(i)
 		schema.Properties[field.Tag.Get("json")] = &huma.Schema{
 			Type: huma.TypeString,
+			Enum: []any{"ASC", "DESC"},
 		}
 	}
 
