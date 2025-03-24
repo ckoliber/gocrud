@@ -6,17 +6,12 @@ import (
 	"github.com/ckoliber/gocrud/internal/schema"
 )
 
-type DeleteOneInput[Model any] struct {
+type DeleteSingleInput[Model any] struct {
 	ID string `path:"id" doc:"Entity identifier"`
 }
-type DeleteOneOutput[Model any] struct {
+type DeleteSingleOutput[Model any] struct {
 	Body Model
 }
-
-func DeleteOne[Model any](ctx context.Context, i *DeleteOneInput[Model]) (*DeleteOneOutput[Model], error) {
-	return nil, nil
-}
-
 type DeleteBulkInput[Model any] struct {
 	Where schema.Where[Model] `query:"where" doc:"Get where" example:"{}"`
 }
@@ -24,6 +19,10 @@ type DeleteBulkOutput[Model any] struct {
 	Body []Model
 }
 
-func DeleteBulk[Model any](ctx context.Context, i *DeleteBulkInput[Model]) (*DeleteBulkOutput[Model], error) {
+func (controller *CRUDController[Model]) DeleteSingle(ctx context.Context, i *DeleteSingleInput[Model]) (*DeleteSingleOutput[Model], error) {
+	return nil, nil
+}
+
+func (controller *CRUDController[Model]) DeleteBulk(ctx context.Context, i *DeleteBulkInput[Model]) (*DeleteBulkOutput[Model], error) {
 	return nil, nil
 }

@@ -2,17 +2,12 @@ package controller
 
 import "context"
 
-type PostOneInput[Model any] struct {
+type PostSingleInput[Model any] struct {
 	Body Model
 }
-type PostOneOutput[Model any] struct {
+type PostSingleOutput[Model any] struct {
 	Body Model
 }
-
-func PostOne[Model any](ctx context.Context, i *PostOneInput[Model]) (*PostOneOutput[Model], error) {
-	return nil, nil
-}
-
 type PostBulkInput[Model any] struct {
 	Body []Model
 }
@@ -20,6 +15,10 @@ type PostBulkOutput[Model any] struct {
 	Body []Model
 }
 
-func PostBulk[Model any](ctx context.Context, i *PostBulkInput[Model]) (*PostBulkOutput[Model], error) {
+func (controller *CRUDController[Model]) PostSingle(ctx context.Context, i *PostSingleInput[Model]) (*PostSingleOutput[Model], error) {
+	return nil, nil
+}
+
+func (controller *CRUDController[Model]) PostBulk(ctx context.Context, i *PostBulkInput[Model]) (*PostBulkOutput[Model], error) {
 	return nil, nil
 }
