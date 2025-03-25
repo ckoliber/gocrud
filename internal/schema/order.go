@@ -2,7 +2,6 @@ package schema
 
 import (
 	"encoding/json"
-	"fmt"
 	"reflect"
 
 	"github.com/danielgtaylor/huma/v2"
@@ -10,13 +9,13 @@ import (
 
 type Order[Model any] map[string]string
 
-func (order *Order[Model]) UnmarshalText(text []byte) error {
-	return json.Unmarshal(text, (*map[string]string)(order))
+func (o *Order[Model]) UnmarshalText(text []byte) error {
+	return json.Unmarshal(text, (*map[string]string)(o))
 }
 
 // Schema returns a schema representing this value on the wire.
 // It returns the schema of the contained type.
-func (order *Order[Model]) Schema(r huma.Registry) *huma.Schema {
+func (o *Order[Model]) Schema(r huma.Registry) *huma.Schema {
 	schema := &huma.Schema{
 		Type:                 huma.TypeObject,
 		Properties:           map[string]*huma.Schema{},
@@ -33,12 +32,4 @@ func (order *Order[Model]) Schema(r huma.Registry) *huma.Schema {
 	}
 
 	return schema
-}
-
-func (order *Order[Model]) ToSQL() (result []string) {
-	for key, val := range *order {
-		result = append(result, fmt.Sprintf("%s %s", key, val))
-	}
-
-	return result
 }

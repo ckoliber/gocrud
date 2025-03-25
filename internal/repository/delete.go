@@ -1,16 +1,14 @@
 package repository
 
-import (
-	"github.com/huandu/go-sqlbuilder"
-)
+import "github.com/ckoliber/gocrud/internal/schema"
 
-func (repository *CRUDRepository[Model]) DeleteReturnNull(where string) ([]Model, error) {
-	builder := sqlbuilder.DeleteFrom(repository.table)
+func (r *CRUDRepository[Model]) Delete(fields *schema.Fields[Model], where *schema.Where[Model], order *schema.Order[Model], limit *int, skip *int) ([]Model, error) {
+	builder := r.model.DeleteFrom(r.table)
 	builder.Where(where)
 
 	query, args := builder.Build()
 
-	result, err := repository.db.Exec(query, args)
+	result, err := r.db.Exec(query, args)
 	if err != nil {
 		return nil, err
 	}

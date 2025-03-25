@@ -1,15 +1,14 @@
 package repository
 
-import (
-	"github.com/huandu/go-sqlbuilder"
-)
+import "github.com/ckoliber/gocrud/internal/schema"
 
-func (repository *CRUDRepository[Model]) Update(model Model, where string) ([]Model, error) {
-	builder := sqlbuilder.Update(repository.table) //.Set(model)
+func (r *CRUDRepository[Model]) Update(fields *schema.Fields[Model], where *schema.Where[Model], order *schema.Order[Model], limit *int, skip *int, model *Model) ([]Model, error) {
+	builder := r.model.Update(r.table, model)
+	builder.Where(where)
 
 	query, args := builder.Build()
 
-	result, err := repository.db.Exec(query, args)
+	result, err := r.db.Exec(query, args)
 	if err != nil {
 		return nil, err
 	}

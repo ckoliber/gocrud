@@ -4,133 +4,143 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/danielgtaylor/huma/v2"
-	"github.com/huandu/go-sqlbuilder"
 
-	"github.com/ckoliber/gocrud/internal/controller"
 	"github.com/ckoliber/gocrud/internal/repository"
-	"github.com/ckoliber/gocrud/internal/utils"
+	"github.com/ckoliber/gocrud/internal/service"
+)
+
+type Mode int
+
+const (
+	BulkSingle Mode = iota
+	Single
+	None
 )
 
 type Options[Model any] struct {
-	Flavor sqlbuilder.Flavor
+	GETMode    Mode
+	PUTMode    Mode
+	POSTMode   Mode
+	PATCHMode  Mode
+	DELETEMode Mode
 
-	ReadEnable   bool
-	CreateEnable bool
-	UpdateEnable bool
-	DeleteEnable bool
-
-	CreateBulk bool
-	UpdateBulk bool
-	DeleteBulk bool
-
-	UpdateReturn int // Count - ID - Record
-	DeleteReturn int // Count - ID - Record
-
-	UpdatePartition bool
-	DeletePartition bool
-
-	MapRead   func(skip int, limit int, order map[string]string, where sqlbuilder.WhereClause, columns []string)
-	MapCreate func(columns []string, models []Model)
-	MapUpdate func(skip int, limit int, order map[string]string, where sqlbuilder.WhereClause, columns []string, models []Model)
-	MapDelete func(skip int, limit int, order map[string]string, where sqlbuilder.WhereClause, columns []string)
+	service.CRUDHooks[Model]
 }
 
 func Register[Model any](api huma.API, db *sql.DB, options *Options[Model]) {
-	_controller := controller.CRUDController[Model]{}
-	_repository := repository.CRUDRepository[Model]{
-		table:   utils.GetModelTable[Model](),
-		columns: utils.GetModelColumns[Model](),
-	}
+	repo := repository.NewCRUDRepository[Model](db)
+	svc := service.NewCRUDService(repo, &options.CRUDHooks)
 
 	// Register GET operations
-	huma.Register(api, huma.Operation{
-		OperationID: fmt.Sprintf("get-one-%s", key),
-		Path:        fmt.Sprintf("/%s/{id}", key),
-		Method:      http.MethodGet,
-		Summary:     fmt.Sprintf("GET One %s", name),
-		Description: fmt.Sprintf("GET One %s", name),
-		// Tags:        []string{"GET", "One", name},
-	}, crud.GetSingle)
-	huma.Register(api, huma.Operation{
-		OperationID: fmt.Sprintf("get-bulk-%s", key),
-		Path:        fmt.Sprintf("/%s", key),
-		Method:      http.MethodGet,
-		Summary:     fmt.Sprintf("GET Bulk %s", name),
-		Description: fmt.Sprintf("GET Bulk %s", name),
-		// Tags:        []string{"GET", "Bulk", name},
-	}, crud.GetBulk)
+	if options.GETMode <= Single {
+		huma.Register(api, huma.Operation{
+			OperationID: fmt.Sprintf("get-single-%s", strings.ToLower(svc.GetName())),
+			Path:        svc.GetPath() + "/{id}",
+			Method:      http.MethodGet,
+			Summary:     fmt.Sprintf("GET Single %s", svc.GetName()),
+			Description: fmt.Sprintf("GET Single %s", svc.GetName()),
+			// Tags:        []string{"GET", "Single", svc.GetName()},
+		}, svc.GetSingle)
+	}
+	if options.GETMode <= BulkSingle {
+		huma.Register(api, huma.Operation{
+			OperationID: fmt.Sprintf("get-bulk-%s", strings.ToLower(svc.GetName())),
+			Path:        svc.GetPath(),
+			Method:      http.MethodGet,
+			Summary:     fmt.Sprintf("GET Bulk %s", svc.GetName()),
+			Description: fmt.Sprintf("GET Bulk %s", svc.GetName()),
+			// Tags:        []string{"GET", "Bulk", svc.GetName()},
+		}, svc.GetBulk)
+	}
 
 	// Register PUT operations
-	huma.Register(api, huma.Operation{
-		OperationID: fmt.Sprintf("put-one-%s", key),
-		Path:        fmt.Sprintf("/%s/{id}", key),
-		Method:      http.MethodPut,
-		Summary:     fmt.Sprintf("PUT One %s", name),
-		Description: fmt.Sprintf("PUT One %s", name),
-		// Tags:        []string{"PUT", "One", name},
-	}, crud.PutSingle)
-	huma.Register(api, huma.Operation{
-		OperationID: fmt.Sprintf("put-bulk-%s", key),
-		Path:        fmt.Sprintf("/%s", key),
-		Method:      http.MethodPut,
-		Summary:     fmt.Sprintf("PUT Bulk %s", name),
-		Description: fmt.Sprintf("PUT Bulk %s", name),
-		// Tags:        []string{"PUT", "Bulk", name},
-	}, crud.PutBulk)
+	if options.PUTMode <= Single {
+		huma.Register(api, huma.Operation{
+			OperationID: fmt.Sprintf("put-single-%s", strings.ToLower(svc.GetName())),
+			Path:        svc.GetPath() + "/{id}",
+			Method:      http.MethodPut,
+			Summary:     fmt.Sprintf("PUT Single %s", svc.GetName()),
+			Description: fmt.Sprintf("PUT Single %s", svc.GetName()),
+			// Tags:        []string{"PUT", "Single", svc.GetName()},
+		}, svc.PutSingle)
+	}
+	if options.PUTMode <= BulkSingle {
+		huma.Register(api, huma.Operation{
+			OperationID: fmt.Sprintf("put-bulk-%s", strings.ToLower(svc.GetName())),
+			Path:        svc.GetPath(),
+			Method:      http.MethodPut,
+			Summary:     fmt.Sprintf("PUT Bulk %s", svc.GetName()),
+			Description: fmt.Sprintf("PUT Bulk %s", svc.GetName()),
+			// Tags:        []string{"PUT", "Bulk", svc.GetName()},
+		}, svc.PutBulk)
+	}
 
 	// Register POST operations
-	huma.Register(api, huma.Operation{
-		OperationID: fmt.Sprintf("post-one-%s", key),
-		Path:        fmt.Sprintf("/%s/one", key),
-		Method:      http.MethodPost,
-		Summary:     fmt.Sprintf("POST One %s", name),
-		Description: fmt.Sprintf("POST One %s", name),
-		// Tags:        []string{"POST", "One", name},
-	}, crud.PostSingle)
-	huma.Register(api, huma.Operation{
-		OperationID: fmt.Sprintf("post-bulk-%s", key),
-		Path:        fmt.Sprintf("/%s", key),
-		Method:      http.MethodPost,
-		Summary:     fmt.Sprintf("POST Bulk %s", name),
-		Description: fmt.Sprintf("POST Bulk %s", name),
-		// Tags:        []string{"POST", "Bulk", name},
-	}, crud.PostBulk)
+	if options.POSTMode <= Single {
+		huma.Register(api, huma.Operation{
+			OperationID: fmt.Sprintf("post-single-%s", strings.ToLower(svc.GetName())),
+			Path:        svc.GetPath() + "/one",
+			Method:      http.MethodPost,
+			Summary:     fmt.Sprintf("POST Single %s", svc.GetName()),
+			Description: fmt.Sprintf("POST Single %s", svc.GetName()),
+			// Tags:        []string{"POST", "Single", name},
+		}, svc.PostSingle)
+	}
+	if options.POSTMode <= BulkSingle {
+		huma.Register(api, huma.Operation{
+			OperationID: fmt.Sprintf("post-bulk-%s", strings.ToLower(svc.GetName())),
+			Path:        svc.GetPath(),
+			Method:      http.MethodPost,
+			Summary:     fmt.Sprintf("POST Bulk %s", svc.GetName()),
+			Description: fmt.Sprintf("POST Bulk %s", svc.GetName()),
+			// Tags:        []string{"POST", "Bulk", svc.GetName()},
+		}, svc.PostBulk)
+	}
 
 	// Register PATCH operations
-	huma.Register(api, huma.Operation{
-		OperationID: fmt.Sprintf("patch-one-%s", key),
-		Path:        fmt.Sprintf("/%s/{id}", key),
-		Method:      http.MethodPatch,
-		Summary:     fmt.Sprintf("PATCH One %s", name),
-		Description: fmt.Sprintf("PATCH One %s", name),
-		// Tags:        []string{"PATCH", "One", name},
-	}, crud.PatchSingle)
-	huma.Register(api, huma.Operation{
-		OperationID: fmt.Sprintf("patch-bulk-%s", key),
-		Path:        fmt.Sprintf("/%s", key),
-		Method:      http.MethodPatch,
-		Summary:     fmt.Sprintf("PATCH Bulk %s", name),
-		Description: fmt.Sprintf("PATCH Bulk %s", name),
-		// Tags:        []string{"PATCH", "Bulk", name},
-	}, crud.PatchBulk)
+	if options.PATCHMode <= Single {
+		huma.Register(api, huma.Operation{
+			OperationID: fmt.Sprintf("patch-single-%s", strings.ToLower(svc.GetName())),
+			Path:        svc.GetPath() + "/{id}",
+			Method:      http.MethodPatch,
+			Summary:     fmt.Sprintf("PATCH Single %s", svc.GetName()),
+			Description: fmt.Sprintf("PATCH Single %s", svc.GetName()),
+			// Tags:        []string{"PATCH", "Single", svc.GetName()},
+		}, svc.PatchSingle)
+	}
+	if options.PATCHMode <= BulkSingle {
+		huma.Register(api, huma.Operation{
+			OperationID: fmt.Sprintf("patch-bulk-%s", strings.ToLower(svc.GetName())),
+			Path:        svc.GetPath(),
+			Method:      http.MethodPatch,
+			Summary:     fmt.Sprintf("PATCH Bulk %s", svc.GetName()),
+			Description: fmt.Sprintf("PATCH Bulk %s", svc.GetName()),
+			// Tags:        []string{"PATCH", "Bulk", svc.GetName()},
+		}, svc.PatchBulk)
+	}
 
 	// Register DELETE operations
-	huma.Register(api, huma.Operation{
-		OperationID: fmt.Sprintf("delete-one-%s", key),
-		Path:        fmt.Sprintf("/%s/{id}", key),
-		Method:      http.MethodDelete,
-		Summary:     fmt.Sprintf("DELETE One %s", name),
-		Description: fmt.Sprintf("DELETE One %s", name),
-		// Tags:        []string{"DELETE", "One", name},
-	}, crud.DeleteSingle)
-	huma.Register(api, huma.Operation{
-		OperationID: fmt.Sprintf("delete-bulk-%s", key),
-		Path:        fmt.Sprintf("/%s", key),
-		Method:      http.MethodDelete,
-		Summary:     fmt.Sprintf("DELETE Bulk %s", name),
-		Description: fmt.Sprintf("DELETE Bulk %s", name),
-		// Tags:        []string{"DELETE", "Bulk", name},
-	}, crud.DeleteBulk)
+	if options.DELETEMode <= Single {
+		huma.Register(api, huma.Operation{
+			OperationID: fmt.Sprintf("delete-single-%s", strings.ToLower(svc.GetName())),
+			Path:        svc.GetPath() + "/{id}",
+			Method:      http.MethodDelete,
+			Summary:     fmt.Sprintf("DELETE Single %s", svc.GetName()),
+			Description: fmt.Sprintf("DELETE Single %s", svc.GetName()),
+			// Tags:        []string{"DELETE", "Single", svc.GetName()},
+		}, svc.DeleteSingle)
+	}
+	if options.DELETEMode <= BulkSingle {
+		huma.Register(api, huma.Operation{
+			OperationID: fmt.Sprintf("delete-bulk-%s", strings.ToLower(svc.GetName())),
+			Path:        svc.GetPath(),
+			Method:      http.MethodDelete,
+			Summary:     fmt.Sprintf("DELETE Bulk %s", svc.GetName()),
+			Description: fmt.Sprintf("DELETE Bulk %s", svc.GetName()),
+			// Tags:        []string{"DELETE", "Bulk", svc.GetName()},
+		}, svc.DeleteBulk)
+	}
 }

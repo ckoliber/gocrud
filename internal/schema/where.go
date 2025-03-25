@@ -9,13 +9,13 @@ import (
 
 type Where[Model any] map[string]any
 
-func (where *Where[Model]) UnmarshalText(text []byte) error {
-	return json.Unmarshal(text, (*map[string]any)(where))
+func (w *Where[Model]) UnmarshalText(text []byte) error {
+	return json.Unmarshal(text, (*map[string]any)(w))
 }
 
 // Schema returns a schema representing this value on the wire.
 // It returns the schema of the contained type.
-func (where *Where[Model]) Schema(r huma.Registry) *huma.Schema {
+func (w *Where[Model]) Schema(r huma.Registry) *huma.Schema {
 	name := "Where" + huma.DefaultSchemaNamer(reflect.TypeFor[Model](), "")
 	schema := &huma.Schema{
 		Type: huma.TypeObject,
@@ -50,9 +50,4 @@ func (where *Where[Model]) Schema(r huma.Registry) *huma.Schema {
 
 	r.Map()[name] = schema
 	return schema
-}
-
-func (where *Where[Model]) ToSQL() (string, error) {
-	// TODO: Implement
-	return "", nil
 }
