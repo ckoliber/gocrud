@@ -1,24 +1,43 @@
 package repository
 
-import (
-	"os"
+import "fmt"
 
-	"github.com/ckoliber/gocrud/internal/schema"
-)
-
-func (r *CRUDRepository[Model]) Read(fields *schema.Fields[Model], where *schema.Where[Model], order *schema.Order[Model], limit *int, skip *int) ([]Model, error) {
-	data := map[string]any{
-		"action": "read",
-		"fields": fields,
-		"where":  where,
-		"order":  order,
-		"limit":  limit,
-		"skip":   skip,
+func (r *CRUDRepository[Model]) Read(where *map[string]any, order *map[string]string, limit *int, skip *int) ([]Model, error) {
+	builder := r.model.SelectFrom(r.table)
+	if where != nil {
+		builder.Where(WhereToString(&builder.Cond, *where))
+	}
+	if order != nil {
+		builder.OrderBy(OrderToString(*order))
+	}
+	if limit != nil {
+		builder.Limit(*limit)
+	}
+	if skip != nil {
+		builder.Offset(*skip)
 	}
 
-	if err := r.template.Execute(os.Stdout, data); err != nil {
+	query, args := builder.Build()
+
+	fmt.Println(query, args)
+
+	rows, err := r.db.Query(query, args...)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	var result []Model
+	for rows.Next() {
+		var model Model
+		if err := rows.Scan(r.model.Addr(&model)...); err != nil {
+			return nil, err
+		}
+		result = append(result, model)
+	}
+	if err = rows.Err(); err != nil {
 		return nil, err
 	}
 
-	return nil, nil
+	return result, nil
 }

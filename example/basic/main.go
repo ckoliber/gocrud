@@ -21,18 +21,18 @@ type Options struct {
 }
 
 type User struct {
-	_    struct{} `json:"user"`
-	ID   string   `json:"id"`
-	Name string   `json:"name" maxLength:"30" example:"David" doc:"User name"`
-	Age  int      `json:"age" minimum:"1" maximum:"120" example:"25" doc:"User age from 1 to 120"`
+	_    struct{} `db:"users" json:"user"`
+	ID   *int     `db:"id" json:"id,omitempty"`
+	Name string   `db:"name" json:"name" maxLength:"30" example:"David" doc:"User name"`
+	Age  int      `db:"age" json:"age" minimum:"1" maximum:"120" example:"25" doc:"User age from 1 to 120"`
 }
 
 type Document struct {
-	_       struct{} `json:"document"`
-	ID      string   `json:"id"`
-	Title   string   `json:"title" maxLength:"50" doc:"Document title"`
-	Content string   `json:"content" maxLength:"500" doc:"Document content"`
-	UserID  string   `json:"userId" doc:"Document userId"`
+	_       struct{} `db:"documents" json:"document"`
+	ID      *int     `db:"id" json:"id,omitempty"`
+	Title   string   `db:"title" json:"title" maxLength:"50" doc:"Document title"`
+	Content string   `db:"content" json:"content" maxLength:"500" doc:"Document content"`
+	UserID  int      `db:"userId" json:"userId" doc:"Document userId"`
 }
 
 func main() {
@@ -50,8 +50,8 @@ func main() {
 		}
 
 		// Register GET /greeting/{name}
-		gocrud.Register(api, db, &gocrud.Options[User]{})
-		gocrud.Register(api, db, &gocrud.Options[Document]{})
+		gocrud.Register(api, gocrud.NewRepository[User](db), &gocrud.Options[User]{})
+		gocrud.Register(api, gocrud.NewRepository[Document](db), &gocrud.Options[Document]{})
 
 		// Create the HTTP server.
 		server := http.Server{

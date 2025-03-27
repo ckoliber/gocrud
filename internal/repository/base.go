@@ -4,41 +4,34 @@ import (
 	"database/sql"
 	"reflect"
 	"strings"
-	"text/template"
+
+	"github.com/huandu/go-sqlbuilder"
 )
 
-type CRUDRepository[Model any] struct {
-	db       *sql.DB
-	table    string
-	columns  []string
-	template *template.Template
+type Repository[Model any] interface {
+	Read(where *map[string]any, order *map[string]string, limit *int, skip *int) ([]Model, error)
+	Update(where *map[string]any, model *Model) ([]Model, error)
+	Delete(where *map[string]any) ([]Model, error)
+	Create(models *[]Model) ([]Model, error)
 }
 
-func NewCRUDRepository[Model any](db *sql.DB, SQL *template.Template) *CRUDRepository[Model] {
+type CRUDRepository[Model any] struct {
+	db    *sql.DB
+	table string
+	model *sqlbuilder.Struct
+}
+
+func NewCRUDRepository[Model any](db *sql.DB) *CRUDRepository[Model] {
 	_type := reflect.TypeFor[Model]()
 
 	result := &CRUDRepository[Model]{
-		db:       db,
-		table:    strings.ToLower(_type.Name()),
-		columns:  []string{},
-		template: SQL,
-	}
-
-	if SQL == nil {
-		switch reflect.TypeOf(db.Driver()).String() {
-		case "*pq.Driver", "*pqx.Driver":
-			result.template = getPostgres()
-		case "*mysql.MySQLDriver":
-			result.template = getMySQL()
-		case "*mssql.MssqlDriver":
-			result.template = getMSSQL()
-		case "*sqlite.SQLiteDriver":
-			result.template = getSQLite()
-		}
+		db:    db,
+		table: strings.ToLower(_type.Name()),
+		model: sqlbuilder.NewStruct(new(Model)).For(sqlbuilder.PostgreSQL),
 	}
 
 	if field, ok := _type.FieldByName("_"); ok {
-		if value := field.Tag.Get("table"); value != "" {
+		if value := field.Tag.Get("db"); value != "" {
 			result.table = value
 		}
 	}
@@ -46,6 +39,51 @@ func NewCRUDRepository[Model any](db *sql.DB, SQL *template.Template) *CRUDRepos
 	return result
 }
 
-func (r *CRUDRepository[Model]) Transaction() (*sql.Tx, error) {
-	return r.db.Begin()
+func Map[T, V any](ts []T, fn func(T) V) []V {
+	result := make([]V, len(ts))
+	for i, t := range ts {
+		result[i] = fn(t)
+	}
+	return result
+}
+
+func OrderToString(order map[string]string) string {
+	result := []string{}
+
+	for key, val := range order {
+		result = append(result, key+" "+val)
+	}
+
+	return strings.Join(result, ",")
+}
+
+func WhereToString(cond *sqlbuilder.Cond, where map[string]any) string {
+	if item, ok := where["_not"]; ok {
+		return "NOT (" + WhereToString(cond, item.(map[string]any)) + ")"
+	} else if items, ok := where["_and"]; ok {
+		return "(" + strings.Join(Map(items.([]map[string]any), func(item map[string]any) string { return WhereToString(cond, item) }), " AND ") + ")"
+	} else if items, ok := where["_or"]; ok {
+		return "(" + strings.Join(Map(items.([]map[string]any), func(item map[string]any) string { return WhereToString(cond, item) }), " OR ") + ")"
+	}
+
+	result := []string{}
+	for key, val := range where {
+		expr := val.(map[string]any)
+
+		if value, ok := expr["_eq"]; ok {
+			result = append(result, cond.EQ(key, value))
+		} else if value, ok := expr["_neq"]; ok {
+			result = append(result, cond.NEQ(key, value))
+		} else if value, ok := expr["_gt"]; ok {
+			result = append(result, cond.GT(key, value))
+		} else if value, ok := expr["_gte"]; ok {
+			result = append(result, cond.GTE(key, value))
+		} else if value, ok := expr["_lt"]; ok {
+			result = append(result, cond.LT(key, value))
+		} else if value, ok := expr["_lte"]; ok {
+			result = append(result, cond.LTE(key, value))
+		}
+	}
+
+	return cond.And(result...)
 }

@@ -6,36 +6,47 @@ import (
 	"strings"
 
 	"github.com/ckoliber/gocrud/internal/repository"
-	"github.com/ckoliber/gocrud/internal/schema"
 )
 
 type CRUDHooks[Model any] struct {
-	PreRead   func(fields *schema.Fields[Model], where *schema.Where[Model], order *schema.Order[Model], limit *int, skip *int) error
-	PreCreate func(fields *schema.Fields[Model], models *[]Model) error
-	PreUpdate func(fields *schema.Fields[Model], where *schema.Where[Model], order *schema.Order[Model], limit *int, skip *int, model *Model) error
-	PreDelete func(fields *schema.Fields[Model], where *schema.Where[Model], order *schema.Order[Model], limit *int, skip *int) error
+	PreRead   func(where *map[string]any, order *map[string]string, limit *int, skip *int) error
+	PreUpdate func(where *map[string]any, model *Model) error
+	PreDelete func(where *map[string]any) error
+	PreCreate func(models *[]Model) error
 
 	PostRead   func(models *[]Model) error
-	PostCreate func(models *[]Model) error
 	PostUpdate func(models *[]Model) error
 	PostDelete func(models *[]Model) error
+	PostCreate func(models *[]Model) error
 }
 
 type CRUDService[Model any] struct {
+	id    string
+	key   string
 	name  string
 	path  string
-	repo  *repository.CRUDRepository[Model]
+	repo  repository.Repository[Model]
 	hooks *CRUDHooks[Model]
 }
 
-func NewCRUDService[Model any](repo *repository.CRUDRepository[Model], hooks *CRUDHooks[Model]) *CRUDService[Model] {
+func NewCRUDService[Model any](repo repository.Repository[Model], hooks *CRUDHooks[Model]) *CRUDService[Model] {
 	_type := reflect.TypeFor[Model]()
 
 	result := &CRUDService[Model]{
+		id:    "id",
+		key:   "ID",
 		name:  _type.Name(),
 		path:  fmt.Sprintf("/%s", strings.ToLower(_type.Name())),
 		repo:  repo,
 		hooks: hooks,
+	}
+
+	for i := range _type.NumField() {
+		field := _type.Field(i)
+		if val, ok := field.Tag.Lookup("id"); ok && val == "true" {
+			result.id = field.Tag.Get("json")
+			result.key = field.Name
+		}
 	}
 
 	if field, ok := _type.FieldByName("_"); ok {

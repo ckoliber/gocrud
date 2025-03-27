@@ -7,23 +7,22 @@ import (
 )
 
 type DeleteSingleInput[Model any] struct {
-	Fields schema.Fields[Model] `query:"fields,deepObject" doc:"Entity fields" example:"[]"`
-	ID     string               `path:"id" doc:"Entity identifier"`
+	ID string `path:"id" doc:"Entity identifier"`
 }
 type DeleteSingleOutput[Model any] struct {
 	Body Model
 }
 
 func (s *CRUDService[Model]) DeleteSingle(ctx context.Context, i *DeleteSingleInput[Model]) (*DeleteSingleOutput[Model], error) {
-	where := schema.Where[Model]{"id": i.ID}
+	where := schema.Where[Model]{s.id: i.ID}
 
 	if s.hooks.PreDelete != nil {
-		if err := s.hooks.PreDelete(&i.Fields, &where, nil, nil, nil); err != nil {
+		if err := s.hooks.PreDelete((*map[string]any)(&where)); err != nil {
 			return nil, err
 		}
 	}
 
-	result, err := s.repo.Delete(&i.Fields, &where, nil, nil, nil)
+	result, err := s.repo.Delete((*map[string]any)(&where))
 	if err != nil {
 		return nil, err
 	}

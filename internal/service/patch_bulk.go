@@ -7,12 +7,8 @@ import (
 )
 
 type PatchBulkInput[Model any] struct {
-	Fields schema.Fields[Model] `query:"fields,deepObject" doc:"Entity fields" example:"[]"`
-	Where  schema.Where[Model]  `query:"where,deepObject" doc:"Entity where" example:"{}"`
-	Order  schema.Order[Model]  `query:"order,deepObject" doc:"Entity order" example:"{}"`
-	Limit  int                  `query:"limit" min:"1" doc:"Entity limit" example:"50"`
-	Skip   int                  `query:"skip" min:"0" doc:"Entity skip" example:"0"`
-	Body   Model
+	Where schema.Where[Model] `query:"where,deepObject" doc:"Entity where" example:"{}"`
+	Body  Model
 }
 type PatchBulkOutput[Model any] struct {
 	Body []Model
@@ -20,12 +16,12 @@ type PatchBulkOutput[Model any] struct {
 
 func (s *CRUDService[Model]) PatchBulk(ctx context.Context, i *PatchBulkInput[Model]) (o *PatchBulkOutput[Model], err error) {
 	if s.hooks.PreUpdate != nil {
-		if err := s.hooks.PreUpdate(&i.Fields, &i.Where, &i.Order, &i.Limit, &i.Skip, &i.Body); err != nil {
+		if err := s.hooks.PreUpdate((*map[string]any)(&i.Where), &i.Body); err != nil {
 			return nil, err
 		}
 	}
 
-	result, err := s.repo.Update(&i.Fields, &i.Where, &i.Order, &i.Limit, &i.Skip, &i.Body)
+	result, err := s.repo.Update((*map[string]any)(&i.Where), &i.Body)
 	if err != nil {
 		return nil, err
 	}

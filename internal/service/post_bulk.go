@@ -2,13 +2,10 @@ package service
 
 import (
 	"context"
-
-	"github.com/ckoliber/gocrud/internal/schema"
 )
 
 type PostBulkInput[Model any] struct {
-	Fields schema.Fields[Model] `query:"fields,deepObject" doc:"Entity fields" example:"[]"`
-	Body   []Model
+	Body []Model
 }
 type PostBulkOutput[Model any] struct {
 	Body []Model
@@ -16,12 +13,12 @@ type PostBulkOutput[Model any] struct {
 
 func (s *CRUDService[Model]) PostBulk(ctx context.Context, i *PostBulkInput[Model]) (*PostBulkOutput[Model], error) {
 	if s.hooks.PreCreate != nil {
-		if err := s.hooks.PreCreate(&i.Fields, &i.Body); err != nil {
+		if err := s.hooks.PreCreate(&i.Body); err != nil {
 			return nil, err
 		}
 	}
 
-	result, err := s.repo.Create(&i.Fields, &i.Body)
+	result, err := s.repo.Create(&i.Body)
 	if err != nil {
 		return nil, err
 	}

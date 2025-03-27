@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
-	"text/template"
 
 	"github.com/danielgtaylor/huma/v2"
 
@@ -22,8 +21,6 @@ const (
 )
 
 type Options[Model any] struct {
-	SQL *template.Template
-
 	GETMode    Mode
 	PUTMode    Mode
 	POSTMode   Mode
@@ -33,8 +30,7 @@ type Options[Model any] struct {
 	service.CRUDHooks[Model]
 }
 
-func Register[Model any](api huma.API, db *sql.DB, options *Options[Model]) {
-	repo := repository.NewCRUDRepository[Model](db, options.SQL)
+func Register[Model any](api huma.API, repo repository.Repository[Model], options *Options[Model]) {
 	svc := service.NewCRUDService(repo, &options.CRUDHooks)
 
 	// Register GET operations
@@ -146,4 +142,8 @@ func Register[Model any](api huma.API, db *sql.DB, options *Options[Model]) {
 			// Tags:        []string{"DELETE", "Bulk", svc.GetName()},
 		}, svc.DeleteBulk)
 	}
+}
+
+func NewRepository[Model any](db *sql.DB) repository.Repository[Model] {
+	return repository.NewCRUDRepository[Model](db)
 }
