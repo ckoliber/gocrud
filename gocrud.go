@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"net/http"
 	"strings"
+	"text/template"
 
 	"github.com/danielgtaylor/huma/v2"
 
@@ -21,6 +22,8 @@ const (
 )
 
 type Options[Model any] struct {
+	SQL *template.Template
+
 	GETMode    Mode
 	PUTMode    Mode
 	POSTMode   Mode
@@ -31,7 +34,7 @@ type Options[Model any] struct {
 }
 
 func Register[Model any](api huma.API, db *sql.DB, options *Options[Model]) {
-	repo := repository.NewCRUDRepository[Model](db)
+	repo := repository.NewCRUDRepository[Model](db, options.SQL)
 	svc := service.NewCRUDService(repo, &options.CRUDHooks)
 
 	// Register GET operations

@@ -17,8 +17,10 @@ type DeleteSingleOutput[Model any] struct {
 func (s *CRUDService[Model]) DeleteSingle(ctx context.Context, i *DeleteSingleInput[Model]) (*DeleteSingleOutput[Model], error) {
 	where := schema.Where[Model]{"id": i.ID}
 
-	if err := s.hooks.PreDelete(&i.Fields, &where, nil, nil, nil); err != nil {
-		return nil, err
+	if s.hooks.PreDelete != nil {
+		if err := s.hooks.PreDelete(&i.Fields, &where, nil, nil, nil); err != nil {
+			return nil, err
+		}
 	}
 
 	result, err := s.repo.Delete(&i.Fields, &where, nil, nil, nil)
@@ -26,8 +28,10 @@ func (s *CRUDService[Model]) DeleteSingle(ctx context.Context, i *DeleteSingleIn
 		return nil, err
 	}
 
-	if err := s.hooks.PostDelete(&result); err != nil {
-		return nil, err
+	if s.hooks.PostDelete != nil {
+		if err := s.hooks.PostDelete(&result); err != nil {
+			return nil, err
+		}
 	}
 
 	return &DeleteSingleOutput[Model]{

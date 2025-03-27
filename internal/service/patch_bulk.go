@@ -19,8 +19,10 @@ type PatchBulkOutput[Model any] struct {
 }
 
 func (s *CRUDService[Model]) PatchBulk(ctx context.Context, i *PatchBulkInput[Model]) (o *PatchBulkOutput[Model], err error) {
-	if err := s.hooks.PreUpdate(&i.Fields, &i.Where, &i.Order, &i.Limit, &i.Skip, &i.Body); err != nil {
-		return nil, err
+	if s.hooks.PreUpdate != nil {
+		if err := s.hooks.PreUpdate(&i.Fields, &i.Where, &i.Order, &i.Limit, &i.Skip, &i.Body); err != nil {
+			return nil, err
+		}
 	}
 
 	result, err := s.repo.Update(&i.Fields, &i.Where, &i.Order, &i.Limit, &i.Skip, &i.Body)
@@ -28,8 +30,10 @@ func (s *CRUDService[Model]) PatchBulk(ctx context.Context, i *PatchBulkInput[Mo
 		return nil, err
 	}
 
-	if err := s.hooks.PostUpdate(&o.Body); err != nil {
-		return nil, err
+	if s.hooks.PostUpdate != nil {
+		if err := s.hooks.PostUpdate(&o.Body); err != nil {
+			return nil, err
+		}
 	}
 
 	return &PatchBulkOutput[Model]{

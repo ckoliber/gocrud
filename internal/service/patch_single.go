@@ -18,8 +18,10 @@ type PatchSingleOutput[Model any] struct {
 func (s *CRUDService[Model]) PatchSingle(ctx context.Context, i *PatchSingleInput[Model]) (*PatchSingleOutput[Model], error) {
 	where := schema.Where[Model]{"id": i.ID}
 
-	if err := s.hooks.PreUpdate(&i.Fields, &where, nil, nil, nil, &i.Body); err != nil {
-		return nil, err
+	if s.hooks.PreUpdate != nil {
+		if err := s.hooks.PreUpdate(&i.Fields, &where, nil, nil, nil, &i.Body); err != nil {
+			return nil, err
+		}
 	}
 
 	result, err := s.repo.Update(&i.Fields, &where, nil, nil, nil, &i.Body)
@@ -27,8 +29,10 @@ func (s *CRUDService[Model]) PatchSingle(ctx context.Context, i *PatchSingleInpu
 		return nil, err
 	}
 
-	if err := s.hooks.PostUpdate(&result); err != nil {
-		return nil, err
+	if s.hooks.PostUpdate != nil {
+		if err := s.hooks.PostUpdate(&result); err != nil {
+			return nil, err
+		}
 	}
 
 	return &PatchSingleOutput[Model]{

@@ -18,8 +18,10 @@ type GetBulkOutput[Model any] struct {
 }
 
 func (s *CRUDService[Model]) GetBulk(ctx context.Context, i *GetBulkInput[Model]) (*GetBulkOutput[Model], error) {
-	if err := s.hooks.PreRead(&i.Fields, &i.Where, &i.Order, &i.Limit, &i.Skip); err != nil {
-		return nil, err
+	if s.hooks.PreRead != nil {
+		if err := s.hooks.PreRead(&i.Fields, &i.Where, &i.Order, &i.Limit, &i.Skip); err != nil {
+			return nil, err
+		}
 	}
 
 	result, err := s.repo.Read(&i.Fields, &i.Where, &i.Order, &i.Limit, &i.Skip)
@@ -27,8 +29,10 @@ func (s *CRUDService[Model]) GetBulk(ctx context.Context, i *GetBulkInput[Model]
 		return nil, err
 	}
 
-	if err := s.hooks.PostRead(&result); err != nil {
-		return nil, err
+	if s.hooks.PostRead != nil {
+		if err := s.hooks.PostRead(&result); err != nil {
+			return nil, err
+		}
 	}
 
 	return &GetBulkOutput[Model]{

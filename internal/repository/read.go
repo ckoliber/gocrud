@@ -1,27 +1,24 @@
 package repository
 
 import (
-	"fmt"
+	"os"
 
 	"github.com/ckoliber/gocrud/internal/schema"
 )
 
 func (r *CRUDRepository[Model]) Read(fields *schema.Fields[Model], where *schema.Where[Model], order *schema.Order[Model], limit *int, skip *int) ([]Model, error) {
-	builder := r.model.SelectFrom(r.table)
-	builder.Where(where)
+	data := map[string]any{
+		"action": "read",
+		"fields": fields,
+		"where":  where,
+		"order":  order,
+		"limit":  limit,
+		"skip":   skip,
+	}
 
-	query, args := builder.Build()
-
-	rows, err := r.db.Query(query, args)
-	if err != nil {
+	if err := r.template.Execute(os.Stdout, data); err != nil {
 		return nil, err
 	}
 
-	var result []Model
-	rows.Scan(result)
-
-	fmt.Println(query)
-	fmt.Println(args)
-
-	return result, nil
+	return nil, nil
 }

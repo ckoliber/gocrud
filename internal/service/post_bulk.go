@@ -15,8 +15,10 @@ type PostBulkOutput[Model any] struct {
 }
 
 func (s *CRUDService[Model]) PostBulk(ctx context.Context, i *PostBulkInput[Model]) (*PostBulkOutput[Model], error) {
-	if err := s.hooks.PreCreate(&i.Fields, &i.Body); err != nil {
-		return nil, err
+	if s.hooks.PreCreate != nil {
+		if err := s.hooks.PreCreate(&i.Fields, &i.Body); err != nil {
+			return nil, err
+		}
 	}
 
 	result, err := s.repo.Create(&i.Fields, &i.Body)
@@ -24,8 +26,10 @@ func (s *CRUDService[Model]) PostBulk(ctx context.Context, i *PostBulkInput[Mode
 		return nil, err
 	}
 
-	if err := s.hooks.PostCreate(&result); err != nil {
-		return nil, err
+	if s.hooks.PostCreate != nil {
+		if err := s.hooks.PostCreate(&result); err != nil {
+			return nil, err
+		}
 	}
 
 	return &PostBulkOutput[Model]{

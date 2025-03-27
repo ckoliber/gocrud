@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"database/sql"
 	"fmt"
 	"net/http"
 	"time"
@@ -11,6 +12,8 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humago"
 	"github.com/danielgtaylor/huma/v2/humacli"
+
+	_ "github.com/lib/pq"
 )
 
 type Options struct {
@@ -41,9 +44,14 @@ func main() {
 
 		api.UseMiddleware()
 
+		db, err := sql.Open("postgres", "host=127.0.0.1 port=5432 user=postgres password=password dbname=postgres sslmode=disable")
+		if err != nil {
+			fmt.Println(err)
+		}
+
 		// Register GET /greeting/{name}
-		gocrud.Register[User](api)
-		gocrud.Register[Document](api)
+		gocrud.Register(api, db, &gocrud.Options[User]{})
+		gocrud.Register(api, db, &gocrud.Options[Document]{})
 
 		// Create the HTTP server.
 		server := http.Server{

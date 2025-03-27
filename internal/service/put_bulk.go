@@ -27,9 +27,11 @@ func (s *CRUDService[Model]) PutBulk(ctx context.Context, i *PutBulkInput[Model]
 		// TODO: must change model ID
 		where := schema.Where[Model]{"id": "#model.ID"}
 
-		if err := s.hooks.PreUpdate(&i.Fields, &where, nil, nil, nil, &model); err != nil {
-			// tx.Rollback()
-			return nil, err
+		if s.hooks.PreUpdate != nil {
+			if err := s.hooks.PreUpdate(&i.Fields, &where, nil, nil, nil, &model); err != nil {
+				// tx.Rollback()
+				return nil, err
+			}
 		}
 
 		result, err := s.repo.Update(&i.Fields, &where, nil, nil, nil, &model)
@@ -38,9 +40,11 @@ func (s *CRUDService[Model]) PutBulk(ctx context.Context, i *PutBulkInput[Model]
 			return nil, err
 		}
 
-		if err := s.hooks.PostUpdate(&result); err != nil {
-			// tx.Rollback()
-			return nil, err
+		if s.hooks.PostUpdate != nil {
+			if err := s.hooks.PostUpdate(&result); err != nil {
+				// tx.Rollback()
+				return nil, err
+			}
 		}
 
 		o.Body = append(o.Body, result...)
