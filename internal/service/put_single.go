@@ -2,8 +2,6 @@ package service
 
 import (
 	"context"
-
-	"github.com/ckoliber/gocrud/internal/schema"
 )
 
 type PutSingleInput[Model any] struct {
@@ -15,21 +13,19 @@ type PutSingleOutput[Model any] struct {
 }
 
 func (s *CRUDService[Model]) PutSingle(ctx context.Context, i *PutSingleInput[Model]) (*PutSingleOutput[Model], error) {
-	where := schema.Where[Model]{s.id: map[string]any{"_eq": i.ID}}
-
-	if s.hooks.PreUpdate != nil {
-		if err := s.hooks.PreUpdate((*map[string]any)(&where), &i.Body); err != nil {
+	if s.hooks.PrePut != nil {
+		if err := s.hooks.PrePut(&[]Model{i.Body}); err != nil {
 			return nil, err
 		}
 	}
 
-	result, err := s.repo.Update((*map[string]any)(&where), &i.Body)
+	result, err := s.repo.Put(&[]Model{i.Body})
 	if err != nil {
 		return nil, err
 	}
 
-	if s.hooks.PostUpdate != nil {
-		if err := s.hooks.PostUpdate(&result); err != nil {
+	if s.hooks.PostPut != nil {
+		if err := s.hooks.PostPut(&result); err != nil {
 			return nil, err
 		}
 	}

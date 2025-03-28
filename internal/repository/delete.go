@@ -2,7 +2,7 @@ package repository
 
 import "strings"
 
-func (r *CRUDRepository[Model]) Delete(where *map[string]any) ([]Model, error) {
+func (r *SQLRepository[Model]) Delete(where *map[string]any) ([]Model, error) {
 	builder := r.model.DeleteFrom(r.table)
 	if value := WhereToString(&builder.Cond, where); value != "" {
 		builder.Where(value)

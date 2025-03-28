@@ -12,19 +12,19 @@ type PostBulkOutput[Model any] struct {
 }
 
 func (s *CRUDService[Model]) PostBulk(ctx context.Context, i *PostBulkInput[Model]) (*PostBulkOutput[Model], error) {
-	if s.hooks.PreCreate != nil {
-		if err := s.hooks.PreCreate(&i.Body); err != nil {
+	if s.hooks.PrePost != nil {
+		if err := s.hooks.PrePost(&i.Body); err != nil {
 			return nil, err
 		}
 	}
 
-	result, err := s.repo.Create(&i.Body)
+	result, err := s.repo.Post(&i.Body)
 	if err != nil {
 		return nil, err
 	}
 
-	if s.hooks.PostCreate != nil {
-		if err := s.hooks.PostCreate(&result); err != nil {
+	if s.hooks.PostPost != nil {
+		if err := s.hooks.PostPost(&result); err != nil {
 			return nil, err
 		}
 	}

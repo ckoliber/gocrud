@@ -1,6 +1,6 @@
 package repository
 
-func (r *CRUDRepository[Model]) Read(where *map[string]any, order *map[string]string, limit *int, skip *int) ([]Model, error) {
+func (r *SQLRepository[Model]) Get(where *map[string]any, order *map[string]string, limit *int, skip *int) ([]Model, error) {
 	builder := r.model.SelectFrom(r.table)
 	if value := WhereToString(&builder.Cond, where); value != "" {
 		builder.Where(value)

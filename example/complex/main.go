@@ -41,7 +41,6 @@ func main() {
 
 		api.UseMiddleware()
 
-		// Register GET /greeting/{name}
 		gocrud.Register[User](api)
 		gocrud.Register[Document](api)
 

@@ -2,7 +2,7 @@ package repository
 
 import "strings"
 
-func (r *CRUDRepository[Model]) Create(models *[]Model) ([]Model, error) {
+func (r *SQLRepository[Model]) Post(models *[]Model) ([]Model, error) {
 	anySlice := make([]any, len(*models))
 	for i, model := range *models {
 		anySlice[i] = model

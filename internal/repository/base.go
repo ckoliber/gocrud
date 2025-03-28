@@ -9,22 +9,22 @@ import (
 )
 
 type Repository[Model any] interface {
-	Read(where *map[string]any, order *map[string]string, limit *int, skip *int) ([]Model, error)
-	Update(where *map[string]any, model *Model) ([]Model, error)
+	Get(where *map[string]any, order *map[string]string, limit *int, skip *int) ([]Model, error)
+	Put(models *[]Model) ([]Model, error)
+	Post(models *[]Model) ([]Model, error)
 	Delete(where *map[string]any) ([]Model, error)
-	Create(models *[]Model) ([]Model, error)
 }
 
-type CRUDRepository[Model any] struct {
+type SQLRepository[Model any] struct {
 	db    *sql.DB
 	table string
 	model *sqlbuilder.Struct
 }
 
-func NewCRUDRepository[Model any](db *sql.DB) *CRUDRepository[Model] {
+func NewSQLRepository[Model any](db *sql.DB) *SQLRepository[Model] {
 	_type := reflect.TypeFor[Model]()
 
-	result := &CRUDRepository[Model]{
+	result := &SQLRepository[Model]{
 		db:    db,
 		table: strings.ToLower(_type.Name()),
 		model: sqlbuilder.NewStruct(new(Model)).For(sqlbuilder.PostgreSQL),

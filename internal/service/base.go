@@ -9,15 +9,15 @@ import (
 )
 
 type CRUDHooks[Model any] struct {
-	PreRead   func(where *map[string]any, order *map[string]string, limit *int, skip *int) error
-	PreUpdate func(where *map[string]any, model *Model) error
+	PreGet    func(where *map[string]any, order *map[string]string, limit *int, skip *int) error
+	PrePut    func(models *[]Model) error
+	PrePost   func(models *[]Model) error
 	PreDelete func(where *map[string]any) error
-	PreCreate func(models *[]Model) error
 
-	PostRead   func(models *[]Model) error
-	PostUpdate func(models *[]Model) error
+	PostGet    func(models *[]Model) error
+	PostPut    func(models *[]Model) error
+	PostPost   func(models *[]Model) error
 	PostDelete func(models *[]Model) error
-	PostCreate func(models *[]Model) error
 }
 
 type CRUDService[Model any] struct {
@@ -34,7 +34,6 @@ func NewCRUDService[Model any](repo repository.Repository[Model], hooks *CRUDHoo
 
 	result := &CRUDService[Model]{
 		id:    "id",
-		key:   "ID",
 		name:  _type.Name(),
 		path:  fmt.Sprintf("/%s", strings.ToLower(_type.Name())),
 		repo:  repo,
@@ -45,7 +44,6 @@ func NewCRUDService[Model any](repo repository.Repository[Model], hooks *CRUDHoo
 		field := _type.Field(i)
 		if val, ok := field.Tag.Lookup("id"); ok && val == "true" {
 			result.id = field.Tag.Get("json")
-			result.key = field.Name
 		}
 	}
 
@@ -62,7 +60,7 @@ func NewCRUDService[Model any](repo repository.Repository[Model], hooks *CRUDHoo
 }
 
 func (s *CRUDService[Model]) GetName() string {
-	return s.name
+	return strings.ToLower(s.name)
 }
 
 func (s *CRUDService[Model]) GetPath() string {

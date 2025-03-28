@@ -4,7 +4,6 @@ import (
 	"database/sql"
 	"fmt"
 	"net/http"
-	"strings"
 
 	"github.com/danielgtaylor/huma/v2"
 
@@ -21,11 +20,10 @@ const (
 )
 
 type Options[Model any] struct {
-	GETMode    Mode
-	PUTMode    Mode
-	POSTMode   Mode
-	PATCHMode  Mode
-	DELETEMode Mode
+	GetMode    Mode
+	PutMode    Mode
+	PostMode   Mode
+	DeleteMode Mode
 
 	service.CRUDHooks[Model]
 }
@@ -33,117 +31,87 @@ type Options[Model any] struct {
 func Register[Model any](api huma.API, repo repository.Repository[Model], options *Options[Model]) {
 	svc := service.NewCRUDService(repo, &options.CRUDHooks)
 
-	// Register GET operations
-	if options.GETMode <= Single {
+	// Register Get operations
+	if options.GetMode <= Single {
 		huma.Register(api, huma.Operation{
-			OperationID: fmt.Sprintf("get-single-%s", strings.ToLower(svc.GetName())),
+			OperationID: fmt.Sprintf("get-single-%s", svc.GetName()),
 			Path:        svc.GetPath() + "/{id}",
 			Method:      http.MethodGet,
-			Summary:     fmt.Sprintf("GET Single %s", svc.GetName()),
-			Description: fmt.Sprintf("GET Single %s", svc.GetName()),
-			// Tags:        []string{"GET", "Single", svc.GetName()},
+			Summary:     fmt.Sprintf("Get single-%s", svc.GetName()),
+			Description: fmt.Sprintf("Retrieves a single %s by its unique identifier. Returns full resource representation.", svc.GetName()),
 		}, svc.GetSingle)
 	}
-	if options.GETMode <= BulkSingle {
+	if options.GetMode <= BulkSingle {
 		huma.Register(api, huma.Operation{
-			OperationID: fmt.Sprintf("get-bulk-%s", strings.ToLower(svc.GetName())),
+			OperationID: fmt.Sprintf("get-bulk-%s", svc.GetName()),
 			Path:        svc.GetPath(),
 			Method:      http.MethodGet,
-			Summary:     fmt.Sprintf("GET Bulk %s", svc.GetName()),
-			Description: fmt.Sprintf("GET Bulk %s", svc.GetName()),
-			// Tags:        []string{"GET", "Bulk", svc.GetName()},
+			Summary:     fmt.Sprintf("Get bulk-%s", svc.GetName()),
+			Description: fmt.Sprintf("Returns a paginated list of %s resources. Supports filtering, sorting and pagination parameters.", svc.GetName()),
 		}, svc.GetBulk)
 	}
 
-	// Register PUT operations
-	if options.PUTMode <= Single {
+	// Register Put operations
+	if options.PutMode <= Single {
 		huma.Register(api, huma.Operation{
-			OperationID: fmt.Sprintf("put-single-%s", strings.ToLower(svc.GetName())),
+			OperationID: fmt.Sprintf("put-single-%s", svc.GetName()),
 			Path:        svc.GetPath() + "/{id}",
 			Method:      http.MethodPut,
-			Summary:     fmt.Sprintf("PUT Single %s", svc.GetName()),
-			Description: fmt.Sprintf("PUT Single %s", svc.GetName()),
-			// Tags:        []string{"PUT", "Single", svc.GetName()},
+			Summary:     fmt.Sprintf("Put single-%s", svc.GetName()),
+			Description: fmt.Sprintf("Full update operation for a %s resource. Requires complete resource representation.", svc.GetName()),
 		}, svc.PutSingle)
 	}
-	if options.PUTMode <= BulkSingle {
+	if options.PutMode <= BulkSingle {
 		huma.Register(api, huma.Operation{
-			OperationID: fmt.Sprintf("put-bulk-%s", strings.ToLower(svc.GetName())),
+			OperationID: fmt.Sprintf("put-bulk-%s", svc.GetName()),
 			Path:        svc.GetPath(),
 			Method:      http.MethodPut,
-			Summary:     fmt.Sprintf("PUT Bulk %s", svc.GetName()),
-			Description: fmt.Sprintf("PUT Bulk %s", svc.GetName()),
-			// Tags:        []string{"PUT", "Bulk", svc.GetName()},
+			Summary:     fmt.Sprintf("Put bulk-%s", svc.GetName()),
+			Description: fmt.Sprintf("Batch update operation for multiple %s resources. Each resource requires complete representation.", svc.GetName()),
 		}, svc.PutBulk)
 	}
 
-	// Register POST operations
-	if options.POSTMode <= Single {
+	// Register Post operations
+	if options.PostMode <= Single {
 		huma.Register(api, huma.Operation{
-			OperationID: fmt.Sprintf("post-single-%s", strings.ToLower(svc.GetName())),
+			OperationID: fmt.Sprintf("post-single-%s", svc.GetName()),
 			Path:        svc.GetPath() + "/one",
 			Method:      http.MethodPost,
-			Summary:     fmt.Sprintf("POST Single %s", svc.GetName()),
-			Description: fmt.Sprintf("POST Single %s", svc.GetName()),
-			// Tags:        []string{"POST", "Single", name},
+			Summary:     fmt.Sprintf("Post single-%s", svc.GetName()),
+			Description: fmt.Sprintf("Creates a new %s resource. Returns the created resource with generated identifier.", svc.GetName()),
 		}, svc.PostSingle)
 	}
-	if options.POSTMode <= BulkSingle {
+	if options.PostMode <= BulkSingle {
 		huma.Register(api, huma.Operation{
-			OperationID: fmt.Sprintf("post-bulk-%s", strings.ToLower(svc.GetName())),
+			OperationID: fmt.Sprintf("post-bulk-%s", svc.GetName()),
 			Path:        svc.GetPath(),
 			Method:      http.MethodPost,
-			Summary:     fmt.Sprintf("POST Bulk %s", svc.GetName()),
-			Description: fmt.Sprintf("POST Bulk %s", svc.GetName()),
-			// Tags:        []string{"POST", "Bulk", svc.GetName()},
+			Summary:     fmt.Sprintf("Post bulk-%s", svc.GetName()),
+			Description: fmt.Sprintf("Batch creation operation for multiple %s resources. Returns created resources with generated identifiers.", svc.GetName()),
 		}, svc.PostBulk)
 	}
 
-	// Register PATCH operations
-	if options.PATCHMode <= Single {
+	// Register Delete operations
+	if options.DeleteMode <= Single {
 		huma.Register(api, huma.Operation{
-			OperationID: fmt.Sprintf("patch-single-%s", strings.ToLower(svc.GetName())),
-			Path:        svc.GetPath() + "/{id}",
-			Method:      http.MethodPatch,
-			Summary:     fmt.Sprintf("PATCH Single %s", svc.GetName()),
-			Description: fmt.Sprintf("PATCH Single %s", svc.GetName()),
-			// Tags:        []string{"PATCH", "Single", svc.GetName()},
-		}, svc.PatchSingle)
-	}
-	if options.PATCHMode <= BulkSingle {
-		huma.Register(api, huma.Operation{
-			OperationID: fmt.Sprintf("patch-bulk-%s", strings.ToLower(svc.GetName())),
-			Path:        svc.GetPath(),
-			Method:      http.MethodPatch,
-			Summary:     fmt.Sprintf("PATCH Bulk %s", svc.GetName()),
-			Description: fmt.Sprintf("PATCH Bulk %s", svc.GetName()),
-			// Tags:        []string{"PATCH", "Bulk", svc.GetName()},
-		}, svc.PatchBulk)
-	}
-
-	// Register DELETE operations
-	if options.DELETEMode <= Single {
-		huma.Register(api, huma.Operation{
-			OperationID: fmt.Sprintf("delete-single-%s", strings.ToLower(svc.GetName())),
+			OperationID: fmt.Sprintf("delete-single-%s", svc.GetName()),
 			Path:        svc.GetPath() + "/{id}",
 			Method:      http.MethodDelete,
-			Summary:     fmt.Sprintf("DELETE Single %s", svc.GetName()),
-			Description: fmt.Sprintf("DELETE Single %s", svc.GetName()),
-			// Tags:        []string{"DELETE", "Single", svc.GetName()},
+			Summary:     fmt.Sprintf("Delete single-%s", svc.GetName()),
+			Description: fmt.Sprintf("Permanently removes a %s resource by its identifier. This operation cannot be undone.", svc.GetName()),
 		}, svc.DeleteSingle)
 	}
-	if options.DELETEMode <= BulkSingle {
+	if options.DeleteMode <= BulkSingle {
 		huma.Register(api, huma.Operation{
-			OperationID: fmt.Sprintf("delete-bulk-%s", strings.ToLower(svc.GetName())),
+			OperationID: fmt.Sprintf("delete-bulk-%s", svc.GetName()),
 			Path:        svc.GetPath(),
 			Method:      http.MethodDelete,
-			Summary:     fmt.Sprintf("DELETE Bulk %s", svc.GetName()),
-			Description: fmt.Sprintf("DELETE Bulk %s", svc.GetName()),
-			// Tags:        []string{"DELETE", "Bulk", svc.GetName()},
+			Summary:     fmt.Sprintf("Delete bulk-%s", svc.GetName()),
+			Description: fmt.Sprintf("Batch deletion operation for multiple %s resources. This operation cannot be undone.", svc.GetName()),
 		}, svc.DeleteBulk)
 	}
 }
 
 func NewRepository[Model any](db *sql.DB) repository.Repository[Model] {
-	return repository.NewCRUDRepository[Model](db)
+	return repository.NewSQLRepository[Model](db)
 }

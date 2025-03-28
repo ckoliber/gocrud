@@ -11,6 +11,7 @@ import (
 
 	"github.com/danielgtaylor/huma/v2"
 	"github.com/danielgtaylor/huma/v2/adapters/humago"
+	"github.com/danielgtaylor/huma/v2/autopatch"
 	"github.com/danielgtaylor/huma/v2/humacli"
 
 	_ "github.com/lib/pq"
@@ -22,14 +23,14 @@ type Options struct {
 
 type User struct {
 	_    struct{} `db:"users" json:"user"`
-	ID   *int     `db:"id" json:"id,omitempty"`
+	ID   *int     `db:"id" fieldtag:"pk" json:"id,omitempty"`
 	Name string   `db:"name" json:"name" maxLength:"30" example:"David" doc:"User name"`
 	Age  int      `db:"age" json:"age" minimum:"1" maximum:"120" example:"25" doc:"User age from 1 to 120"`
 }
 
 type Document struct {
 	_       struct{} `db:"documents" json:"document"`
-	ID      *int     `db:"id" json:"id,omitempty"`
+	ID      *int     `db:"id" fieldtag:"pk" json:"id,omitempty"`
 	Title   string   `db:"title" json:"title" maxLength:"50" doc:"Document title"`
 	Content string   `db:"content" json:"content" maxLength:"500" doc:"Document content"`
 	UserID  int      `db:"userId" json:"userId" doc:"Document userId"`
@@ -49,9 +50,9 @@ func main() {
 			fmt.Println(err)
 		}
 
-		// Register GET /greeting/{name}
 		gocrud.Register(api, gocrud.NewRepository[User](db), &gocrud.Options[User]{})
 		gocrud.Register(api, gocrud.NewRepository[Document](db), &gocrud.Options[Document]{})
+		autopatch.AutoPatch(api)
 
 		// Create the HTTP server.
 		server := http.Server{
