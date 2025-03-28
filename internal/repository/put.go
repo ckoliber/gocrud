@@ -1,32 +1,63 @@
 package repository
 
+import (
+	"fmt"
+	"strings"
+
+	"github.com/huandu/go-sqlbuilder"
+)
+
+func ModelToWhere[Model any](_struct *sqlbuilder.Struct, model Model) *map[string]any {
+	result := map[string]any{}
+
+	columns := _struct.Columns()
+	values := _struct.Values(&model)
+	for idx := range len(values) {
+		result[columns[idx]] = map[string]any{"_eq": values[idx]}
+	}
+
+	return &result
+}
+
 func (r *SQLRepository[Model]) Put(models *[]Model) ([]Model, error) {
-	return nil, nil
-	// builder := r.model.WithoutTag("pk").Update(r.table, model)
-	// if value := WhereToString(&builder.Cond, where); value != "" {
-	// 	builder.Where(value)
-	// }
-	// builder.SQL("RETURNING " + strings.Join(r.model.Columns(), ","))
+	result := []Model{}
 
-	// query, args := builder.Build()
+	tx, err := r.db.Begin()
+	if err != nil {
+		return nil, err
+	}
 
-	// rows, err := r.db.Query(query, args...)
-	// if err != nil {
-	// 	return nil, err
-	// }
-	// defer rows.Close()
+	for _, model := range *models {
+		fmt.Println(r.model.Values(&model)...)
+		builder := r.model.WithoutTag("pk").Update(r.table, model)
+		builder.Where(WhereToString(&builder.Cond, ModelToWhere(r.model.WithTag("pk"), model)))
+		builder.SQL("RETURNING " + strings.Join(r.model.Columns(), ","))
 
-	// result := []Model{}
-	// for rows.Next() {
-	// 	var model Model
-	// 	if err := rows.Scan(r.model.Addr(&model)...); err != nil {
-	// 		return nil, err
-	// 	}
-	// 	result = append(result, model)
-	// }
-	// if err = rows.Err(); err != nil {
-	// 	return nil, err
-	// }
+		query, args := builder.Build()
 
-	// return result, nil
+		fmt.Println(query, args)
+
+		rows, err := tx.Query(query, args...)
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+		defer rows.Close()
+
+		for rows.Next() {
+			var model Model
+			if err := rows.Scan(r.model.Addr(&model)...); err != nil {
+				tx.Rollback()
+				return nil, err
+			}
+			result = append(result, model)
+		}
+		if err = rows.Err(); err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+	}
+
+	tx.Commit()
+	return result, nil
 }

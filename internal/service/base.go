@@ -22,7 +22,6 @@ type CRUDHooks[Model any] struct {
 
 type CRUDService[Model any] struct {
 	id    string
-	key   string
 	name  string
 	path  string
 	repo  repository.Repository[Model]
@@ -42,13 +41,13 @@ func NewCRUDService[Model any](repo repository.Repository[Model], hooks *CRUDHoo
 
 	for i := range _type.NumField() {
 		field := _type.Field(i)
-		if val, ok := field.Tag.Lookup("id"); ok && val == "true" {
+		if value := field.Tag.Get("id"); value == "true" {
 			result.id = field.Tag.Get("json")
 		}
 	}
 
 	if field, ok := _type.FieldByName("_"); ok {
-		if value := field.Tag.Get("name"); value != "" {
+		if value := field.Tag.Get("json"); value != "" {
 			result.name = value
 		}
 		if value := field.Tag.Get("path"); value != "" {

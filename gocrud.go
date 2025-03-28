@@ -55,7 +55,7 @@ func Register[Model any](api huma.API, repo repository.Repository[Model], option
 	if options.PutMode <= Single {
 		huma.Register(api, huma.Operation{
 			OperationID: fmt.Sprintf("put-single-%s", svc.GetName()),
-			Path:        svc.GetPath() + "/{id}",
+			Path:        svc.GetPath() + "/one",
 			Method:      http.MethodPut,
 			Summary:     fmt.Sprintf("Put single-%s", svc.GetName()),
 			Description: fmt.Sprintf("Full update operation for a %s resource. Requires complete resource representation.", svc.GetName()),

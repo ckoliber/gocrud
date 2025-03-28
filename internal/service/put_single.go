@@ -5,7 +5,6 @@ import (
 )
 
 type PutSingleInput[Model any] struct {
-	ID   string `path:"id" doc:"Entity identifier"`
 	Body Model
 }
 type PutSingleOutput[Model any] struct {
