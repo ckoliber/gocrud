@@ -7,7 +7,7 @@ import (
 )
 
 type PatchBulkInput[Model any] struct {
-	Where schema.Where[Model] `query:"where,deepObject" doc:"Entity where" example:"{}"`
+	Where schema.Where[Model] `query:"where" doc:"Entity where" example:"{}"`
 	Body  Model
 }
 type PatchBulkOutput[Model any] struct {

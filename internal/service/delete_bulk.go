@@ -7,7 +7,7 @@ import (
 )
 
 type DeleteBulkInput[Model any] struct {
-	Where schema.Where[Model] `query:"where,deepObject" doc:"Entity where" example:"{}"`
+	Where schema.Where[Model] `query:"where" doc:"Entity where" example:"{}"`
 }
 type DeleteBulkOutput[Model any] struct {
 	Body []Model

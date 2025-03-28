@@ -14,7 +14,7 @@ type DeleteSingleOutput[Model any] struct {
 }
 
 func (s *CRUDService[Model]) DeleteSingle(ctx context.Context, i *DeleteSingleInput[Model]) (*DeleteSingleOutput[Model], error) {
-	where := schema.Where[Model]{s.id: i.ID}
+	where := schema.Where[Model]{s.id: map[string]any{"_eq": i.ID}}
 
 	if s.hooks.PreDelete != nil {
 		if err := s.hooks.PreDelete((*map[string]any)(&where)); err != nil {

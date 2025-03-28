@@ -15,7 +15,7 @@ type PatchSingleOutput[Model any] struct {
 }
 
 func (s *CRUDService[Model]) PatchSingle(ctx context.Context, i *PatchSingleInput[Model]) (*PatchSingleOutput[Model], error) {
-	where := schema.Where[Model]{s.id: i.ID}
+	where := schema.Where[Model]{s.id: map[string]any{"_eq": i.ID}}
 
 	if s.hooks.PreUpdate != nil {
 		if err := s.hooks.PreUpdate((*map[string]any)(&where), &i.Body); err != nil {

@@ -7,8 +7,8 @@ import (
 )
 
 type GetBulkInput[Model any] struct {
-	Where schema.Where[Model] `query:"where,deepObject" doc:"Entity where" example:"{}"`
-	Order schema.Order[Model] `query:"order,deepObject" doc:"Entity order" example:"{}"`
+	Where schema.Where[Model] `query:"where" doc:"Entity where" example:"{}"`
+	Order schema.Order[Model] `query:"order" doc:"Entity order" example:"{}"`
 	Limit int                 `query:"limit" min:"1" doc:"Entity limit" example:"50"`
 	Skip  int                 `query:"skip" min:"0" doc:"Entity skip" example:"0"`
 }

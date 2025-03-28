@@ -47,27 +47,35 @@ func Map[T, V any](ts []T, fn func(T) V) []V {
 	return result
 }
 
-func OrderToString(order map[string]string) string {
+func OrderToString(order *map[string]string) string {
+	if order == nil {
+		return ""
+	}
+
 	result := []string{}
 
-	for key, val := range order {
+	for key, val := range *order {
 		result = append(result, key+" "+val)
 	}
 
 	return strings.Join(result, ",")
 }
 
-func WhereToString(cond *sqlbuilder.Cond, where map[string]any) string {
-	if item, ok := where["_not"]; ok {
-		return "NOT (" + WhereToString(cond, item.(map[string]any)) + ")"
-	} else if items, ok := where["_and"]; ok {
-		return "(" + strings.Join(Map(items.([]map[string]any), func(item map[string]any) string { return WhereToString(cond, item) }), " AND ") + ")"
-	} else if items, ok := where["_or"]; ok {
-		return "(" + strings.Join(Map(items.([]map[string]any), func(item map[string]any) string { return WhereToString(cond, item) }), " OR ") + ")"
+func WhereToString(cond *sqlbuilder.Cond, where *map[string]any) string {
+	if where == nil {
+		return ""
+	}
+
+	if item, ok := (*where)["_not"]; ok {
+		return "NOT (" + WhereToString(cond, item.(*map[string]any)) + ")"
+	} else if items, ok := (*where)["_and"]; ok {
+		return "(" + strings.Join(Map(items.([]*map[string]any), func(item *map[string]any) string { return WhereToString(cond, item) }), " AND ") + ")"
+	} else if items, ok := (*where)["_or"]; ok {
+		return "(" + strings.Join(Map(items.([]*map[string]any), func(item *map[string]any) string { return WhereToString(cond, item) }), " OR ") + ")"
 	}
 
 	result := []string{}
-	for key, val := range where {
+	for key, val := range *where {
 		expr := val.(map[string]any)
 
 		if value, ok := expr["_eq"]; ok {

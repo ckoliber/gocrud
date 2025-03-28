@@ -14,7 +14,7 @@ type GetSingleOutput[Model any] struct {
 }
 
 func (s *CRUDService[Model]) GetSingle(ctx context.Context, i *GetSingleInput[Model]) (*GetSingleOutput[Model], error) {
-	where := schema.Where[Model]{s.id: i.ID}
+	where := schema.Where[Model]{s.id: map[string]any{"_eq": i.ID}}
 
 	if s.hooks.PreRead != nil {
 		if err := s.hooks.PreRead((*map[string]any)(&where), nil, nil, nil); err != nil {

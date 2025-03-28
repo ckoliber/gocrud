@@ -18,7 +18,7 @@ func (s *CRUDService[Model]) PutBulk(ctx context.Context, i *PutBulkInput[Model]
 	o := &PutBulkOutput[Model]{}
 
 	for _, model := range i.Body {
-		where := schema.Where[Model]{s.id: reflect.Indirect(reflect.ValueOf(model)).FieldByName(s.key).String()}
+		where := schema.Where[Model]{s.id: map[string]any{"_eq": reflect.Indirect(reflect.ValueOf(model)).FieldByName(s.key).String()}}
 
 		if s.hooks.PreUpdate != nil {
 			if err := s.hooks.PreUpdate((*map[string]any)(&where), &model); err != nil {

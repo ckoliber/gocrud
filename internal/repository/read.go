@@ -1,14 +1,12 @@
 package repository
 
-import "fmt"
-
 func (r *CRUDRepository[Model]) Read(where *map[string]any, order *map[string]string, limit *int, skip *int) ([]Model, error) {
 	builder := r.model.SelectFrom(r.table)
-	if where != nil {
-		builder.Where(WhereToString(&builder.Cond, *where))
+	if value := WhereToString(&builder.Cond, where); value != "" {
+		builder.Where(value)
 	}
-	if order != nil {
-		builder.OrderBy(OrderToString(*order))
+	if value := OrderToString(order); value != "" {
+		builder.OrderBy(value)
 	}
 	if limit != nil {
 		builder.Limit(*limit)
@@ -19,15 +17,13 @@ func (r *CRUDRepository[Model]) Read(where *map[string]any, order *map[string]st
 
 	query, args := builder.Build()
 
-	fmt.Println(query, args)
-
 	rows, err := r.db.Query(query, args...)
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	var result []Model
+	result := []Model{}
 	for rows.Next() {
 		var model Model
 		if err := rows.Scan(r.model.Addr(&model)...); err != nil {

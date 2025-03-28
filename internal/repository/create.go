@@ -1,17 +1,17 @@
 package repository
 
-import (
-	"fmt"
-	"strings"
-)
+import "strings"
 
 func (r *CRUDRepository[Model]) Create(models *[]Model) ([]Model, error) {
-	builder := r.model.InsertInto(r.table, (*models)[0])
+	anySlice := make([]any, len(*models))
+	for i, model := range *models {
+		anySlice[i] = model
+	}
+
+	builder := r.model.WithoutTag("pk").InsertInto(r.table, anySlice...)
 	builder.SQL("RETURNING " + strings.Join(r.model.Columns(), ","))
 
 	query, args := builder.Build()
-
-	fmt.Println(query, args)
 
 	rows, err := r.db.Query(query, args...)
 	if err != nil {
@@ -19,7 +19,7 @@ func (r *CRUDRepository[Model]) Create(models *[]Model) ([]Model, error) {
 	}
 	defer rows.Close()
 
-	var result []Model
+	result := []Model{}
 	for rows.Next() {
 		var model Model
 		if err := rows.Scan(r.model.Addr(&model)...); err != nil {

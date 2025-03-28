@@ -4,11 +4,10 @@ import "strings"
 
 func (r *CRUDRepository[Model]) Delete(where *map[string]any) ([]Model, error) {
 	builder := r.model.DeleteFrom(r.table)
-
-	builder.SQL("RETURNING " + strings.Join(r.model.Columns(), ","))
-	if where != nil {
-		builder.Where(WhereToString(&builder.Cond, *where))
+	if value := WhereToString(&builder.Cond, where); value != "" {
+		builder.Where(value)
 	}
+	builder.SQL("RETURNING " + strings.Join(r.model.Columns(), ","))
 
 	query, args := builder.Build()
 
@@ -18,7 +17,7 @@ func (r *CRUDRepository[Model]) Delete(where *map[string]any) ([]Model, error) {
 	}
 	defer rows.Close()
 
-	var result []Model
+	result := []Model{}
 	for rows.Next() {
 		var model Model
 		if err := rows.Scan(r.model.Addr(&model)...); err != nil {

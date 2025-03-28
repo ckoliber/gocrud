@@ -9,27 +9,44 @@ import (
 
 type Order[Model any] map[string]string
 
-func (o *Order[Model]) UnmarshalText(text []byte) error {
-	return json.Unmarshal(text, (*map[string]string)(o))
+func (o *Order[Model]) Validate() error {
+	fields := map[string]string{}
+	_type := reflect.TypeFor[Model]()
+	for i := range _type.NumField() {
+		field := _type.Field(i)
+		fields[field.Tag.Get("json")] = ""
+	}
+
+	// for key, val := range *o {
+	// 	if _, ok := fields[key]; !ok {
+	// 		return huma.Error422UnprocessableEntity("invalid order key " + key)
+	// 	}
+	// 	if val != "ASC" && val != "DESC" {
+	// 		return huma.Error422UnprocessableEntity("invalid order value " + key)
+	// 	}
+	// }
+
+	return nil
 }
 
-// Schema returns a schema representing this value on the wire.
-// It returns the schema of the contained type.
+func (o *Order[Model]) UnmarshalText(text []byte) error {
+	if err := json.Unmarshal(text, (*map[string]string)(o)); err != nil {
+		return err
+	}
+
+	if err := o.Validate(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
 func (o *Order[Model]) Schema(r huma.Registry) *huma.Schema {
+	name := "Order" + huma.DefaultSchemaNamer(reflect.TypeFor[Model](), "")
 	schema := &huma.Schema{
-		Type:                 huma.TypeObject,
-		Properties:           map[string]*huma.Schema{},
-		AdditionalProperties: false,
+		Type: huma.TypeString,
 	}
 
-	modelType := reflect.TypeFor[Model]()
-	for i := range modelType.NumField() {
-		field := modelType.Field(i)
-		schema.Properties[field.Tag.Get("json")] = &huma.Schema{
-			Type: huma.TypeString,
-			Enum: []any{"ASC", "DESC"},
-		}
-	}
-
+	r.Map()[name] = schema
 	return schema
 }
