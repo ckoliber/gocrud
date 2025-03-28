@@ -9,7 +9,7 @@ import (
 )
 
 type CRUDHooks[Model any] struct {
-	PreGet    func(where *map[string]any, order *map[string]string, limit *int, skip *int) error
+	PreGet    func(where *map[string]any, order *map[string]any, limit *int, skip *int) error
 	PrePut    func(models *[]Model) error
 	PrePost   func(models *[]Model) error
 	PreDelete func(where *map[string]any) error

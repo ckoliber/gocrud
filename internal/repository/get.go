@@ -1,7 +1,7 @@
 package repository
 
-func (r *SQLRepository[Model]) Get(where *map[string]any, order *map[string]string, limit *int, skip *int) ([]Model, error) {
-	builder := r.model.SelectFrom(r.table)
+func (r *SQLRepository[Model]) Get(where *map[string]any, order *map[string]any, limit *int, skip *int) ([]Model, error) {
+	builder := r.model.For(r.flavor).SelectFrom(r.table)
 	if value := WhereToString(&builder.Cond, where); value != "" {
 		builder.Where(value)
 	}

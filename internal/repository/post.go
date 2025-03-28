@@ -8,7 +8,7 @@ func (r *SQLRepository[Model]) Post(models *[]Model) ([]Model, error) {
 		anySlice[i] = model
 	}
 
-	builder := r.model.WithoutTag("pk").InsertInto(r.table, anySlice...)
+	builder := r.model.For(r.flavor).WithoutTag("pk").InsertInto(r.table, anySlice...)
 	builder.SQL("RETURNING " + strings.Join(r.model.Columns(), ","))
 
 	query, args := builder.Build()

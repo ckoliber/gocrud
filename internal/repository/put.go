@@ -29,7 +29,7 @@ func (r *SQLRepository[Model]) Put(models *[]Model) ([]Model, error) {
 
 	for _, model := range *models {
 		fmt.Println(r.model.Values(&model)...)
-		builder := r.model.WithoutTag("pk").Update(r.table, model)
+		builder := r.model.For(r.flavor).WithoutTag("pk").Update(r.table, model)
 		builder.Where(WhereToString(&builder.Cond, ModelToWhere(r.model.WithTag("pk"), model)))
 		builder.SQL("RETURNING " + strings.Join(r.model.Columns(), ","))
 

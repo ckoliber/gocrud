@@ -3,7 +3,7 @@ package repository
 import "strings"
 
 func (r *SQLRepository[Model]) Delete(where *map[string]any) ([]Model, error) {
-	builder := r.model.DeleteFrom(r.table)
+	builder := r.model.For(r.flavor).DeleteFrom(r.table)
 	if value := WhereToString(&builder.Cond, where); value != "" {
 		builder.Where(value)
 	}

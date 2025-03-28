@@ -2,51 +2,53 @@ package schema
 
 import (
 	"encoding/json"
+	"errors"
 	"reflect"
 
 	"github.com/danielgtaylor/huma/v2"
 )
 
-type Order[Model any] map[string]string
+type Order[Model any] map[string]any
 
-func (o *Order[Model]) Validate() error {
-	fields := map[string]string{}
-	_type := reflect.TypeFor[Model]()
-	for i := range _type.NumField() {
-		field := _type.Field(i)
-		fields[field.Tag.Get("json")] = ""
-	}
-
-	// for key, val := range *o {
-	// 	if _, ok := fields[key]; !ok {
-	// 		return huma.Error422UnprocessableEntity("invalid order key " + key)
-	// 	}
-	// 	if val != "ASC" && val != "DESC" {
-	// 		return huma.Error422UnprocessableEntity("invalid order value " + key)
-	// 	}
-	// }
-
-	return nil
-}
+var orderRegistry = huma.NewMapRegistry("#/order/", huma.DefaultSchemaNamer)
 
 func (o *Order[Model]) UnmarshalText(text []byte) error {
-	if err := json.Unmarshal(text, (*map[string]string)(o)); err != nil {
+	if err := json.Unmarshal(text, (*map[string]any)(o)); err != nil {
 		return err
 	}
 
-	if err := o.Validate(); err != nil {
-		return err
+	name := huma.DefaultSchemaNamer(reflect.TypeFor[Model](), "")
+	schema := orderRegistry.Map()[name]
+	result := huma.ValidateResult{}
+	huma.Validate(orderRegistry, schema, huma.NewPathBuffer([]byte(""), 0), huma.ModeReadFromServer, (map[string]any)(*o), &result)
+	if len(result.Errors) > 0 {
+		return errors.Join(result.Errors...)
 	}
 
 	return nil
 }
 
 func (o *Order[Model]) Schema(r huma.Registry) *huma.Schema {
-	name := "Order" + huma.DefaultSchemaNamer(reflect.TypeFor[Model](), "")
+	name := huma.DefaultSchemaNamer(reflect.TypeFor[Model](), "")
 	schema := &huma.Schema{
-		Type: huma.TypeString,
+		Type:                 huma.TypeObject,
+		Properties:           map[string]*huma.Schema{},
+		AdditionalProperties: false,
 	}
 
-	r.Map()[name] = schema
-	return schema
+	_type := reflect.TypeFor[Model]()
+	for i := range _type.NumField() {
+		field := _type.Field(i)
+		schema.Properties[field.Tag.Get("json")] = &huma.Schema{
+			Type: huma.TypeString,
+			Enum: []any{"ASC", "DESC"},
+		}
+	}
+
+	schema.PrecomputeMessages()
+	orderRegistry.Map()[name] = schema
+
+	return &huma.Schema{
+		Type: huma.TypeString,
+	}
 }

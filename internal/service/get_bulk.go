@@ -18,12 +18,12 @@ type GetBulkOutput[Model any] struct {
 
 func (s *CRUDService[Model]) GetBulk(ctx context.Context, i *GetBulkInput[Model]) (*GetBulkOutput[Model], error) {
 	if s.hooks.PreGet != nil {
-		if err := s.hooks.PreGet((*map[string]any)(&i.Where), (*map[string]string)(&i.Order), &i.Limit, &i.Skip); err != nil {
+		if err := s.hooks.PreGet((*map[string]any)(&i.Where), (*map[string]any)(&i.Order), &i.Limit, &i.Skip); err != nil {
 			return nil, err
 		}
 	}
 
-	result, err := s.repo.Get((*map[string]any)(&i.Where), (*map[string]string)(&i.Order), &i.Limit, &i.Skip)
+	result, err := s.repo.Get((*map[string]any)(&i.Where), (*map[string]any)(&i.Order), &i.Limit, &i.Skip)
 	if err != nil {
 		return nil, err
 	}

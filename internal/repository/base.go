@@ -2,6 +2,7 @@ package repository
 
 import (
 	"database/sql"
+	"fmt"
 	"reflect"
 	"strings"
 
@@ -9,31 +10,44 @@ import (
 )
 
 type Repository[Model any] interface {
-	Get(where *map[string]any, order *map[string]string, limit *int, skip *int) ([]Model, error)
+	Get(where *map[string]any, order *map[string]any, limit *int, skip *int) ([]Model, error)
 	Put(models *[]Model) ([]Model, error)
 	Post(models *[]Model) ([]Model, error)
 	Delete(where *map[string]any) ([]Model, error)
 }
 
 type SQLRepository[Model any] struct {
-	db    *sql.DB
-	table string
-	model *sqlbuilder.Struct
+	db     *sql.DB
+	table  string
+	model  *sqlbuilder.Struct
+	flavor sqlbuilder.Flavor
 }
 
 func NewSQLRepository[Model any](db *sql.DB) *SQLRepository[Model] {
 	_type := reflect.TypeFor[Model]()
 
 	result := &SQLRepository[Model]{
-		db:    db,
-		table: strings.ToLower(_type.Name()),
-		model: sqlbuilder.NewStruct(new(Model)).For(sqlbuilder.PostgreSQL),
+		db:     db,
+		table:  strings.ToLower(_type.Name()),
+		model:  sqlbuilder.NewStruct(new(Model)),
+		flavor: sqlbuilder.DefaultFlavor,
 	}
 
 	if field, ok := _type.FieldByName("_"); ok {
 		if value := field.Tag.Get("db"); value != "" {
 			result.table = value
 		}
+	}
+
+	switch reflect.ValueOf(db.Driver()).Type().String() {
+	case "*mysql.MySQLDriver":
+		result.flavor = sqlbuilder.MySQL
+	case "*pq.Driver", "pqx.Driver":
+		result.flavor = sqlbuilder.PostgreSQL
+	case "*sqlite.SQLiteDriver":
+		result.flavor = sqlbuilder.SQLite
+	case "*mssql.MssqlDriver":
+		result.flavor = sqlbuilder.SQLServer
 	}
 
 	return result
@@ -47,7 +61,7 @@ func Map[T, V any](ts []T, fn func(T) V) []V {
 	return result
 }
 
-func OrderToString(order *map[string]string) string {
+func OrderToString(order *map[string]any) string {
 	if order == nil {
 		return ""
 	}
@@ -55,7 +69,7 @@ func OrderToString(order *map[string]string) string {
 	result := []string{}
 
 	for key, val := range *order {
-		result = append(result, key+" "+val)
+		result = append(result, fmt.Sprintf("%s %s", key, val))
 	}
 
 	return strings.Join(result, ",")
