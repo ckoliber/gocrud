@@ -53,14 +53,6 @@ func NewSQLRepository[Model any](db *sql.DB) *SQLRepository[Model] {
 	return result
 }
 
-func Map[T, V any](ts []T, fn func(T) V) []V {
-	result := make([]V, len(ts))
-	for i, t := range ts {
-		result[i] = fn(t)
-	}
-	return result
-}
-
 func OrderToString(order *map[string]any) string {
 	if order == nil {
 		return ""
@@ -81,16 +73,30 @@ func WhereToString(cond *sqlbuilder.Cond, where *map[string]any) string {
 	}
 
 	if item, ok := (*where)["_not"]; ok {
-		return "NOT (" + WhereToString(cond, item.(*map[string]any)) + ")"
+		expr := item.(map[string]any)
+
+		return cond.Not(WhereToString(cond, &expr))
 	} else if items, ok := (*where)["_and"]; ok {
-		return "(" + strings.Join(Map(items.([]*map[string]any), func(item *map[string]any) string { return WhereToString(cond, item) }), " AND ") + ")"
+		result := []string{}
+		for _, item := range items.([]any) {
+			expr := item.(map[string]any)
+			result = append(result, WhereToString(cond, &expr))
+		}
+
+		return cond.And(result...)
 	} else if items, ok := (*where)["_or"]; ok {
-		return "(" + strings.Join(Map(items.([]*map[string]any), func(item *map[string]any) string { return WhereToString(cond, item) }), " OR ") + ")"
+		result := []string{}
+		for _, item := range items.([]any) {
+			expr := item.(map[string]any)
+			result = append(result, WhereToString(cond, &expr))
+		}
+
+		return cond.Or(result...)
 	}
 
 	result := []string{}
-	for key, val := range *where {
-		expr := val.(map[string]any)
+	for key, item := range *where {
+		expr := item.(map[string]any)
 
 		if value, ok := expr["_eq"]; ok {
 			result = append(result, cond.EQ(key, value))
