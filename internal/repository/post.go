@@ -1,6 +1,8 @@
 package repository
 
-import "strings"
+import (
+	"strings"
+)
 
 func (r *SQLRepository[Model]) Post(models *[]Model) ([]Model, error) {
 	anySlice := make([]any, len(*models))

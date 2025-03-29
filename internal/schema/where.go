@@ -10,14 +10,14 @@ import (
 
 type Where[Model any] map[string]any
 
-var whereRegistry = huma.NewMapRegistry("#/where/", huma.DefaultSchemaNamer)
+var whereRegistry huma.Registry
 
 func (w *Where[Model]) UnmarshalText(text []byte) error {
 	if err := json.Unmarshal(text, (*map[string]any)(w)); err != nil {
 		return err
 	}
 
-	name := huma.DefaultSchemaNamer(reflect.TypeFor[Model](), "")
+	name := "Where" + huma.DefaultSchemaNamer(reflect.TypeFor[Model](), "")
 	schema := whereRegistry.Map()[name]
 	result := huma.ValidateResult{}
 	huma.Validate(whereRegistry, schema, huma.NewPathBuffer([]byte(""), 0), huma.ModeReadFromServer, (map[string]any)(*w), &result)
@@ -29,23 +29,23 @@ func (w *Where[Model]) UnmarshalText(text []byte) error {
 }
 
 func (w *Where[Model]) Schema(r huma.Registry) *huma.Schema {
-	name := huma.DefaultSchemaNamer(reflect.TypeFor[Model](), "")
+	name := "Where" + huma.DefaultSchemaNamer(reflect.TypeFor[Model](), "")
 	schema := &huma.Schema{
 		Type: huma.TypeObject,
 		Properties: map[string]*huma.Schema{
 			"_not": {
-				Ref: "#/where/" + name,
+				Ref: "#/components/schemas/" + name,
 			},
 			"_and": {
 				Type: huma.TypeArray,
 				Items: &huma.Schema{
-					Ref: "#/where/" + name,
+					Ref: "#/components/schemas/" + name,
 				},
 			},
 			"_or": {
 				Type: huma.TypeArray,
 				Items: &huma.Schema{
-					Ref: "#/where/" + name,
+					Ref: "#/components/schemas/" + name,
 				},
 			},
 		},
@@ -70,7 +70,8 @@ func (w *Where[Model]) Schema(r huma.Registry) *huma.Schema {
 	}
 
 	schema.PrecomputeMessages()
-	whereRegistry.Map()[name] = schema
+	r.Map()[name] = schema
+	whereRegistry = r
 
 	return &huma.Schema{
 		Type: huma.TypeString,

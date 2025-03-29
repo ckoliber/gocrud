@@ -10,14 +10,14 @@ import (
 
 type Order[Model any] map[string]any
 
-var orderRegistry = huma.NewMapRegistry("#/order/", huma.DefaultSchemaNamer)
+var orderRegistry huma.Registry
 
 func (o *Order[Model]) UnmarshalText(text []byte) error {
 	if err := json.Unmarshal(text, (*map[string]any)(o)); err != nil {
 		return err
 	}
 
-	name := huma.DefaultSchemaNamer(reflect.TypeFor[Model](), "")
+	name := "Order" + huma.DefaultSchemaNamer(reflect.TypeFor[Model](), "")
 	schema := orderRegistry.Map()[name]
 	result := huma.ValidateResult{}
 	huma.Validate(orderRegistry, schema, huma.NewPathBuffer([]byte(""), 0), huma.ModeReadFromServer, (map[string]any)(*o), &result)
@@ -29,7 +29,7 @@ func (o *Order[Model]) UnmarshalText(text []byte) error {
 }
 
 func (o *Order[Model]) Schema(r huma.Registry) *huma.Schema {
-	name := huma.DefaultSchemaNamer(reflect.TypeFor[Model](), "")
+	name := "Order" + huma.DefaultSchemaNamer(reflect.TypeFor[Model](), "")
 	schema := &huma.Schema{
 		Type:                 huma.TypeObject,
 		Properties:           map[string]*huma.Schema{},
@@ -46,7 +46,8 @@ func (o *Order[Model]) Schema(r huma.Registry) *huma.Schema {
 	}
 
 	schema.PrecomputeMessages()
-	orderRegistry.Map()[name] = schema
+	r.Map()[name] = schema
+	orderRegistry = r
 
 	return &huma.Schema{
 		Type: huma.TypeString,
