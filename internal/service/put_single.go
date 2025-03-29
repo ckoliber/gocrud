@@ -50,18 +50,18 @@ func (s *CRUDService[Model]) PutSingle(ctx context.Context, i *PutSingleInput[Mo
 	}
 
 	if s.hooks.PrePut != nil {
-		if err := s.hooks.PrePut(&[]Model{i.Body}); err != nil {
+		if err := s.hooks.PrePut(ctx, &[]Model{i.Body}); err != nil {
 			return nil, err
 		}
 	}
 
-	result, err := s.repo.Put(&[]Model{i.Body})
+	result, err := s.repo.Put(ctx, &[]Model{i.Body})
 	if err != nil {
 		return nil, err
 	}
 
 	if s.hooks.PostPut != nil {
-		if err := s.hooks.PostPut(&result); err != nil {
+		if err := s.hooks.PostPut(ctx, &result); err != nil {
 			return nil, err
 		}
 	}

@@ -1,6 +1,8 @@
 package repository
 
-func (r *SQLRepository[Model]) Get(where *map[string]any, order *map[string]any, limit *int, skip *int) ([]Model, error) {
+import "context"
+
+func (r *SQLRepository[Model]) Get(ctx context.Context, where *map[string]any, order *map[string]any, limit *int, skip *int) ([]Model, error) {
 	builder := r.model.For(r.flavor).SelectFrom(r.table)
 	if value := WhereToString(&builder.Cond, where); value != "" {
 		builder.Where(value)
@@ -17,7 +19,7 @@ func (r *SQLRepository[Model]) Get(where *map[string]any, order *map[string]any,
 
 	query, args := builder.Build()
 
-	rows, err := r.db.Query(query, args...)
+	rows, err := r.db.QueryContext(ctx, query, args...)
 	if err != nil {
 		return nil, err
 	}

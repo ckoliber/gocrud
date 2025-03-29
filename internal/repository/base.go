@@ -1,6 +1,7 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"reflect"
@@ -10,10 +11,10 @@ import (
 )
 
 type Repository[Model any] interface {
-	Get(where *map[string]any, order *map[string]any, limit *int, skip *int) ([]Model, error)
-	Put(models *[]Model) ([]Model, error)
-	Post(models *[]Model) ([]Model, error)
-	Delete(where *map[string]any) ([]Model, error)
+	Get(ctx context.Context, where *map[string]any, order *map[string]any, limit *int, skip *int) ([]Model, error)
+	Put(ctx context.Context, models *[]Model) ([]Model, error)
+	Post(ctx context.Context, models *[]Model) ([]Model, error)
+	Delete(ctx context.Context, where *map[string]any) ([]Model, error)
 }
 
 type SQLRepository[Model any] struct {

@@ -13,18 +13,18 @@ type PutBulkOutput[Model any] struct {
 
 func (s *CRUDService[Model]) PutBulk(ctx context.Context, i *PutBulkInput[Model]) (*PutBulkOutput[Model], error) {
 	if s.hooks.PrePut != nil {
-		if err := s.hooks.PrePut(&i.Body); err != nil {
+		if err := s.hooks.PrePut(ctx, &i.Body); err != nil {
 			return nil, err
 		}
 	}
 
-	result, err := s.repo.Put(&i.Body)
+	result, err := s.repo.Put(ctx, &i.Body)
 	if err != nil {
 		return nil, err
 	}
 
 	if s.hooks.PostPut != nil {
-		if err := s.hooks.PostPut(&result); err != nil {
+		if err := s.hooks.PostPut(ctx, &result); err != nil {
 			return nil, err
 		}
 	}

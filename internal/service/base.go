@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"fmt"
 	"reflect"
 	"strings"
@@ -9,15 +10,15 @@ import (
 )
 
 type CRUDHooks[Model any] struct {
-	PreGet    func(where *map[string]any, order *map[string]any, limit *int, skip *int) error
-	PrePut    func(models *[]Model) error
-	PrePost   func(models *[]Model) error
-	PreDelete func(where *map[string]any) error
+	PreGet    func(ctx context.Context, where *map[string]any, order *map[string]any, limit *int, skip *int) error
+	PrePut    func(ctx context.Context, models *[]Model) error
+	PrePost   func(ctx context.Context, models *[]Model) error
+	PreDelete func(ctx context.Context, where *map[string]any) error
 
-	PostGet    func(models *[]Model) error
-	PostPut    func(models *[]Model) error
-	PostPost   func(models *[]Model) error
-	PostDelete func(models *[]Model) error
+	PostGet    func(ctx context.Context, models *[]Model) error
+	PostPut    func(ctx context.Context, models *[]Model) error
+	PostPost   func(ctx context.Context, models *[]Model) error
+	PostDelete func(ctx context.Context, models *[]Model) error
 }
 
 type CRUDService[Model any] struct {

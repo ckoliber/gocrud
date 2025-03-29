@@ -1,8 +1,8 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
-	"log/slog"
 	"strings"
 
 	"github.com/huandu/go-sqlbuilder"
@@ -18,24 +18,22 @@ func ModelsToAnys[Model any](models []Model) []any {
 	return anySlice
 }
 
-func (r *SQLRepository[Model]) Post(models *[]Model) ([]Model, error) {
+func (r *SQLRepository[Model]) Post(ctx context.Context, models *[]Model) ([]Model, error) {
 	var rows *sql.Rows
 	var err error
 	switch r.flavor {
 	case sqlbuilder.PostgreSQL, sqlbuilder.SQLite:
-		rows, err = r.PostReturn(models)
+		rows, err = r.PostReturn(ctx, models)
 	case sqlbuilder.SQLServer:
-		rows, err = r.PostOutput(models)
+		rows, err = r.PostOutput(ctx, models)
 	default:
-		rows, err = r.PostSelect(models)
+		rows, err = r.PostSelect(ctx, models)
 	}
 
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
-
-	slog.Debug()
 
 	result := []Model{}
 	for rows.Next() {
@@ -52,16 +50,16 @@ func (r *SQLRepository[Model]) Post(models *[]Model) ([]Model, error) {
 	return result, nil
 }
 
-func (r *SQLRepository[Model]) PostReturn(models *[]Model) (*sql.Rows, error) {
+func (r *SQLRepository[Model]) PostReturn(ctx context.Context, models *[]Model) (*sql.Rows, error) {
 	builder := r.model.For(r.flavor).WithoutTag("pk").InsertInto(r.table, ModelsToAnys(*models)...)
 	builder.SQL("RETURNING " + strings.Join(r.model.Columns(), ","))
 
 	query, args := builder.Build()
 
-	return r.db.Query(query, args...)
+	return r.db.QueryContext(ctx, query, args...)
 }
 
-func (r *SQLRepository[Model]) PostOutput(models *[]Model) (*sql.Rows, error) {
+func (r *SQLRepository[Model]) PostOutput(ctx context.Context, models *[]Model) (*sql.Rows, error) {
 	builder := r.model.For(r.flavor).WithoutTag("pk").InsertInto(r.table, ModelsToAnys(*models)...)
 
 	outputs := []string{}
@@ -72,11 +70,11 @@ func (r *SQLRepository[Model]) PostOutput(models *[]Model) (*sql.Rows, error) {
 
 	query, args := builder.Build()
 
-	return r.db.Query(query, args...)
+	return r.db.QueryContext(ctx, query, args...)
 }
 
-func (r *SQLRepository[Model]) PostSelect(models *[]Model) (*sql.Rows, error) {
-	tx, err := r.db.Begin()
+func (r *SQLRepository[Model]) PostSelect(ctx context.Context, models *[]Model) (*sql.Rows, error) {
+	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -86,12 +84,12 @@ func (r *SQLRepository[Model]) PostSelect(models *[]Model) (*sql.Rows, error) {
 		builder.Where(value)
 	}
 	query, args := builder.Build()
-	rows, err := tx.Query(query, args...)
+	rows, err := tx.QueryContext(ctx, query, args...)
 
 	deleteBuilder := r.model.For(r.flavor).DeleteFrom(r.table)
 	deleteBuilder.WhereClause = builder.WhereClause
 	deleteQuery, deleteArgs := deleteBuilder.Build()
-	if _, err := tx.Exec(deleteQuery, deleteArgs...); err != nil {
+	if _, err := tx.ExecContext(ctx, deleteQuery, deleteArgs...); err != nil {
 		tx.Rollback()
 		return nil, err
 	}

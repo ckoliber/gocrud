@@ -1,22 +1,23 @@
 package repository
 
 import (
+	"context"
 	"database/sql"
 	"strings"
 
 	"github.com/huandu/go-sqlbuilder"
 )
 
-func (r *SQLRepository[Model]) Delete(where *map[string]any) ([]Model, error) {
+func (r *SQLRepository[Model]) Delete(ctx context.Context, where *map[string]any) ([]Model, error) {
 	var rows *sql.Rows
 	var err error
 	switch r.flavor {
 	case sqlbuilder.PostgreSQL, sqlbuilder.SQLite:
-		rows, err = r.DeleteReturn(where)
+		rows, err = r.DeleteReturn(ctx, where)
 	case sqlbuilder.SQLServer:
-		rows, err = r.DeleteOutput(where)
+		rows, err = r.DeleteOutput(ctx, where)
 	default:
-		rows, err = r.DeleteSelect(where)
+		rows, err = r.DeleteSelect(ctx, where)
 	}
 
 	if err != nil {
@@ -39,7 +40,7 @@ func (r *SQLRepository[Model]) Delete(where *map[string]any) ([]Model, error) {
 	return result, nil
 }
 
-func (r *SQLRepository[Model]) DeleteReturn(where *map[string]any) (*sql.Rows, error) {
+func (r *SQLRepository[Model]) DeleteReturn(ctx context.Context, where *map[string]any) (*sql.Rows, error) {
 	builder := r.model.For(r.flavor).DeleteFrom(r.table)
 	if value := WhereToString(&builder.Cond, where); value != "" {
 		builder.Where(value)
@@ -48,10 +49,10 @@ func (r *SQLRepository[Model]) DeleteReturn(where *map[string]any) (*sql.Rows, e
 
 	query, args := builder.Build()
 
-	return r.db.Query(query, args...)
+	return r.db.QueryContext(ctx, query, args...)
 }
 
-func (r *SQLRepository[Model]) DeleteOutput(where *map[string]any) (*sql.Rows, error) {
+func (r *SQLRepository[Model]) DeleteOutput(ctx context.Context, where *map[string]any) (*sql.Rows, error) {
 	builder := r.model.For(r.flavor).DeleteFrom(r.table)
 	if value := WhereToString(&builder.Cond, where); value != "" {
 		builder.Where(value)
@@ -64,11 +65,11 @@ func (r *SQLRepository[Model]) DeleteOutput(where *map[string]any) (*sql.Rows, e
 
 	query, args := builder.Build()
 
-	return r.db.Query(query, args...)
+	return r.db.QueryContext(ctx, query, args...)
 }
 
-func (r *SQLRepository[Model]) DeleteSelect(where *map[string]any) (*sql.Rows, error) {
-	tx, err := r.db.Begin()
+func (r *SQLRepository[Model]) DeleteSelect(ctx context.Context, where *map[string]any) (*sql.Rows, error) {
+	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		return nil, err
 	}
@@ -78,12 +79,12 @@ func (r *SQLRepository[Model]) DeleteSelect(where *map[string]any) (*sql.Rows, e
 		builder.Where(value)
 	}
 	query, args := builder.Build()
-	rows, err := tx.Query(query, args...)
+	rows, err := tx.QueryContext(ctx, query, args...)
 
 	deleteBuilder := r.model.For(r.flavor).DeleteFrom(r.table)
 	deleteBuilder.WhereClause = builder.WhereClause
 	deleteQuery, deleteArgs := deleteBuilder.Build()
-	if _, err := tx.Exec(deleteQuery, deleteArgs...); err != nil {
+	if _, err := tx.ExecContext(ctx, deleteQuery, deleteArgs...); err != nil {
 		tx.Rollback()
 		return nil, err
 	}
