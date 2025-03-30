@@ -40,6 +40,7 @@ func NewSQLRepository[Model any](db *sql.DB) *SQLRepository[Model] {
 		}
 	}
 
+	// TODO: must be completed
 	switch reflect.ValueOf(db.Driver()).Type().String() {
 	case "*mysql.MySQLDriver":
 		result.flavor = sqlbuilder.MySQL

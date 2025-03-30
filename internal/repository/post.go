@@ -3,6 +3,8 @@ package repository
 import (
 	"context"
 	"database/sql"
+	"errors"
+	"reflect"
 	"strings"
 
 	"github.com/huandu/go-sqlbuilder"
@@ -79,17 +81,44 @@ func (r *SQLRepository[Model]) PostSelect(ctx context.Context, models *[]Model) 
 		return nil, err
 	}
 
-	builder := r.model.For(r.flavor).SelectFrom(r.table)
-	if value := WhereToString(&builder.Cond, where); value != "" {
-		builder.Where(value)
+	// TODO: fill models pk fields (Auto generate from type)
+	for _, model := range *models {
+		_type := reflect.TypeOf(model)
+		_value := reflect.ValueOf(model)
+		for i := range _type.NumField() {
+			field := _type.Field(i)
+			value := _value.Field(i)
+			if tag := field.Tag.Get(sqlbuilder.FieldTag); strings.Contains(tag, "pk") {
+				switch value.Kind() {
+				case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+					value.SetInt(1)
+				case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+					value.SetUint(1)
+				case reflect.Float32, reflect.Float64:
+					value.SetFloat(1.1)
+				case reflect.Complex64, reflect.Complex128:
+					value.SetComplex(1)
+				case reflect.String:
+					value.SetString("1")
+				default:
+					return nil, errors.New("invalid ID type")
+				}
+			}
+		}
 	}
+
+	mutateBuilder := r.model.For(r.flavor).InsertInto(r.table, ModelsToAnys(*models)...)
+	mutateQuery, mutateArgs := mutateBuilder.Build()
+	if _, err := tx.ExecContext(ctx, mutateQuery, mutateArgs...); err != nil {
+		tx.Rollback()
+		return nil, err
+	}
+
+	builder := r.model.For(r.flavor).SelectFrom(r.table)
+	builder.Where(builder.In("id", []string{"1", "2"}))
 	query, args := builder.Build()
 	rows, err := tx.QueryContext(ctx, query, args...)
-
-	deleteBuilder := r.model.For(r.flavor).DeleteFrom(r.table)
-	deleteBuilder.WhereClause = builder.WhereClause
-	deleteQuery, deleteArgs := deleteBuilder.Build()
-	if _, err := tx.ExecContext(ctx, deleteQuery, deleteArgs...); err != nil {
+	if err != nil {
 		tx.Rollback()
 		return nil, err
 	}
