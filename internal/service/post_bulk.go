@@ -12,8 +12,8 @@ type PostBulkOutput[Model any] struct {
 }
 
 func (s *CRUDService[Model]) PostBulk(ctx context.Context, i *PostBulkInput[Model]) (*PostBulkOutput[Model], error) {
-	if s.hooks.PrePost != nil {
-		if err := s.hooks.PrePost(ctx, &i.Body); err != nil {
+	if s.hooks.BeforePost != nil {
+		if err := s.hooks.BeforePost(ctx, &i.Body); err != nil {
 			return nil, err
 		}
 	}
@@ -23,8 +23,8 @@ func (s *CRUDService[Model]) PostBulk(ctx context.Context, i *PostBulkInput[Mode
 		return nil, err
 	}
 
-	if s.hooks.PostPost != nil {
-		if err := s.hooks.PostPost(ctx, &result); err != nil {
+	if s.hooks.AfterPost != nil {
+		if err := s.hooks.AfterPost(ctx, &result); err != nil {
 			return nil, err
 		}
 	}

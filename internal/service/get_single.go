@@ -16,8 +16,8 @@ type GetSingleOutput[Model any] struct {
 func (s *CRUDService[Model]) GetSingle(ctx context.Context, i *GetSingleInput[Model]) (*GetSingleOutput[Model], error) {
 	where := schema.Where[Model]{s.id: map[string]any{"_eq": i.ID}}
 
-	if s.hooks.PreGet != nil {
-		if err := s.hooks.PreGet(ctx, (*map[string]any)(&where), nil, nil, nil); err != nil {
+	if s.hooks.BeforeGet != nil {
+		if err := s.hooks.BeforeGet(ctx, (*map[string]any)(&where), nil, nil, nil); err != nil {
 			return nil, err
 		}
 	}
@@ -27,8 +27,8 @@ func (s *CRUDService[Model]) GetSingle(ctx context.Context, i *GetSingleInput[Mo
 		return nil, err
 	}
 
-	if s.hooks.PostGet != nil {
-		if err := s.hooks.PostGet(ctx, &result); err != nil {
+	if s.hooks.AfterGet != nil {
+		if err := s.hooks.AfterGet(ctx, &result); err != nil {
 			return nil, err
 		}
 	}

@@ -10,15 +10,15 @@ import (
 )
 
 type CRUDHooks[Model any] struct {
-	PreGet    func(ctx context.Context, where *map[string]any, order *map[string]any, limit *int, skip *int) error
-	PrePut    func(ctx context.Context, models *[]Model) error
-	PrePost   func(ctx context.Context, models *[]Model) error
-	PreDelete func(ctx context.Context, where *map[string]any) error
+	BeforeGet    func(ctx context.Context, where *map[string]any, order *map[string]any, limit *int, skip *int) error
+	BeforePut    func(ctx context.Context, models *[]Model) error
+	BeforePost   func(ctx context.Context, models *[]Model) error
+	BeforeDelete func(ctx context.Context, where *map[string]any) error
 
-	PostGet    func(ctx context.Context, models *[]Model) error
-	PostPut    func(ctx context.Context, models *[]Model) error
-	PostPost   func(ctx context.Context, models *[]Model) error
-	PostDelete func(ctx context.Context, models *[]Model) error
+	AfterGet    func(ctx context.Context, models *[]Model) error
+	AfterPut    func(ctx context.Context, models *[]Model) error
+	AfterPost   func(ctx context.Context, models *[]Model) error
+	AfterDelete func(ctx context.Context, models *[]Model) error
 }
 
 type CRUDService[Model any] struct {

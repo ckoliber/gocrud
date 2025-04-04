@@ -12,8 +12,8 @@ type PostSingleOutput[Model any] struct {
 }
 
 func (s *CRUDService[Model]) PostSingle(ctx context.Context, i *PostSingleInput[Model]) (*PostSingleOutput[Model], error) {
-	if s.hooks.PrePost != nil {
-		if err := s.hooks.PrePost(ctx, &[]Model{i.Body}); err != nil {
+	if s.hooks.BeforePost != nil {
+		if err := s.hooks.BeforePost(ctx, &[]Model{i.Body}); err != nil {
 			return nil, err
 		}
 	}
@@ -23,8 +23,8 @@ func (s *CRUDService[Model]) PostSingle(ctx context.Context, i *PostSingleInput[
 		return nil, err
 	}
 
-	if s.hooks.PostPost != nil {
-		if err := s.hooks.PostPost(ctx, &result); err != nil {
+	if s.hooks.AfterPost != nil {
+		if err := s.hooks.AfterPost(ctx, &result); err != nil {
 			return nil, err
 		}
 	}

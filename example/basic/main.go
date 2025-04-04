@@ -23,14 +23,14 @@ type Options struct {
 
 type User struct {
 	_    struct{} `db:"users" json:"user"`
-	ID   int      `db:"id" fieldtag:"pk" json:"id"`
+	ID   int      `db:"id" fieldtag:"pk" json:"id" required:"false"`
 	Name string   `db:"name" json:"name" maxLength:"30" example:"David" doc:"User name"`
 	Age  int      `db:"age" json:"age" minimum:"1" maximum:"120" example:"25" doc:"User age from 1 to 120"`
 }
 
 type Document struct {
 	_       struct{} `db:"documents" json:"document"`
-	ID      int      `db:"id" fieldtag:"pk" json:"id"`
+	ID      int      `db:"id" fieldtag:"pk" json:"id" required:"false"`
 	Title   string   `db:"title" json:"title" maxLength:"50" doc:"Document title"`
 	Content string   `db:"content" json:"content" maxLength:"500" doc:"Document content"`
 	UserID  int      `db:"userId" json:"userId" doc:"Document userId"`
@@ -50,8 +50,8 @@ func main() {
 			fmt.Println(err)
 		}
 
-		gocrud.Register(api, gocrud.NewRepository[User](db), &gocrud.Options[User]{})
-		gocrud.Register(api, gocrud.NewRepository[Document](db), &gocrud.Options[Document]{})
+		gocrud.Register(api, gocrud.NewRepository[User](db), &gocrud.Config[User]{})
+		gocrud.Register(api, gocrud.NewRepository[Document](db), &gocrud.Config[Document]{})
 		autopatch.AutoPatch(api)
 
 		// Create the HTTP server.

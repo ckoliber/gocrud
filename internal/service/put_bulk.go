@@ -12,8 +12,8 @@ type PutBulkOutput[Model any] struct {
 }
 
 func (s *CRUDService[Model]) PutBulk(ctx context.Context, i *PutBulkInput[Model]) (*PutBulkOutput[Model], error) {
-	if s.hooks.PrePut != nil {
-		if err := s.hooks.PrePut(ctx, &i.Body); err != nil {
+	if s.hooks.BeforePut != nil {
+		if err := s.hooks.BeforePut(ctx, &i.Body); err != nil {
 			return nil, err
 		}
 	}
@@ -23,8 +23,8 @@ func (s *CRUDService[Model]) PutBulk(ctx context.Context, i *PutBulkInput[Model]
 		return nil, err
 	}
 
-	if s.hooks.PostPut != nil {
-		if err := s.hooks.PostPut(ctx, &result); err != nil {
+	if s.hooks.AfterPut != nil {
+		if err := s.hooks.AfterPut(ctx, &result); err != nil {
 			return nil, err
 		}
 	}

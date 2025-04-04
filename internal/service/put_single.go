@@ -49,8 +49,8 @@ func (s *CRUDService[Model]) PutSingle(ctx context.Context, i *PutSingleInput[Mo
 		return nil, huma.Error422UnprocessableEntity("Invalid ID type")
 	}
 
-	if s.hooks.PrePut != nil {
-		if err := s.hooks.PrePut(ctx, &[]Model{i.Body}); err != nil {
+	if s.hooks.BeforePut != nil {
+		if err := s.hooks.BeforePut(ctx, &[]Model{i.Body}); err != nil {
 			return nil, err
 		}
 	}
@@ -60,8 +60,8 @@ func (s *CRUDService[Model]) PutSingle(ctx context.Context, i *PutSingleInput[Mo
 		return nil, err
 	}
 
-	if s.hooks.PostPut != nil {
-		if err := s.hooks.PostPut(ctx, &result); err != nil {
+	if s.hooks.AfterPut != nil {
+		if err := s.hooks.AfterPut(ctx, &result); err != nil {
 			return nil, err
 		}
 	}

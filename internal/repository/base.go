@@ -6,8 +6,6 @@ import (
 	"fmt"
 	"reflect"
 	"strings"
-
-	"github.com/huandu/go-sqlbuilder"
 )
 
 type Repository[Model any] interface {
@@ -17,59 +15,96 @@ type Repository[Model any] interface {
 	Delete(ctx context.Context, where *map[string]any) ([]Model, error)
 }
 
-type SQLRepository[Model any] struct {
-	db     *sql.DB
-	table  string
-	model  *sqlbuilder.Struct
-	flavor sqlbuilder.Flavor
+type SQLBuilder[Model any] struct {
+	table      string
+	fields     map[int]string
+	operators  map[string]func(string, ...any) string
+	parameter  func(any, *[]any) string
+	identifier func(string) string
 }
 
-func NewSQLRepository[Model any](db *sql.DB) *SQLRepository[Model] {
+func NewSQLBuilder[Model any](operators map[string]func(string, ...any) string, parameter func(any, *[]any) string, identifier func(string) string) *SQLBuilder[Model] {
 	_type := reflect.TypeFor[Model]()
 
-	result := &SQLRepository[Model]{
-		db:     db,
-		table:  strings.ToLower(_type.Name()),
-		model:  sqlbuilder.NewStruct(new(Model)),
-		flavor: sqlbuilder.DefaultFlavor,
-	}
-
-	if field, ok := _type.FieldByName("_"); ok {
-		if value := field.Tag.Get("db"); value != "" {
-			result.table = value
+	fields := map[int]string{}
+	for i := range _type.NumField() {
+		if _type.Field(i).Name == "_" {
+			continue
+		}
+		if tag := _type.Field(i).Tag.Get("db"); tag != "" {
+			fields[i] = tag
+		} else if tag := _type.Field(i).Tag.Get("json"); tag != "" {
+			fields[i] = tag
 		}
 	}
 
-	// TODO: must be completed
-	switch reflect.ValueOf(db.Driver()).Type().String() {
-	case "*mysql.MySQLDriver":
-		result.flavor = sqlbuilder.MySQL
-	case "*pq.Driver", "pqx.Driver":
-		result.flavor = sqlbuilder.PostgreSQL
-	case "*sqlite.SQLiteDriver":
-		result.flavor = sqlbuilder.SQLite
-	case "*mssql.MssqlDriver":
-		result.flavor = sqlbuilder.SQLServer
+	return &SQLBuilder[Model]{
+		table:      strings.ToLower(_type.Name()),
+		fields:     fields,
+		operators:  operators,
+		parameter:  parameter,
+		identifier: identifier,
 	}
-
-	return result
 }
 
-func OrderToString(order *map[string]any) string {
-	if order == nil {
-		return ""
-	}
-
+func (b *SQLBuilder[Model]) Columns() string {
 	result := []string{}
-
-	for key, val := range *order {
-		result = append(result, fmt.Sprintf("%s %s", key, val))
+	for _, name := range b.fields {
+		result = append(result, b.identifier(name))
 	}
 
 	return strings.Join(result, ",")
 }
 
-func WhereToString(cond *sqlbuilder.Cond, where *map[string]any) string {
+func (b *SQLBuilder[Model]) Values(values *[]Model, args *[]any) string {
+	if values == nil {
+		return ""
+	}
+
+	result := []string{}
+	for _, model := range *values {
+		_value := reflect.ValueOf(model)
+
+		fields := []string{}
+		for idx := range b.fields {
+			fields = append(fields, b.parameter(_value.Field(idx).Interface(), args))
+		}
+
+		result = append(result, "("+strings.Join(fields, ",")+")")
+	}
+
+	return strings.Join(result, ",")
+}
+
+func (b *SQLBuilder[Model]) Set(set *Model, args *[]any) string {
+	if set == nil {
+		return ""
+	}
+
+	_value := reflect.ValueOf(*set)
+
+	result := []string{}
+	for idx, name := range b.fields {
+		result = append(result, name+" = "+b.parameter(_value.Field(idx).Interface(), args))
+	}
+
+	return strings.Join(result, ",")
+}
+
+func (b *SQLBuilder[Model]) Order(order *map[string]any) string {
+	if order == nil {
+		return ""
+	}
+
+	result := []string{}
+	for key, val := range *order {
+		result = append(result, fmt.Sprintf("%s %s", b.identifier(key), val))
+	}
+
+	return strings.Join(result, ",")
+}
+
+func (b *SQLBuilder[Model]) Where(where *map[string]any, args *[]any) string {
 	if where == nil {
 		return ""
 	}
@@ -77,43 +112,63 @@ func WhereToString(cond *sqlbuilder.Cond, where *map[string]any) string {
 	if item, ok := (*where)["_not"]; ok {
 		expr := item.(map[string]any)
 
-		return cond.Not(WhereToString(cond, &expr))
+		return "NOT (" + b.Where(&expr, args) + ")"
 	} else if items, ok := (*where)["_and"]; ok {
 		result := []string{}
 		for _, item := range items.([]any) {
 			expr := item.(map[string]any)
-			result = append(result, WhereToString(cond, &expr))
+			result = append(result, b.Where(&expr, args))
 		}
 
-		return cond.And(result...)
+		return "(" + strings.Join(result, " AND ") + ")"
 	} else if items, ok := (*where)["_or"]; ok {
 		result := []string{}
 		for _, item := range items.([]any) {
 			expr := item.(map[string]any)
-			result = append(result, WhereToString(cond, &expr))
+			result = append(result, b.Where(&expr, args))
 		}
 
-		return cond.Or(result...)
+		return "(" + strings.Join(result, " OR ") + ")"
 	}
 
 	result := []string{}
 	for key, item := range *where {
-		expr := item.(map[string]any)
-
-		if value, ok := expr["_eq"]; ok {
-			result = append(result, cond.EQ(key, value))
-		} else if value, ok := expr["_neq"]; ok {
-			result = append(result, cond.NEQ(key, value))
-		} else if value, ok := expr["_gt"]; ok {
-			result = append(result, cond.GT(key, value))
-		} else if value, ok := expr["_gte"]; ok {
-			result = append(result, cond.GTE(key, value))
-		} else if value, ok := expr["_lt"]; ok {
-			result = append(result, cond.LT(key, value))
-		} else if value, ok := expr["_lte"]; ok {
-			result = append(result, cond.LTE(key, value))
+		for op, value := range item.(map[string]any) {
+			if handler, ok := b.operators[op]; ok {
+				result = append(result, handler(b.identifier(key), b.parameter(reflect.ValueOf(value), args)))
+			}
 		}
 	}
 
-	return cond.And(result...)
+	return strings.Join(result, " AND ")
+}
+
+func (b *SQLBuilder[Model]) Scan(rows *sql.Rows, err error) ([]Model, error) {
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+
+	result := []Model{}
+	for rows.Next() {
+		var model Model
+		_value := reflect.ValueOf(model)
+
+		_addrs := []any{}
+		for idx := range b.fields {
+			_addrs = append(_addrs, _value.Field(idx).Addr())
+		}
+
+		if err := rows.Scan(_addrs...); err != nil {
+			return nil, err
+		}
+
+		result = append(result, model)
+	}
+
+	if err = rows.Err(); err != nil {
+		return nil, err
+	}
+
+	return result, nil
 }

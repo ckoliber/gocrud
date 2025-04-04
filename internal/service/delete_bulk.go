@@ -14,8 +14,8 @@ type DeleteBulkOutput[Model any] struct {
 }
 
 func (s *CRUDService[Model]) DeleteBulk(ctx context.Context, i *DeleteBulkInput[Model]) (*DeleteBulkOutput[Model], error) {
-	if s.hooks.PreDelete != nil {
-		if err := s.hooks.PreDelete(ctx, (*map[string]any)(&i.Where)); err != nil {
+	if s.hooks.BeforeDelete != nil {
+		if err := s.hooks.BeforeDelete(ctx, (*map[string]any)(&i.Where)); err != nil {
 			return nil, err
 		}
 	}
@@ -25,8 +25,8 @@ func (s *CRUDService[Model]) DeleteBulk(ctx context.Context, i *DeleteBulkInput[
 		return nil, err
 	}
 
-	if s.hooks.PostDelete != nil {
-		if err := s.hooks.PostDelete(ctx, &result); err != nil {
+	if s.hooks.AfterDelete != nil {
+		if err := s.hooks.AfterDelete(ctx, &result); err != nil {
 			return nil, err
 		}
 	}
