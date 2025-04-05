@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/ckoliber/gocrud/internal/schema"
+	"github.com/danielgtaylor/huma/v2"
 )
 
 type GetSingleInput[Model any] struct {
@@ -25,6 +26,8 @@ func (s *CRUDService[Model]) GetSingle(ctx context.Context, i *GetSingleInput[Mo
 	result, err := s.repo.Get(ctx, (*map[string]any)(&where), nil, nil, nil)
 	if err != nil {
 		return nil, err
+	} else if len(result) <= 0 {
+		return nil, huma.Error404NotFound("entity not found")
 	}
 
 	if s.hooks.AfterGet != nil {

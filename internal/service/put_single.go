@@ -58,6 +58,8 @@ func (s *CRUDService[Model]) PutSingle(ctx context.Context, i *PutSingleInput[Mo
 	result, err := s.repo.Put(ctx, &[]Model{i.Body})
 	if err != nil {
 		return nil, err
+	} else if len(result) <= 0 {
+		return nil, huma.Error404NotFound("entity not found")
 	}
 
 	if s.hooks.AfterPut != nil {

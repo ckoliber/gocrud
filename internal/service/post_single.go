@@ -2,6 +2,8 @@ package service
 
 import (
 	"context"
+
+	"github.com/danielgtaylor/huma/v2"
 )
 
 type PostSingleInput[Model any] struct {
@@ -21,6 +23,8 @@ func (s *CRUDService[Model]) PostSingle(ctx context.Context, i *PostSingleInput[
 	result, err := s.repo.Post(ctx, &[]Model{i.Body})
 	if err != nil {
 		return nil, err
+	} else if len(result) <= 0 {
+		return nil, huma.Error404NotFound("entity not found")
 	}
 
 	if s.hooks.AfterPost != nil {

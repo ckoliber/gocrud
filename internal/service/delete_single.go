@@ -4,6 +4,7 @@ import (
 	"context"
 
 	"github.com/ckoliber/gocrud/internal/schema"
+	"github.com/danielgtaylor/huma/v2"
 )
 
 type DeleteSingleInput[Model any] struct {
@@ -25,6 +26,8 @@ func (s *CRUDService[Model]) DeleteSingle(ctx context.Context, i *DeleteSingleIn
 	result, err := s.repo.Delete(ctx, (*map[string]any)(&where))
 	if err != nil {
 		return nil, err
+	} else if len(result) <= 0 {
+		return nil, huma.Error404NotFound("entity not found")
 	}
 
 	if s.hooks.AfterDelete != nil {

@@ -37,28 +37,7 @@ func NewMSSQLRepository[Model any](db *sql.DB) *MSSQLRepository[Model] {
 }
 
 func (r *MSSQLRepository[Model]) Get(ctx context.Context, where *map[string]any, order *map[string]any, limit *int, skip *int) ([]Model, error) {
-	tpl := template.Must(template.New("select").Parse(`
-		SELECT {{ columns }} FROM {{ table }}
-		{{ with where }}WHERE {{ . }}{{ end }}
-		{{ with order }}ORDER BY {{ . }}{{ end }}
-		{{ with limit }}LIMIT {{ . }}{{ end }}
-		{{ with skip }}OFFSET {{ . }}{{ end }}
-	`))
-
-	args := []any{}
-	var query bytes.Buffer
-	err := tpl.Execute(&query, map[string]any{
-		"columns": r.builder.Columns(),
-		"where":   r.builder.Where(where, &args),
-		"order":   r.builder.Order(order),
-		"limit":   limit,
-		"skip":    skip,
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return r.builder.Scan(r.db.QueryContext(ctx, query.String(), args...))
+	return nil, nil
 }
 
 func (r *MSSQLRepository[Model]) Put(ctx context.Context, models *[]Model) ([]Model, error) {
@@ -80,7 +59,7 @@ func (r *MSSQLRepository[Model]) Put(ctx context.Context, models *[]Model) ([]Mo
 		err := tpl.Execute(&query, map[string]any{
 			"set": r.builder.Set(&model, &args),
 			// TODO: "where":   r.builder.Where(where, &args),
-			"columns": r.builder.Columns(),
+			"columns": r.builder.Fields(),
 		})
 		if err != nil {
 			tx.Rollback()
@@ -101,41 +80,9 @@ func (r *MSSQLRepository[Model]) Put(ctx context.Context, models *[]Model) ([]Mo
 }
 
 func (r *MSSQLRepository[Model]) Post(ctx context.Context, models *[]Model) ([]Model, error) {
-	tpl := template.Must(template.New("insert").Parse(`
-		INSERT INTO {{ table }}({{ columns }})
-		VALUES {{ values }}
-		RETURNING {{ columns }}
-	`))
-
-	args := []any{}
-	var query bytes.Buffer
-	err := tpl.Execute(&query, map[string]any{
-		"columns": r.builder.Columns(),
-		"values":  r.builder.Values(models, &args),
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return r.builder.Scan(r.db.QueryContext(ctx, query.String(), args...))
+	return nil, nil
 }
 
 func (r *MSSQLRepository[Model]) Delete(ctx context.Context, where *map[string]any) ([]Model, error) {
-	tpl := template.Must(template.New("delete").Parse(`
-		DELETE FROM {{ table }}
-		WHERE {{ where }}
-		RETURNING {{ columns }}
-	`))
-
-	args := []any{}
-	var query bytes.Buffer
-	err := tpl.Execute(&query, map[string]any{
-		"columns": r.builder.Columns(),
-		"where":   r.builder.Where(where, &args),
-	})
-	if err != nil {
-		return nil, err
-	}
-
-	return r.builder.Scan(r.db.QueryContext(ctx, query.String(), args...))
+	return nil, nil
 }

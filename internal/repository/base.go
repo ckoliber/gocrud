@@ -15,9 +15,14 @@ type Repository[Model any] interface {
 	Delete(ctx context.Context, where *map[string]any) ([]Model, error)
 }
 
+type Field struct {
+	idx  int
+	name string
+}
+
 type SQLBuilder[Model any] struct {
 	table      string
-	fields     map[int]string
+	fields     []Field
 	operators  map[string]func(string, ...any) string
 	parameter  func(any, *[]any) string
 	identifier func(string) string
@@ -26,20 +31,26 @@ type SQLBuilder[Model any] struct {
 func NewSQLBuilder[Model any](operators map[string]func(string, ...any) string, parameter func(any, *[]any) string, identifier func(string) string) *SQLBuilder[Model] {
 	_type := reflect.TypeFor[Model]()
 
-	fields := map[int]string{}
+	table := strings.ToLower(_type.Name())
+	fields := []Field{}
 	for i := range _type.NumField() {
 		if _type.Field(i).Name == "_" {
-			continue
-		}
-		if tag := _type.Field(i).Tag.Get("db"); tag != "" {
-			fields[i] = tag
-		} else if tag := _type.Field(i).Tag.Get("json"); tag != "" {
-			fields[i] = tag
+			if tag := _type.Field(i).Tag.Get("db"); tag != "" {
+				table = tag
+			} else if tag := _type.Field(i).Tag.Get("json"); tag != "" {
+				table = tag
+			}
+		} else {
+			if tag := _type.Field(i).Tag.Get("db"); tag != "" {
+				fields = append(fields, Field{i, tag})
+			} else if tag := _type.Field(i).Tag.Get("json"); tag != "" {
+				fields = append(fields, Field{i, tag})
+			}
 		}
 	}
 
 	return &SQLBuilder[Model]{
-		table:      strings.ToLower(_type.Name()),
+		table:      table,
 		fields:     fields,
 		operators:  operators,
 		parameter:  parameter,
@@ -47,10 +58,14 @@ func NewSQLBuilder[Model any](operators map[string]func(string, ...any) string, 
 	}
 }
 
-func (b *SQLBuilder[Model]) Columns() string {
+func (b *SQLBuilder[Model]) Table() string {
+	return b.identifier(b.table)
+}
+
+func (b *SQLBuilder[Model]) Fields() string {
 	result := []string{}
-	for _, name := range b.fields {
-		result = append(result, b.identifier(name))
+	for _, field := range b.fields {
+		result = append(result, b.identifier(field.name))
 	}
 
 	return strings.Join(result, ",")
@@ -66,8 +81,8 @@ func (b *SQLBuilder[Model]) Values(values *[]Model, args *[]any) string {
 		_value := reflect.ValueOf(model)
 
 		fields := []string{}
-		for idx := range b.fields {
-			fields = append(fields, b.parameter(_value.Field(idx).Interface(), args))
+		for _, field := range b.fields {
+			fields = append(fields, b.parameter(_value.Field(field.idx).Interface(), args))
 		}
 
 		result = append(result, "("+strings.Join(fields, ",")+")")
@@ -84,8 +99,8 @@ func (b *SQLBuilder[Model]) Set(set *Model, args *[]any) string {
 	_value := reflect.ValueOf(*set)
 
 	result := []string{}
-	for idx, name := range b.fields {
-		result = append(result, name+" = "+b.parameter(_value.Field(idx).Interface(), args))
+	for _, field := range b.fields {
+		result = append(result, field.name+" = "+b.parameter(_value.Field(field.idx).Interface(), args))
 	}
 
 	return strings.Join(result, ",")
@@ -135,7 +150,7 @@ func (b *SQLBuilder[Model]) Where(where *map[string]any, args *[]any) string {
 	for key, item := range *where {
 		for op, value := range item.(map[string]any) {
 			if handler, ok := b.operators[op]; ok {
-				result = append(result, handler(b.identifier(key), b.parameter(reflect.ValueOf(value), args)))
+				result = append(result, handler(b.identifier(key), b.parameter(value, args)))
 			}
 		}
 	}
@@ -152,11 +167,11 @@ func (b *SQLBuilder[Model]) Scan(rows *sql.Rows, err error) ([]Model, error) {
 	result := []Model{}
 	for rows.Next() {
 		var model Model
-		_value := reflect.ValueOf(model)
+		_value := reflect.ValueOf(&model).Elem()
 
 		_addrs := []any{}
-		for idx := range b.fields {
-			_addrs = append(_addrs, _value.Field(idx).Addr())
+		for _, field := range b.fields {
+			_addrs = append(_addrs, _value.Field(field.idx).Addr().Interface())
 		}
 
 		if err := rows.Scan(_addrs...); err != nil {
