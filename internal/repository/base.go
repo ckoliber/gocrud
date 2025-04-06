@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"log/slog"
 	"reflect"
 	"strings"
 )
@@ -30,6 +31,8 @@ type SQLBuilder[Model any] struct {
 }
 
 func NewSQLBuilder[Model any](operators map[string]func(string, ...any) string, generator func(reflect.StructField, *[]any) string, parameter func(reflect.Value, *[]any) string, identifier func(string) string) *SQLBuilder[Model] {
+	// Initialize SQLBuilder with table name and fields based on the Model type
+	// Logs the table name and fields for debugging
 	_type := reflect.TypeFor[Model]()
 
 	table := strings.ToLower(_type.Name())
@@ -46,6 +49,8 @@ func NewSQLBuilder[Model any](operators map[string]func(string, ...any) string, 
 		}
 	}
 
+	slog.Debug("SQLBuilder initialized", slog.String("table", table), slog.Any("fields", fields))
+
 	return &SQLBuilder[Model]{
 		table:      table,
 		fields:     fields,
@@ -57,19 +62,23 @@ func NewSQLBuilder[Model any](operators map[string]func(string, ...any) string, 
 }
 
 func (b *SQLBuilder[Model]) Table() string {
+	// Returns the table name with proper identifier formatting
+	slog.Debug("Fetching table name", slog.String("table", b.table))
 	return b.identifier(b.table)
 }
 
 func (b *SQLBuilder[Model]) Fields() string {
+	// Returns a comma-separated list of field names with proper identifier formatting
 	result := []string{}
 	for _, field := range b.fields {
 		result = append(result, b.identifier(field.name))
 	}
-
+	slog.Debug("Fetching fields", slog.Any("fields", result))
 	return strings.Join(result, ",")
 }
 
 func (b *SQLBuilder[Model]) Values(values *[]Model, keys *[]any, args *[]any) string {
+	// Constructs the VALUES clause for an INSERT query
 	if values == nil {
 		return ""
 	}
@@ -91,10 +100,12 @@ func (b *SQLBuilder[Model]) Values(values *[]Model, keys *[]any, args *[]any) st
 		result = append(result, "("+strings.Join(fields, ",")+")")
 	}
 
+	slog.Debug("Constructed VALUES clause", slog.Any("values", result))
 	return strings.Join(result, ",")
 }
 
 func (b *SQLBuilder[Model]) Set(set *Model, args *[]any) string {
+	// Constructs the SET clause for an UPDATE query
 	if set == nil {
 		return ""
 	}
@@ -115,10 +126,12 @@ func (b *SQLBuilder[Model]) Set(set *Model, args *[]any) string {
 		}
 	}
 
+	slog.Debug("Constructed SET clause", slog.String("set", strings.Join(result, ",")))
 	return strings.Join(result, ",") + " WHERE " + b.Where(&where, args)
 }
 
 func (b *SQLBuilder[Model]) Order(order *map[string]any) string {
+	// Constructs the ORDER BY clause for a query
 	if order == nil {
 		return ""
 	}
@@ -128,10 +141,12 @@ func (b *SQLBuilder[Model]) Order(order *map[string]any) string {
 		result = append(result, fmt.Sprintf("%s %s", b.identifier(key), val))
 	}
 
+	slog.Debug("Constructed ORDER BY clause", slog.Any("order", result))
 	return strings.Join(result, ",")
 }
 
 func (b *SQLBuilder[Model]) Where(where *map[string]any, args *[]any) string {
+	// Constructs the WHERE clause for a query
 	if where == nil {
 		return ""
 	}
@@ -167,11 +182,14 @@ func (b *SQLBuilder[Model]) Where(where *map[string]any, args *[]any) string {
 		}
 	}
 
+	slog.Debug("Constructed WHERE clause", slog.Any("where", result))
 	return strings.Join(result, " AND ")
 }
 
 func (b *SQLBuilder[Model]) Scan(rows *sql.Rows, err error) ([]Model, error) {
+	// Scans the rows returned by a query into a slice of Model
 	if err != nil {
+		slog.Error("Error during query execution", slog.Any("error", err))
 		return nil, err
 	}
 	defer rows.Close()
@@ -194,8 +212,10 @@ func (b *SQLBuilder[Model]) Scan(rows *sql.Rows, err error) ([]Model, error) {
 	}
 
 	if err = rows.Err(); err != nil {
+		slog.Error("Error during row iteration", slog.Any("error", err))
 		return nil, err
 	}
 
+	slog.Debug("Scan completed", slog.Any("result", result))
 	return result, nil
 }

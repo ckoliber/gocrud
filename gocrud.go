@@ -3,6 +3,7 @@ package gocrud
 import (
 	"database/sql"
 	"fmt"
+	"log/slog"
 	"net/http"
 	"reflect"
 
@@ -29,11 +30,14 @@ type Config[Model any] struct {
 	service.CRUDHooks[Model]
 }
 
+// Register sets up CRUD operations for the given API and repository based on the provided configuration.
 func Register[Model any](api huma.API, repo repository.Repository[Model], config *Config[Model]) {
+	// Initialize CRUD service with hooks
 	svc := service.NewCRUDService(repo, &config.CRUDHooks)
 
 	// Register Get operations
 	if config.GetMode <= Single {
+		slog.Debug("Registering GetSingle operation", slog.String("path", svc.GetPath()+"/{id}"))
 		huma.Register(api, huma.Operation{
 			OperationID: fmt.Sprintf("get-single-%s", svc.GetName()),
 			Path:        svc.GetPath() + "/{id}",
@@ -43,6 +47,7 @@ func Register[Model any](api huma.API, repo repository.Repository[Model], config
 		}, svc.GetSingle)
 	}
 	if config.GetMode <= BulkSingle {
+		slog.Debug("Registering GetBulk operation", slog.String("path", svc.GetPath()))
 		huma.Register(api, huma.Operation{
 			OperationID: fmt.Sprintf("get-bulk-%s", svc.GetName()),
 			Path:        svc.GetPath(),
@@ -54,6 +59,7 @@ func Register[Model any](api huma.API, repo repository.Repository[Model], config
 
 	// Register Put operations
 	if config.PutMode <= Single {
+		slog.Debug("Registering PutSingle operation", slog.String("path", svc.GetPath()+"/{id}"))
 		huma.Register(api, huma.Operation{
 			OperationID: fmt.Sprintf("put-single-%s", svc.GetName()),
 			Path:        svc.GetPath() + "/{id}",
@@ -63,6 +69,7 @@ func Register[Model any](api huma.API, repo repository.Repository[Model], config
 		}, svc.PutSingle)
 	}
 	if config.PutMode <= BulkSingle {
+		slog.Debug("Registering PutBulk operation", slog.String("path", svc.GetPath()))
 		huma.Register(api, huma.Operation{
 			OperationID: fmt.Sprintf("put-bulk-%s", svc.GetName()),
 			Path:        svc.GetPath(),
@@ -74,6 +81,7 @@ func Register[Model any](api huma.API, repo repository.Repository[Model], config
 
 	// Register Post operations
 	if config.PostMode <= Single {
+		slog.Debug("Registering PostSingle operation", slog.String("path", svc.GetPath()+"/one"))
 		huma.Register(api, huma.Operation{
 			OperationID: fmt.Sprintf("post-single-%s", svc.GetName()),
 			Path:        svc.GetPath() + "/one",
@@ -83,6 +91,7 @@ func Register[Model any](api huma.API, repo repository.Repository[Model], config
 		}, svc.PostSingle)
 	}
 	if config.PostMode <= BulkSingle {
+		slog.Debug("Registering PostBulk operation", slog.String("path", svc.GetPath()))
 		huma.Register(api, huma.Operation{
 			OperationID: fmt.Sprintf("post-bulk-%s", svc.GetName()),
 			Path:        svc.GetPath(),
@@ -94,6 +103,7 @@ func Register[Model any](api huma.API, repo repository.Repository[Model], config
 
 	// Register Delete operations
 	if config.DeleteMode <= Single {
+		slog.Debug("Registering DeleteSingle operation", slog.String("path", svc.GetPath()+"/{id}"))
 		huma.Register(api, huma.Operation{
 			OperationID: fmt.Sprintf("delete-single-%s", svc.GetName()),
 			Path:        svc.GetPath() + "/{id}",
@@ -103,6 +113,7 @@ func Register[Model any](api huma.API, repo repository.Repository[Model], config
 		}, svc.DeleteSingle)
 	}
 	if config.DeleteMode <= BulkSingle {
+		slog.Debug("Registering DeleteBulk operation", slog.String("path", svc.GetPath()))
 		huma.Register(api, huma.Operation{
 			OperationID: fmt.Sprintf("delete-bulk-%s", svc.GetName()),
 			Path:        svc.GetPath(),
@@ -113,17 +124,27 @@ func Register[Model any](api huma.API, repo repository.Repository[Model], config
 	}
 }
 
+// NewSQLRepository initializes a repository based on the SQL database driver.
 func NewSQLRepository[Model any](db *sql.DB) repository.Repository[Model] {
-	switch reflect.ValueOf(db.Driver()).Type().String() {
+	// Determine the database driver and initialize the appropriate repository
+	driverType := reflect.ValueOf(db.Driver()).Type().String()
+	slog.Debug("Initializing SQL repository", slog.String("driver", driverType))
+
+	switch driverType {
 	case "*mysql.MySQLDriver":
+		slog.Debug("Using MySQL repository")
 		return repository.NewMySQLRepository[Model](db)
 	case "*pq.Driver", "pqx.Driver":
+		slog.Debug("Using Postgres repository")
 		return repository.NewPostgresRepository[Model](db)
 	case "*sqlite.SQLiteDriver":
+		slog.Debug("Using SQLite repository")
 		return repository.NewSQLiteRepository[Model](db)
 	case "*mssql.MssqlDriver":
+		slog.Debug("Using MSSQL repository")
 		return repository.NewMSSQLRepository[Model](db)
 	}
 
+	slog.Error("Unsupported database driver", slog.String("driver", driverType))
 	panic("unsupported database driver")
 }
