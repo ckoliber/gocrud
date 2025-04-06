@@ -63,7 +63,6 @@ func (r *PostgresRepository[Model]) Get(ctx context.Context, where *map[string]a
 }
 
 func (r *PostgresRepository[Model]) Put(ctx context.Context, models *[]Model) ([]Model, error) {
-	// TODO: must be completed
 	// TODO: PK fields must be null
 	result := []Model{}
 

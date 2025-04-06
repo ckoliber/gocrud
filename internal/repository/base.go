@@ -102,8 +102,10 @@ func (b *SQLBuilder[Model]) Set(set *Model, args *[]any) string {
 	_value := reflect.ValueOf(*set)
 
 	result := []string{}
-	for _, field := range b.fields {
-		result = append(result, field.name+"="+b.parameter(_value.Field(field.idx), args))
+	for idx, field := range b.fields {
+		if idx != 0 {
+			result = append(result, field.name+"="+b.parameter(_value.Field(field.idx), args))
+		}
 	}
 
 	where := map[string]any{}
