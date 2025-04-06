@@ -18,6 +18,10 @@ type PutSingleOutput[Model any] struct {
 
 func (s *CRUDService[Model]) PutSingle(ctx context.Context, i *PutSingleInput[Model]) (*PutSingleOutput[Model], error) {
 	field := reflect.ValueOf(&i.Body).Elem().FieldByName(s.key)
+	for field.Kind() == reflect.Pointer {
+		field = field.Elem()
+	}
+
 	switch field.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		value, err := strconv.ParseInt(i.ID, 10, 64)
@@ -46,7 +50,7 @@ func (s *CRUDService[Model]) PutSingle(ctx context.Context, i *PutSingleInput[Mo
 	case reflect.String:
 		field.SetString(i.ID)
 	default:
-		return nil, huma.Error422UnprocessableEntity("Invalid ID type")
+		return nil, huma.Error422UnprocessableEntity("invalid identifier type")
 	}
 
 	if s.hooks.BeforePut != nil {

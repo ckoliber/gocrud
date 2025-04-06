@@ -113,7 +113,7 @@ func Register[Model any](api huma.API, repo repository.Repository[Model], config
 	}
 }
 
-func NewRepository[Model any](db *sql.DB) repository.Repository[Model] {
+func NewSQLRepository[Model any](db *sql.DB) repository.Repository[Model] {
 	switch reflect.ValueOf(db.Driver()).Type().String() {
 	case "*mysql.MySQLDriver":
 		return repository.NewMySQLRepository[Model](db)

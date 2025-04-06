@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"errors"
 	"reflect"
+	"strings"
 
 	"github.com/danielgtaylor/huma/v2"
 )
@@ -39,7 +40,7 @@ func (o *Order[Model]) Schema(r huma.Registry) *huma.Schema {
 	_type := reflect.TypeFor[Model]()
 	for i := range _type.NumField() {
 		field := _type.Field(i)
-		schema.Properties[field.Tag.Get("json")] = &huma.Schema{
+		schema.Properties[strings.Split(field.Tag.Get("json"), ",")[0]] = &huma.Schema{
 			Type: huma.TypeString,
 			Enum: []any{"ASC", "DESC"},
 		}

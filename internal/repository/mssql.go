@@ -5,6 +5,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"reflect"
 	"text/template"
 )
 
@@ -22,17 +23,20 @@ func NewMSSQLRepository[Model any](db *sql.DB) *MSSQLRepository[Model] {
 		"_lt":  func(key string, values ...any) string { return fmt.Sprintf("%s < %s", key, values[0]) },
 		"_lte": func(key string, values ...any) string { return fmt.Sprintf("%s <= %s", key, values[0]) },
 	}
-	identifier := func(name string) string {
-		return fmt.Sprintf("[%s]", name)
+	generator := func(field reflect.StructField, keys *[]any) string {
+		return "NULL"
 	}
-	parameter := func(value any, args *[]any) string {
+	parameter := func(value reflect.Value, args *[]any) string {
 		*args = append(*args, value)
 		return fmt.Sprintf("@p%d", len(*args))
+	}
+	identifier := func(name string) string {
+		return fmt.Sprintf("[%s]", name)
 	}
 
 	return &MSSQLRepository[Model]{
 		db:      db,
-		builder: NewSQLBuilder[Model](operators, parameter, identifier),
+		builder: NewSQLBuilder[Model](operators, generator, parameter, identifier),
 	}
 }
 

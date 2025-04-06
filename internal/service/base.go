@@ -33,37 +33,25 @@ type CRUDService[Model any] struct {
 func NewCRUDService[Model any](repo repository.Repository[Model], hooks *CRUDHooks[Model]) *CRUDService[Model] {
 	_type := reflect.TypeFor[Model]()
 
+	idField := _type.Field(0)
+	if idField.Name == "_" {
+		idField = _type.Field(1)
+	}
+
 	result := &CRUDService[Model]{
-		id:    "id",
-		key:   "ID",
-		name:  _type.Name(),
+		id:    strings.Split(idField.Tag.Get("json"), ",")[0],
+		key:   idField.Name,
+		name:  strings.ToLower(_type.Name()),
 		path:  fmt.Sprintf("/%s", strings.ToLower(_type.Name())),
 		repo:  repo,
 		hooks: hooks,
-	}
-
-	for i := range _type.NumField() {
-		field := _type.Field(i)
-		if value := field.Tag.Get("id"); value == "true" {
-			result.id = field.Tag.Get("json")
-			result.key = field.Name
-		}
-	}
-
-	if field, ok := _type.FieldByName("_"); ok {
-		if value := field.Tag.Get("json"); value != "" {
-			result.name = value
-		}
-		if value := field.Tag.Get("path"); value != "" {
-			result.path = value
-		}
 	}
 
 	return result
 }
 
 func (s *CRUDService[Model]) GetName() string {
-	return strings.ToLower(s.name)
+	return s.name
 }
 
 func (s *CRUDService[Model]) GetPath() string {

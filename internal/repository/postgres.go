@@ -4,6 +4,7 @@ import (
 	"context"
 	"database/sql"
 	"fmt"
+	"reflect"
 )
 
 type PostgresRepository[Model any] struct {
@@ -13,6 +14,8 @@ type PostgresRepository[Model any] struct {
 
 func NewPostgresRepository[Model any](db *sql.DB) *PostgresRepository[Model] {
 	operators := map[string]func(string, ...any) string{
+		// TODO: operators must be refactored based on field type
+		// TODO: operators must be synced to schema where types
 		"_eq":  func(key string, values ...any) string { return fmt.Sprintf("%s = %s", key, values[0]) },
 		"_neq": func(key string, values ...any) string { return fmt.Sprintf("%s != %s", key, values[0]) },
 		"_gt":  func(key string, values ...any) string { return fmt.Sprintf("%s > %s", key, values[0]) },
@@ -20,10 +23,12 @@ func NewPostgresRepository[Model any](db *sql.DB) *PostgresRepository[Model] {
 		"_lt":  func(key string, values ...any) string { return fmt.Sprintf("%s < %s", key, values[0]) },
 		"_lte": func(key string, values ...any) string { return fmt.Sprintf("%s <= %s", key, values[0]) },
 	}
-	parameter := func(value any, args *[]any) string {
-		// *args = append(*args, value)
-		// return "?"
-		return fmt.Sprintf("'%s'", value)
+	generator := func(field reflect.StructField, keys *[]any) string {
+		return "DEFAULT"
+	}
+	parameter := func(value reflect.Value, args *[]any) string {
+		*args = append(*args, value.Interface())
+		return fmt.Sprintf("$%d", len(*args))
 	}
 	identifier := func(name string) string {
 		return fmt.Sprintf("\"%s\"", name)
@@ -31,7 +36,7 @@ func NewPostgresRepository[Model any](db *sql.DB) *PostgresRepository[Model] {
 
 	return &PostgresRepository[Model]{
 		db:      db,
-		builder: NewSQLBuilder[Model](operators, parameter, identifier),
+		builder: NewSQLBuilder[Model](operators, generator, parameter, identifier),
 	}
 }
 
@@ -51,22 +56,47 @@ func (r *PostgresRepository[Model]) Get(ctx context.Context, where *map[string]a
 		query += fmt.Sprintf(" OFFSET %d", *skip)
 	}
 
+	// TODO: must use slog with multiple log severities
 	fmt.Println(query, args)
 
 	return r.builder.Scan(r.db.QueryContext(ctx, query, args...))
 }
 
 func (r *PostgresRepository[Model]) Put(ctx context.Context, models *[]Model) ([]Model, error) {
-	args := []any{}
-	query := "UPDATE " + r.builder.Table() + " SET " + "" + " WHERE " // + r.builder.Where(order) // + " LIMIT " + limit + " OFFSET " + skip
-	fmt.Println(query, args)
-	return nil, nil
+	// TODO: must be completed
+	// TODO: PK fields must be null
+	result := []Model{}
+
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return nil, err
+	}
+
+	for _, model := range *models {
+		args := []any{}
+		query := fmt.Sprintf("UPDATE %s SET %s", r.builder.Table(), r.builder.Set(&model, &args))
+		query += fmt.Sprintf(" RETURNING %s", r.builder.Fields())
+
+		fmt.Println(query, args)
+
+		items, err := r.builder.Scan(tx.QueryContext(ctx, query, args...))
+		if err != nil {
+			tx.Rollback()
+			return nil, err
+		}
+
+		result = append(result, items...)
+	}
+
+	tx.Commit()
+	return result, nil
 }
 
 func (r *PostgresRepository[Model]) Post(ctx context.Context, models *[]Model) ([]Model, error) {
 	args := []any{}
+	keys := []any{}
 	query := fmt.Sprintf("INSERT INTO %s(%s)", r.builder.Table(), r.builder.Fields())
-	if expr := r.builder.Values(models, &args); expr != "" {
+	if expr := r.builder.Values(models, &keys, &args); expr != "" {
 		query += fmt.Sprintf(" VALUES %s", expr)
 	}
 	query += fmt.Sprintf(" RETURNING %s", r.builder.Fields())
