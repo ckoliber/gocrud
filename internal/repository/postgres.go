@@ -8,12 +8,15 @@ import (
 	"reflect"
 )
 
+// PostgresRepository provides CRUD operations for PostgreSQL
 type PostgresRepository[Model any] struct {
 	db      *sql.DB
 	builder *SQLBuilder[Model]
 }
 
+// NewPostgresRepository initializes a new PostgresRepository
 func NewPostgresRepository[Model any](db *sql.DB) *PostgresRepository[Model] {
+	// Define SQL operators and helper functions for query building
 	operators := map[string]func(string, ...any) string{
 		// TODO: operators must be refactored based on field type
 		// TODO: operators must be synced to schema where types
@@ -47,6 +50,7 @@ func NewPostgresRepository[Model any](db *sql.DB) *PostgresRepository[Model] {
 	}
 }
 
+// Get retrieves records from the database based on the provided filters
 func (r *PostgresRepository[Model]) Get(ctx context.Context, where *map[string]any, order *map[string]any, limit *int, skip *int) ([]Model, error) {
 	args := []any{}
 	query := fmt.Sprintf("SELECT %s FROM %s", r.builder.Fields(), r.builder.Table())
@@ -65,6 +69,7 @@ func (r *PostgresRepository[Model]) Get(ctx context.Context, where *map[string]a
 
 	slog.Info("Executing Get query", slog.String("query", query), slog.Any("args", args))
 
+	// Execute the query and scan the results
 	result, err := r.builder.Scan(r.db.QueryContext(ctx, query, args...))
 	if err != nil {
 		slog.Error("Error executing Get query", slog.String("query", query), slog.Any("args", args), slog.Any("error", err))
@@ -74,15 +79,18 @@ func (r *PostgresRepository[Model]) Get(ctx context.Context, where *map[string]a
 	return result, nil
 }
 
+// Put updates existing records in the database
 func (r *PostgresRepository[Model]) Put(ctx context.Context, models *[]Model) ([]Model, error) {
 	result := []Model{}
 
+	// Begin a transaction
 	tx, err := r.db.BeginTx(ctx, nil)
 	if err != nil {
 		slog.Error("Error starting transaction for Put", slog.Any("error", err))
 		return nil, err
 	}
 
+	// Update each model in the database
 	for _, model := range *models {
 		args := []any{}
 		query := fmt.Sprintf("UPDATE %s SET %s", r.builder.Table(), r.builder.Set(&model, &args))
@@ -100,6 +108,7 @@ func (r *PostgresRepository[Model]) Put(ctx context.Context, models *[]Model) ([
 		result = append(result, items...)
 	}
 
+	// Commit the transaction
 	if err := tx.Commit(); err != nil {
 		slog.Error("Error committing transaction for Put", slog.Any("error", err))
 		return nil, err
@@ -108,6 +117,7 @@ func (r *PostgresRepository[Model]) Put(ctx context.Context, models *[]Model) ([
 	return result, nil
 }
 
+// Post inserts new records into the database
 func (r *PostgresRepository[Model]) Post(ctx context.Context, models *[]Model) ([]Model, error) {
 	args := []any{}
 	keys := []any{}
@@ -119,6 +129,7 @@ func (r *PostgresRepository[Model]) Post(ctx context.Context, models *[]Model) (
 
 	slog.Info("Executing Post query", slog.String("query", query), slog.Any("args", args))
 
+	// Execute the query and scan the results
 	result, err := r.builder.Scan(r.db.QueryContext(ctx, query, args...))
 	if err != nil {
 		slog.Error("Error executing Post query", slog.String("query", query), slog.Any("args", args), slog.Any("error", err))
@@ -128,6 +139,7 @@ func (r *PostgresRepository[Model]) Post(ctx context.Context, models *[]Model) (
 	return result, nil
 }
 
+// Delete removes records from the database based on the provided filters
 func (r *PostgresRepository[Model]) Delete(ctx context.Context, where *map[string]any) ([]Model, error) {
 	args := []any{}
 	query := fmt.Sprintf("DELETE FROM %s", r.builder.Table())
@@ -138,6 +150,7 @@ func (r *PostgresRepository[Model]) Delete(ctx context.Context, where *map[strin
 
 	slog.Info("Executing Delete query", slog.String("query", query), slog.Any("args", args))
 
+	// Execute the query and scan the results
 	result, err := r.builder.Scan(r.db.QueryContext(ctx, query, args...))
 	if err != nil {
 		slog.Error("Error executing Delete query", slog.String("query", query), slog.Any("args", args), slog.Any("error", err))
