@@ -24,13 +24,13 @@ type Field struct {
 type SQLBuilder[Model any] struct {
 	table      string
 	fields     []Field
-	operators  map[string]func(string, ...any) string
+	operators  map[string]func(string, ...string) string
 	generator  func(reflect.StructField, *[]any) string
 	parameter  func(reflect.Value, *[]any) string
 	identifier func(string) string
 }
 
-func NewSQLBuilder[Model any](operators map[string]func(string, ...any) string, generator func(reflect.StructField, *[]any) string, parameter func(reflect.Value, *[]any) string, identifier func(string) string) *SQLBuilder[Model] {
+func NewSQLBuilder[Model any](operators map[string]func(string, ...string) string, generator func(reflect.StructField, *[]any) string, parameter func(reflect.Value, *[]any) string, identifier func(string) string) *SQLBuilder[Model] {
 	// Initialize SQLBuilder with table name and fields based on the Model type
 	// Logs the table name and fields for debugging
 	_type := reflect.TypeFor[Model]()
@@ -177,7 +177,18 @@ func (b *SQLBuilder[Model]) Where(where *map[string]any, args *[]any) string {
 	for key, item := range *where {
 		for op, value := range item.(map[string]any) {
 			if handler, ok := b.operators[op]; ok {
-				result = append(result, handler(b.identifier(key), b.parameter(reflect.ValueOf(value), args)))
+				_value := reflect.ValueOf(value)
+
+				if _value.Kind() == reflect.String {
+					result = append(result, handler(b.identifier(key), b.parameter(_value, args)))
+				} else if _value.Kind() == reflect.Slice {
+					items := []string{}
+					for i := range _value.Len() {
+						items = append(items, b.parameter(_value.Index(i), args))
+					}
+
+					result = append(result, handler(b.identifier(key), items...))
+				}
 			}
 		}
 	}

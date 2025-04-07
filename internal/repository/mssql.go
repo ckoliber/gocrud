@@ -15,13 +15,13 @@ type MSSQLRepository[Model any] struct {
 }
 
 func NewMSSQLRepository[Model any](db *sql.DB) *MSSQLRepository[Model] {
-	operators := map[string]func(string, ...any) string{
-		"_eq":  func(key string, values ...any) string { return fmt.Sprintf("%s = %s", key, values[0]) },
-		"_neq": func(key string, values ...any) string { return fmt.Sprintf("%s != %s", key, values[0]) },
-		"_gt":  func(key string, values ...any) string { return fmt.Sprintf("%s > %s", key, values[0]) },
-		"_gte": func(key string, values ...any) string { return fmt.Sprintf("%s >= %s", key, values[0]) },
-		"_lt":  func(key string, values ...any) string { return fmt.Sprintf("%s < %s", key, values[0]) },
-		"_lte": func(key string, values ...any) string { return fmt.Sprintf("%s <= %s", key, values[0]) },
+	operators := map[string]func(string, ...string) string{
+		"_eq":  func(key string, values ...string) string { return fmt.Sprintf("%s = %s", key, values[0]) },
+		"_neq": func(key string, values ...string) string { return fmt.Sprintf("%s != %s", key, values[0]) },
+		"_gt":  func(key string, values ...string) string { return fmt.Sprintf("%s > %s", key, values[0]) },
+		"_gte": func(key string, values ...string) string { return fmt.Sprintf("%s >= %s", key, values[0]) },
+		"_lt":  func(key string, values ...string) string { return fmt.Sprintf("%s < %s", key, values[0]) },
+		"_lte": func(key string, values ...string) string { return fmt.Sprintf("%s <= %s", key, values[0]) },
 	}
 	generator := func(field reflect.StructField, keys *[]any) string {
 		return "NULL"

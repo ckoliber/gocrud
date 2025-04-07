@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log/slog"
 	"reflect"
+	"strings"
 )
 
 // PostgresRepository provides CRUD operations for PostgreSQL
@@ -17,21 +18,25 @@ type PostgresRepository[Model any] struct {
 // NewPostgresRepository initializes a new PostgresRepository
 func NewPostgresRepository[Model any](db *sql.DB) *PostgresRepository[Model] {
 	// Define SQL operators and helper functions for query building
-	operators := map[string]func(string, ...any) string{
+	operators := map[string]func(string, ...string) string{
 		// TODO: operators must be refactored based on field type
 		// TODO: operators must be synced to schema where types
-		"_eq":     func(key string, values ...any) string { return fmt.Sprintf("%s = %s", key, values[0]) },
-		"_neq":    func(key string, values ...any) string { return fmt.Sprintf("%s != %s", key, values[0]) },
-		"_gt":     func(key string, values ...any) string { return fmt.Sprintf("%s > %s", key, values[0]) },
-		"_gte":    func(key string, values ...any) string { return fmt.Sprintf("%s >= %s", key, values[0]) },
-		"_lt":     func(key string, values ...any) string { return fmt.Sprintf("%s < %s", key, values[0]) },
-		"_lte":    func(key string, values ...any) string { return fmt.Sprintf("%s <= %s", key, values[0]) },
-		"_like":   func(key string, values ...any) string { return fmt.Sprintf("%s LIKE %s", key, values[0]) },
-		"_nlike":  func(key string, values ...any) string { return fmt.Sprintf("%s NOT LIKE %s", key, values[0]) },
-		"_ilike":  func(key string, values ...any) string { return fmt.Sprintf("%s ILIKE %s", key, values[0]) },
-		"_nilike": func(key string, values ...any) string { return fmt.Sprintf("%s NOT ILIKE %s", key, values[0]) },
-		"_in":     func(key string, values ...any) string { return fmt.Sprintf("%s IN (%s)", key, values) },
-		"_nin":    func(key string, values ...any) string { return fmt.Sprintf("%s NOT IN (%s)", key, values) },
+		"_eq":     func(key string, values ...string) string { return fmt.Sprintf("%s = %s", key, values[0]) },
+		"_neq":    func(key string, values ...string) string { return fmt.Sprintf("%s != %s", key, values[0]) },
+		"_gt":     func(key string, values ...string) string { return fmt.Sprintf("%s > %s", key, values[0]) },
+		"_gte":    func(key string, values ...string) string { return fmt.Sprintf("%s >= %s", key, values[0]) },
+		"_lt":     func(key string, values ...string) string { return fmt.Sprintf("%s < %s", key, values[0]) },
+		"_lte":    func(key string, values ...string) string { return fmt.Sprintf("%s <= %s", key, values[0]) },
+		"_like":   func(key string, values ...string) string { return fmt.Sprintf("%s LIKE %s", key, values[0]) },
+		"_nlike":  func(key string, values ...string) string { return fmt.Sprintf("%s NOT LIKE %s", key, values[0]) },
+		"_ilike":  func(key string, values ...string) string { return fmt.Sprintf("%s ILIKE %s", key, values[0]) },
+		"_nilike": func(key string, values ...string) string { return fmt.Sprintf("%s NOT ILIKE %s", key, values[0]) },
+		"_in": func(key string, values ...string) string {
+			return fmt.Sprintf("%s IN (%s)", key, strings.Join(values, ","))
+		},
+		"_nin": func(key string, values ...string) string {
+			return fmt.Sprintf("%s NOT IN (%s)", key, strings.Join(values, ","))
+		},
 	}
 	generator := func(field reflect.StructField, keys *[]any) string {
 		return "DEFAULT"
