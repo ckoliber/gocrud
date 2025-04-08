@@ -23,6 +23,7 @@ type Field struct {
 
 type SQLBuilder[Model any] struct {
 	table      string
+	keys       []string
 	fields     []Field
 	operators  map[string]func(string, ...string) string
 	generator  func(reflect.StructField, *[]any) string
@@ -53,6 +54,7 @@ func NewSQLBuilder[Model any](operators map[string]func(string, ...string) strin
 
 	return &SQLBuilder[Model]{
 		table:      table,
+		keys:       []string{fields[0].name},
 		fields:     fields,
 		operators:  operators,
 		generator:  generator,
