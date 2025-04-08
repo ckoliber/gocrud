@@ -38,7 +38,7 @@ func NewMySQLRepository[Model any](db *sql.DB) *MySQLRepository[Model] {
 	}
 	parameter := func(value reflect.Value, args *[]any) string {
 		*args = append(*args, value.Interface())
-		return fmt.Sprintf("$%d", len(*args))
+		return "?"
 	}
 	identifier := func(name string) string {
 		return fmt.Sprintf("`%s`", name)
@@ -101,9 +101,21 @@ func (r *MySQLRepository[Model]) Put(ctx context.Context, models *[]Model) ([]Mo
 
 		slog.Info("Executing Put query", slog.String("query", query), slog.Any("args", args))
 
-		items, err := r.builder.Scan(tx.QueryContext(ctx, query, args...))
-		if err != nil {
+		if _, err := tx.ExecContext(ctx, query, args...); err != nil {
 			slog.Error("Error executing Put query", slog.String("query", query), slog.Any("args", args), slog.Any("error", err))
+			tx.Rollback()
+			return nil, err
+		}
+
+		getArgs := []any{}
+		getQuery := fmt.Sprintf("SELECT %s FROM %s", r.builder.Fields(""), r.builder.Table())
+		if expr := r.builder.Where(&where, &getArgs); expr != "" {
+			getQuery += fmt.Sprintf(" WHERE %s", expr)
+		}
+
+		items, err := r.builder.Scan(tx.QueryContext(ctx, getQuery, getArgs...))
+		if err != nil {
+			slog.Error("Error executing Put query", slog.String("query", getQuery), slog.Any("args", getArgs), slog.Any("error", err))
 			tx.Rollback()
 			return nil, err
 		}
@@ -143,6 +155,29 @@ func (r *MySQLRepository[Model]) Post(ctx context.Context, models *[]Model) ([]M
 
 // Delete removes records from the database based on the provided filters
 func (r *MySQLRepository[Model]) Delete(ctx context.Context, where *map[string]any) ([]Model, error) {
+	// Begin a transaction
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		slog.Error("Error starting transaction for Put", slog.Any("error", err))
+		return nil, err
+	}
+
+	getArgs := []any{}
+	getQuery := fmt.Sprintf("SELECT %s FROM %s", r.builder.Fields(""), r.builder.Table())
+	if expr := r.builder.Where(where, &getArgs); expr != "" {
+		getQuery += fmt.Sprintf(" WHERE %s", expr)
+	}
+
+	slog.Info("Executing Delete query", slog.String("query", getQuery), slog.Any("args", getArgs))
+
+	// Execute the query and scan the results
+	result, err := r.builder.Scan(r.db.QueryContext(ctx, getQuery, getArgs...))
+	if err != nil {
+		slog.Error("Error executing Delete query", slog.String("query", getQuery), slog.Any("args", getArgs), slog.Any("error", err))
+		tx.Rollback()
+		return nil, err
+	}
+
 	args := []any{}
 	query := fmt.Sprintf("DELETE FROM %s", r.builder.Table())
 	if expr := r.builder.Where(where, &args); expr != "" {
@@ -151,10 +186,16 @@ func (r *MySQLRepository[Model]) Delete(ctx context.Context, where *map[string]a
 
 	slog.Info("Executing Delete query", slog.String("query", query), slog.Any("args", args))
 
-	// Execute the query and scan the results
-	result, err := r.builder.Scan(r.db.QueryContext(ctx, query, args...))
-	if err != nil {
+	// Execute the query
+	if _, err := r.db.ExecContext(ctx, query, args...); err != nil {
 		slog.Error("Error executing Delete query", slog.String("query", query), slog.Any("args", args), slog.Any("error", err))
+		tx.Rollback()
+		return nil, err
+	}
+
+	// Commit the transaction
+	if err := tx.Commit(); err != nil {
+		slog.Error("Error committing transaction for Delete", slog.Any("error", err))
 		return nil, err
 	}
 
