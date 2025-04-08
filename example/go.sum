@@ -12,8 +12,8 @@ github.com/Azure/azure-sdk-for-go/sdk/security/keyvault/internal v1.0.0 h1:D3occ
 github.com/Azure/azure-sdk-for-go/sdk/security/keyvault/internal v1.0.0/go.mod h1:bTSOgj05NGRuHHhQwAdPnYr9TOdNmKlZTgGLL6nyAdI=
 github.com/AzureAD/microsoft-authentication-library-for-go v1.2.2 h1:XHOnouVk1mxXfQidrMEnLlPk9UMeRtyBTnEFtxkV0kU=
 github.com/AzureAD/microsoft-authentication-library-for-go v1.2.2/go.mod h1:wP83P5OoQ5p6ip3ScPr0BAq0BvuPAvacpEuSzyouqAI=
-github.com/ckoliber/gocrud v0.0.0-20250408132606-3056c6581ddb h1:rjubYtC+Eej9uIYzMCwOAdfM3w0B2hMFptub07lAdXQ=
-github.com/ckoliber/gocrud v0.0.0-20250408132606-3056c6581ddb/go.mod h1:erThEwCVXFBxM7O9/TKPL1ykefnrjMLisdCD++kgANw=
+github.com/ckoliber/gocrud v1.0.0 h1:pK2PFRrLtFv9bNx6OLyZuDfcJlT2KZvRmsvzJAHFSkM=
+github.com/ckoliber/gocrud v1.0.0/go.mod h1:+wbfj+rmJtpkHbO2qQWfa8Wuyhq+0glgwo6dhoHYQdI=
 github.com/cpuguy83/go-md2man/v2 v2.0.4/go.mod h1:tgQtvFlXSQOSOSIRvRPT7W67SCa46tRHOmNcaadrF8o=
 github.com/danielgtaylor/huma/v2 v2.32.0 h1:ytU9ExG/axC434+soXxwNzv0uaxOb3cyCgjj8y3PmBE=
 github.com/danielgtaylor/huma/v2 v2.32.0/go.mod h1:9BxJwkeoPPDEJ2Bg4yPwL1mM1rYpAwCAWFKoo723spk=

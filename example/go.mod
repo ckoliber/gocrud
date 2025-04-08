@@ -3,7 +3,7 @@ module github.com/ckoliber/gocrud/examples
 go 1.24.2
 
 require (
-	github.com/ckoliber/gocrud v0.0.0-20250408132606-3056c6581ddb
+	github.com/ckoliber/gocrud v1.0.0
 	github.com/danielgtaylor/huma/v2 v2.32.0
 	github.com/go-sql-driver/mysql v1.9.2
 	github.com/lib/pq v1.10.9
