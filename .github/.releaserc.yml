@@ -1,4 +1,4 @@
-tagFormat: ${version}
+tagFormat: v${version}
 branches:
     - main
 plugins:
