@@ -77,10 +77,10 @@ func (b *SQLBuilder[Model]) Fields(prefix string) string {
 	return strings.Join(result, ",")
 }
 
-func (b *SQLBuilder[Model]) Values(values *[]Model, keys *[]any, args *[]any) string {
+func (b *SQLBuilder[Model]) Values(values *[]Model, args *[]any, keys *[]any) (string, string) {
 	// Constructs the VALUES clause for an INSERT query
 	if values == nil {
-		return ""
+		return "", ""
 	}
 
 	fields := []string{}
@@ -114,7 +114,7 @@ func (b *SQLBuilder[Model]) Values(values *[]Model, keys *[]any, args *[]any) st
 	}
 
 	slog.Debug("Constructed VALUES clause", slog.Any("values", result))
-	return "(" + strings.Join(fields, ",") + ") VALUES " + strings.Join(result, ",")
+	return strings.Join(fields, ","), strings.Join(result, ",")
 }
 
 func (b *SQLBuilder[Model]) Set(set *Model, args *[]any, where *map[string]any) string {
@@ -129,7 +129,25 @@ func (b *SQLBuilder[Model]) Set(set *Model, args *[]any, where *map[string]any) 
 	for idx, field := range b.fields {
 		if idx == 0 {
 			if where != nil {
-				(*where)[field.name] = map[string]any{"_eq": _value.Field(field.idx).Interface()}
+				_field := _value.Field(field.idx)
+				for _field.Kind() == reflect.Pointer {
+					_field = _field.Elem()
+				}
+
+				switch _field.Kind() {
+				case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
+					(*where)[field.name] = map[string]any{"_eq": fmt.Sprintf("%d", _field.Int())}
+				case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
+					(*where)[field.name] = map[string]any{"_eq": fmt.Sprintf("%d", _field.Uint())}
+				case reflect.Float32, reflect.Float64:
+					(*where)[field.name] = map[string]any{"_eq": fmt.Sprintf("%f", _field.Float())}
+				case reflect.Complex64, reflect.Complex128:
+					(*where)[field.name] = map[string]any{"_eq": fmt.Sprintf("%f", _field.Complex())}
+				case reflect.String:
+					(*where)[field.name] = map[string]any{"_eq": _field.String()}
+				default:
+					panic("Invalid identifier type")
+				}
 			}
 		} else {
 			result = append(result, field.name+"="+b.parameter(_value.Field(field.idx), args))

@@ -24,42 +24,42 @@ type PutSingleOutput[Model any] struct {
 func (s *CRUDService[Model]) PutSingle(ctx context.Context, i *PutSingleInput[Model]) (*PutSingleOutput[Model], error) {
 	slog.Debug("Executing PutSingle operation", slog.String("id", i.ID), slog.Any("body", i.Body))
 
-	field := reflect.ValueOf(&i.Body).Elem().FieldByName(s.key)
-	for field.Kind() == reflect.Pointer {
-		field = field.Elem()
+	_field := reflect.ValueOf(&i.Body).Elem().FieldByName(s.key)
+	for _field.Kind() == reflect.Pointer {
+		_field = _field.Elem()
 	}
 
-	switch field.Kind() {
+	switch _field.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		value, err := strconv.ParseInt(i.ID, 10, 64)
 		if err != nil {
 			slog.Error("Failed to parse ID as integer", slog.Any("error", err))
 			return nil, huma.Error422UnprocessableEntity(err.Error())
 		}
-		field.SetInt(value)
+		_field.SetInt(value)
 	case reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64:
 		value, err := strconv.ParseUint(i.ID, 10, 64)
 		if err != nil {
 			slog.Error("Failed to parse ID as unsigned integer", slog.Any("error", err))
 			return nil, huma.Error422UnprocessableEntity(err.Error())
 		}
-		field.SetUint(value)
+		_field.SetUint(value)
 	case reflect.Float32, reflect.Float64:
 		value, err := strconv.ParseFloat(i.ID, 64)
 		if err != nil {
 			slog.Error("Failed to parse ID as float", slog.Any("error", err))
 			return nil, huma.Error422UnprocessableEntity(err.Error())
 		}
-		field.SetFloat(value)
+		_field.SetFloat(value)
 	case reflect.Complex64, reflect.Complex128:
 		value, err := strconv.ParseComplex(i.ID, 128)
 		if err != nil {
 			slog.Error("Failed to parse ID as complex number", slog.Any("error", err))
 			return nil, huma.Error422UnprocessableEntity(err.Error())
 		}
-		field.SetComplex(value)
+		_field.SetComplex(value)
 	case reflect.String:
-		field.SetString(i.ID)
+		_field.SetString(i.ID)
 	default:
 		slog.Error("Invalid identifier type", slog.String("id", i.ID))
 		return nil, huma.Error422UnprocessableEntity("invalid identifier type")

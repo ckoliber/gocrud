@@ -95,10 +95,10 @@ func (r *MSSQLRepository[Model]) Put(ctx context.Context, models *[]Model) ([]Mo
 		args := []any{}
 		where := map[string]any{}
 		query := fmt.Sprintf("UPDATE %s SET %s", r.builder.Table(), r.builder.Set(&model, &args, &where))
+		query += fmt.Sprintf(" OUTPUT %s", r.builder.Fields("INSERTED."))
 		if expr := r.builder.Where(&where, &args); expr != "" {
 			query += fmt.Sprintf(" WHERE %s", expr)
 		}
-		query += fmt.Sprintf(" OUTPUT %s", r.builder.Fields("INSERTED."))
 
 		slog.Info("Executing Put query", slog.String("query", query), slog.Any("args", args))
 
@@ -124,9 +124,12 @@ func (r *MSSQLRepository[Model]) Put(ctx context.Context, models *[]Model) ([]Mo
 // Post inserts new records into the database
 func (r *MSSQLRepository[Model]) Post(ctx context.Context, models *[]Model) ([]Model, error) {
 	args := []any{}
-	keys := []any{}
-	query := fmt.Sprintf("INSERT INTO %s %s", r.builder.Table(), r.builder.Values(models, &keys, &args))
-	query += fmt.Sprintf(" OUTPUT %s", r.builder.Fields("INSERTED."))
+	query := fmt.Sprintf("INSERT INTO %s", r.builder.Table())
+	if fields, values := r.builder.Values(models, &args, nil); fields != "" && values != "" {
+		query += fmt.Sprintf(" (%s)", fields)
+		query += fmt.Sprintf(" OUTPUT %s", r.builder.Fields("INSERTED."))
+		query += fmt.Sprintf(" VALUES %s", values)
+	}
 
 	slog.Info("Executing Post query", slog.String("query", query), slog.Any("args", args))
 
@@ -144,10 +147,10 @@ func (r *MSSQLRepository[Model]) Post(ctx context.Context, models *[]Model) ([]M
 func (r *MSSQLRepository[Model]) Delete(ctx context.Context, where *map[string]any) ([]Model, error) {
 	args := []any{}
 	query := fmt.Sprintf("DELETE FROM %s", r.builder.Table())
+	query += fmt.Sprintf(" OUTPUT %s", r.builder.Fields("DELETED."))
 	if expr := r.builder.Where(where, &args); expr != "" {
 		query += fmt.Sprintf(" WHERE %s", expr)
 	}
-	query += fmt.Sprintf(" OUTPUT %s", r.builder.Fields("DELETED."))
 
 	slog.Info("Executing Delete query", slog.String("query", query), slog.Any("args", args))
 

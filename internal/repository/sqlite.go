@@ -124,8 +124,10 @@ func (r *SQLiteRepository[Model]) Put(ctx context.Context, models *[]Model) ([]M
 // Post inserts new records into the database
 func (r *SQLiteRepository[Model]) Post(ctx context.Context, models *[]Model) ([]Model, error) {
 	args := []any{}
-	keys := []any{}
-	query := fmt.Sprintf("INSERT INTO %s %s", r.builder.Table(), r.builder.Values(models, &keys, &args))
+	query := fmt.Sprintf("INSERT INTO %s", r.builder.Table())
+	if fields, values := r.builder.Values(models, &args, nil); fields != "" && values != "" {
+		query += fmt.Sprintf(" (%s) VALUES %s", fields, values)
+	}
 	query += fmt.Sprintf(" RETURNING %s", r.builder.Fields(""))
 
 	slog.Info("Executing Post query", slog.String("query", query), slog.Any("args", args))
