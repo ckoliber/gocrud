@@ -1,0 +1,49 @@
+name: CI Pipeline
+
+on:
+    push:
+        tags: ["*"]
+        branches: [main]
+    pull_request:
+        branches: [main]
+    workflow_dispatch:
+        inputs: {}
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+        permissions:
+            contents: read
+            packages: write
+            attestations: write
+            id-token: write
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+
+            - name: Setup Golang
+              uses: actions/setup-go@v5
+              with:
+                  go-version: "1.24"
+
+            - run: go get
+            - run: go build
+
+    release:
+        needs: build
+        runs-on: ubuntu-latest
+        if: github.ref_protected && !startsWith(github.event.head_commit.message, 'chore')
+        steps:
+            - name: Checkout repository
+              uses: actions/checkout@v4
+              with:
+                  persist-credentials: false
+
+            - name: Semantic Release
+              run: cp .github/.releaserc.yml .
+            - uses: cycjimmy/semantic-release-action@v4
+              with:
+                  extra_plugins: "@semantic-release/exec"
+              env:
+                  GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+                  GITHUB_API: ${{ github.api_url }}
