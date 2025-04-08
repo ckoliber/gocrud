@@ -67,11 +67,11 @@ func (b *SQLBuilder[Model]) Table() string {
 	return b.identifier(b.table)
 }
 
-func (b *SQLBuilder[Model]) Fields() string {
+func (b *SQLBuilder[Model]) Fields(prefix string) string {
 	// Returns a comma-separated list of field names with proper identifier formatting
 	result := []string{}
 	for _, field := range b.fields {
-		result = append(result, b.identifier(field.name))
+		result = append(result, prefix+b.identifier(field.name))
 	}
 	slog.Debug("Fetching fields", slog.Any("fields", result))
 	return strings.Join(result, ",")
@@ -83,28 +83,41 @@ func (b *SQLBuilder[Model]) Values(values *[]Model, keys *[]any, args *[]any) st
 		return ""
 	}
 
+	fields := []string{}
+	for idx, field := range b.fields {
+		if idx == 0 {
+			if b.generator != nil {
+				fields = append(fields, b.identifier(field.name))
+			}
+		} else {
+			fields = append(fields, b.identifier(field.name))
+		}
+	}
+
 	result := []string{}
 	for _, model := range *values {
 		_type := reflect.TypeOf(model)
 		_value := reflect.ValueOf(model)
 
-		fields := []string{}
+		items := []string{}
 		for idx, field := range b.fields {
 			if idx == 0 {
-				fields = append(fields, b.generator(_type.Field(field.idx), keys))
+				if b.generator != nil {
+					items = append(items, b.generator(_type.Field(field.idx), keys))
+				}
 			} else {
-				fields = append(fields, b.parameter(_value.Field(field.idx), args))
+				items = append(items, b.parameter(_value.Field(field.idx), args))
 			}
 		}
 
-		result = append(result, "("+strings.Join(fields, ",")+")")
+		result = append(result, "("+strings.Join(items, ",")+")")
 	}
 
 	slog.Debug("Constructed VALUES clause", slog.Any("values", result))
-	return strings.Join(result, ",")
+	return "(" + strings.Join(fields, ",") + ") VALUES " + strings.Join(result, ",")
 }
 
-func (b *SQLBuilder[Model]) Set(set *Model, args *[]any) string {
+func (b *SQLBuilder[Model]) Set(set *Model, args *[]any, where *map[string]any) string {
 	// Constructs the SET clause for an UPDATE query
 	if set == nil {
 		return ""
@@ -114,20 +127,17 @@ func (b *SQLBuilder[Model]) Set(set *Model, args *[]any) string {
 
 	result := []string{}
 	for idx, field := range b.fields {
-		if idx != 0 {
+		if idx == 0 {
+			if where != nil {
+				(*where)[field.name] = map[string]any{"_eq": _value.Field(field.idx).Interface()}
+			}
+		} else {
 			result = append(result, field.name+"="+b.parameter(_value.Field(field.idx), args))
 		}
 	}
 
-	where := map[string]any{}
-	for idx, field := range b.fields {
-		if idx == 0 {
-			where[field.name] = map[string]any{"_eq": _value.Field(field.idx).Interface()}
-		}
-	}
-
 	slog.Debug("Constructed SET clause", slog.String("set", strings.Join(result, ",")))
-	return strings.Join(result, ",") + " WHERE " + b.Where(&where, args)
+	return strings.Join(result, ",")
 }
 
 func (b *SQLBuilder[Model]) Order(order *map[string]any) string {

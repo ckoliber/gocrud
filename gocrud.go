@@ -140,11 +140,11 @@ func NewSQLRepository[Model any](db *sql.DB) repository.Repository[Model] {
 	case "*sqlite.SQLiteDriver":
 		slog.Debug("Using SQLite repository")
 		return repository.NewSQLiteRepository[Model](db)
-	case "*mssql.MssqlDriver":
+	case "*mssql.Driver":
 		slog.Debug("Using MSSQL repository")
 		return repository.NewMSSQLRepository[Model](db)
 	}
 
 	slog.Error("Unsupported database driver", slog.String("driver", driverType))
-	panic("unsupported database driver")
+	panic("unsupported database driver " + driverType)
 }
