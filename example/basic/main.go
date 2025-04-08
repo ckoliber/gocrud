@@ -15,7 +15,9 @@ import (
 	"github.com/danielgtaylor/huma/v2/humacli"
 
 	// _ "github.com/lib/pq"
-	_ "github.com/microsoft/go-mssqldb"
+	// _ "github.com/mattn/go-sqlite3"
+	// _ "github.com/microsoft/go-mssqldb"
+	_ "github.com/go-sql-driver/mysql"
 )
 
 type Options struct {
@@ -47,7 +49,9 @@ func main() {
 		api.UseMiddleware()
 
 		// db, err := sql.Open("postgres", "host=127.0.0.1 port=5432 user=postgres password=password dbname=postgres sslmode=disable")
-		db, err := sql.Open("sqlserver", "sqlserver://sa:P@ssw0rd@localhost:1433?database=master&encrypt=disable")
+		// db, err := sql.Open("sqlite3", "file:locked.sqlite?cache=shared")
+		// db, err := sql.Open("sqlserver", "sqlserver://sa:P@ssw0rd@localhost:1433?database=master&encrypt=disable")
+		db, err := sql.Open("mysql", "root:password@/default")
 		if err != nil {
 			fmt.Println(err)
 		}

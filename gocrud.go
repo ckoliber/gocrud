@@ -137,7 +137,7 @@ func NewSQLRepository[Model any](db *sql.DB) repository.Repository[Model] {
 	case "*pq.Driver", "pqx.Driver":
 		slog.Debug("Using Postgres repository")
 		return repository.NewPostgresRepository[Model](db)
-	case "*sqlite.SQLiteDriver":
+	case "*sqlite3.SQLiteDriver":
 		slog.Debug("Using SQLite repository")
 		return repository.NewSQLiteRepository[Model](db)
 	case "*mssql.Driver":
