@@ -1,3 +1,10 @@
+## [1.2.1](https://github.com/ckoliber/gocrud/compare/v1.2.0...v1.2.1) (2025-04-08)
+
+
+### Bug Fixes
+
+* **deps:** update module github.com/ckoliber/gocrud to v1.2.0 ([86d6252](https://github.com/ckoliber/gocrud/commit/86d625247e51675d8f36710d3dfc0071ce315dc2))
+
 # [1.2.0](https://github.com/ckoliber/gocrud/compare/v1.1.0...v1.2.0) (2025-04-08)
 
 
