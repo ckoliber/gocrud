@@ -1,4 +1,9 @@
-site_name: GoCRUD Documents
+site_name: GoCRUD
+site_url: https://ckoliber.dev/gocrud
+copyright: Copyright &copy; 2025 KoLiBer.
+repo_name: ckoliber/gocrud
+repo_url: https://github.com/ckoliber/gocrud
+edit_uri: edit/main/docs/
 theme:
     name: "material"
     palette: {}
