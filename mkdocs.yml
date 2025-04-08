@@ -13,14 +13,6 @@ markdown_extensions:
     - pymdownx.inlinehilite
     - pymdownx.highlight:
           linenums: true
-    - pymdownx.superfences:
-          custom_fences:
-              - name: mermaid
-                class: mermaid
-                format: !!python/name:pymdownx.superfences.fence_div_format
-extra_javascript:
-    - https://unpkg.com/mermaid@8.6.4/dist/mermaid.min.js
-    - https://polyfill.io/v3/polyfill.min.js?features=es6
 nav:
     - README: README.md
     - Introduction: introduction.md
