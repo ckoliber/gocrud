@@ -1,4 +1,4 @@
-name: CI Pipeline
+name: Pages Pipeline
 
 on:
     push:

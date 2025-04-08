@@ -23,7 +23,7 @@ The documentation is organized as follows:
 -   **[CRUD Operations](crud-operations.md)**: Learn how to use the generated CRUD endpoints.
 -   **[Hooks](hooks.md)**: Customize your API behavior with hooks.
 -   **[Advanced Topics](advanced-topics.md)**: Explore advanced features and future enhancements.
--   **[FAQ](faq.md)**: Frequently asked questions and troubleshooting tips.
+-   **[FAQ](FAQ.md)**: Frequently asked questions and troubleshooting tips.
 
 ## 🚀 Getting Started
 
@@ -31,11 +31,11 @@ To get started with GoCRUD, check out the [Getting Started](getting-started.md) 
 
 ## 🛠️ Contributing
 
-We welcome contributions to improve GoCRUD and its documentation. If you'd like to contribute, please check out the [Contributing Guide](../CONTRIBUTING.md).
+We welcome contributions to improve GoCRUD and its documentation. If you'd like to contribute, please check out the [Contributing Guide](https://github.com/ckoliber/gocrud/CONTRIBUTING.md).
 
 ## 📝 License
 
-This project is licensed under the MIT License. See the [LICENSE](../LICENSE.md) file for details.
+This project is licensed under the MIT License. See the [LICENSE](https://github.com/ckoliber/gocrud/LICENSE.md) file for details.
 
 ---
 

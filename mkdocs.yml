@@ -23,3 +23,9 @@ extra_javascript:
     - https://polyfill.io/v3/polyfill.min.js?features=es6
 nav:
     - README: README.md
+    - Introduction: introduction.md
+    - Getting Started: getting-started.md
+    - Configuration: configuration.md
+    - CRUD Operations: crud-operations.md
+    - Advanced Topics: advanced-topics.md
+    - FAQ: FAQ.md
