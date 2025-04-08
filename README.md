@@ -12,7 +12,7 @@ GoCRUD is a powerful Go module that extends [Huma](https://huma.rocks/) to autom
 
 ## 📋 Prerequisites
 
--   Go 1.16 or higher
+-   Go 1.22 or higher
 -   A project using [Huma](https://huma.rocks/)
 
 ## 🛠️ Installation
