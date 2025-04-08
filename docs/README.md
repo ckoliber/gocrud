@@ -21,7 +21,7 @@ The documentation is organized as follows:
 -   **[Getting Started](getting-started.md)**: Step-by-step guide to set up and use GoCRUD in your project.
 -   **[Configuration](configuration.md)**: Detailed explanation of configuration options and examples.
 -   **[CRUD Operations](crud-operations.md)**: Learn how to use the generated CRUD endpoints.
--   **[Hooks](hooks.md)**: Customize your API behavior with hooks.
+-   **[CRUD Hooks](crud-hooks.md)**: Customize your API behavior with hooks.
 -   **[Advanced Topics](advanced-topics.md)**: Explore advanced features and future enhancements.
 -   **[FAQ](FAQ.md)**: Frequently asked questions and troubleshooting tips.
 

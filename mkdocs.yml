@@ -27,5 +27,6 @@ nav:
     - Getting Started: getting-started.md
     - Configuration: configuration.md
     - CRUD Operations: crud-operations.md
+    - CRUD Hooks: crud-hooks.md
     - Advanced Topics: advanced-topics.md
     - FAQ: FAQ.md
