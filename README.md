@@ -1,17 +1,14 @@
 # GoCRUD
 
-A powerful Go module that extends [Huma](https://huma.rocks/) to automatically generate CRUD APIs with built-in support for permissions and relations.
+GoCRUD is a powerful Go module that extends [Huma](https://huma.rocks/) to automatically generate CRUD APIs with built-in support for input validation and customizable hooks. It simplifies API development by automating repetitive tasks, allowing you to focus on your business logic.
 
 ## 🚀 Features
 
--   Seamless integration with Huma API framework
--   Automatic CRUD endpoint generation from your models
--   Built-in permissions system
--   Relationship handling (one-to-one, one-to-many, many-to-many)
--   Input validation out of the box
--   Customizable API behaviors
--   Clean and maintainable generated code
--   Compatible with existing Huma middleware
+-   **Seamless Huma Integration**: Works effortlessly with the Huma API framework.
+-   **Automatic CRUD Generation**: Instantly generate RESTful endpoints for your models.
+-   **Input Validation**: Automatically validates input data.
+-   **Customizable Hooks**: Add custom logic before or after CRUD operations.
+-   **Clean and Maintainable**: Keeps your codebase organized and easy to maintain.
 
 ## 📋 Prerequisites
 
@@ -20,122 +17,115 @@ A powerful Go module that extends [Huma](https://huma.rocks/) to automatically g
 
 ## 🛠️ Installation
 
+Install GoCRUD using `go get`:
+
 ```bash
 go get github.com/ckoliber/gocrud
 ```
 
 ## 🎯 Quick Start
 
-1. In your existing Huma project, define your model:
+1. **Define Your Model**:
 
 ```go
 type User struct {
-    ID        uint      `json:"id"`
-    Name      string    `json:"name"`
-    Email     string    `json:"email"`
-    CreatedAt time.Time `json:"created_at"`
+	_    struct{} `db:"users" json:"-"`
+	ID   *int     `db:"id" json:"id" required:"false"`
+	Name *string  `db:"name" json:"name" required:"false" maxLength:"30" example:"David" doc:"User name"`
+	Age  *int     `db:"age" json:"age" required:"false" minimum:"1" maximum:"120" example:"25" doc:"User age from 1 to 120"`
 }
 ```
 
-2. Register your model with GoCRUD in your main application:
+2. **Register Your Model with GoCRUD**:
 
 ```go
 package main
 
 import (
     "github.com/danielgtaylor/huma/v2"
-    "github.com/danielgtaylor/huma/v2/adapters/humago"
-
     "github.com/ckoliber/gocrud"
+    "database/sql"
+    _ "github.com/lib/pq" // Example: PostgreSQL driver
 )
 
 func main() {
-    mux := http.NewServeMux()
+    db, _ := sql.Open("postgres", "your-dsn-here")
+    api := huma.New("My API", "1.0.0")
 
-    // Initialize your Huma API
-    api := humago.New(mux, huma.DefaultConfig("My API", "1.0.0"))
+    repo := gocrud.NewSQLRepository[User](db)
+    gocrud.Register(api, repo, &gocrud.Config[User]{})
 
-    // Register your model with GoCRUD
-    gocrud.Register[User](api, &gocrud.Config{
-        // Optional: Configure permissions
-        Permissions: &gocrud.Permissions{
-            Create: []string{"admin", "user"},
-            Read:   []string{"admin", "user"},
-            Update: []string{"admin"},
-            Delete: []string{"admin"},
-        },
-        // Optional: Configure relations
-        Relations: []gocrud.Relation{
-            {
-                Field: "Posts",
-                Type:  "Post",
-                Kind:  gocrud.OneToMany,
-            },
-        },
-    })
-
-    // Start your API server
-    http.ListenAndServe(fmt.Sprintf(":%d", options.Port), mux)
+    api.Serve()
 }
 ```
 
-## 📚 Generated Endpoints
+3. **Run Your API**:
 
-GoCRUD automatically generates the following RESTful endpoints for your model:
+Start your application, and GoCRUD will generate the following endpoints for the `User` model:
 
--   `GET /users` - List all users (with pagination)
+-   `GET /users` - List all users
 -   `POST /users` - Create a new user
 -   `GET /users/{id}` - Get a specific user
 -   `PUT /users/{id}` - Update a user
 -   `DELETE /users/{id}` - Delete a user
--   `GET /users/{id}/posts` - Get related posts (when relations are configured)
 
 ## 🔧 Configuration Options
 
+GoCRUD provides a flexible configuration system to customize API behavior:
+
 ```go
-type Config struct {
-    // Define who can perform which operations
-    Permissions *Permissions
+type Config[Model any] struct {
+    GetMode    Mode // Configure GET behavior (e.g., single or bulk)
+    PutMode    Mode // Configure PUT behavior
+    PostMode   Mode // Configure POST behavior
+    DeleteMode Mode // Configure DELETE behavior
 
-    // Configure model relationships
-    Relations []Relation
-
-    // Custom base path (default: plural of model name)
-    BasePath string
-
-    // Custom validators
-    Validators map[string]ValidatorFunc
-
-    // Hooks for custom logic
-    Hooks Hooks
-}
-
-type Hooks struct {
-    BeforeCreate func(ctx context.Context, model interface{}) error
-    AfterCreate  func(ctx context.Context, model interface{}) error
-    // ... more hooks available
+    CRUDHooks[Model] // Add hooks for custom logic
 }
 ```
 
+### Example: Adding Hooks
+
+```go
+config := &gocrud.Config[User]{
+    CRUDHooks: gocrud.CRUDHooks[User]{
+        BeforePost: func(ctx context.Context, models *[]User) error {
+            for _, user := range *models {
+                if user.Age < 18 {
+                    return fmt.Errorf("user must be at least 18 years old")
+                }
+            }
+            return nil
+        },
+    },
+}
+```
+
+## 📚 Advanced Features
+
+### Future Enhancements
+
+-   **Relationships**: Support for one-to-one, one-to-many, and many-to-many relationships will be added in future versions.
+
 ## 🤝 Contributing
 
-Contributions are welcome! Please feel free to submit a Pull Request.
+We welcome contributions! To contribute:
 
-1. Fork the repository
-2. Create your feature branch (`git checkout -b feature/AmazingFeature`)
-3. Commit your changes (`git commit -m 'Add some AmazingFeature'`)
-4. Push to the branch (`git push origin feature/AmazingFeature`)
-5. Open a Pull Request
+1. Fork the repository.
+2. Create a feature branch: `git checkout -b feature/my-feature`.
+3. Commit your changes: `git commit -m "Add my feature"`.
+4. Push to the branch: `git push origin feature/my-feature`.
+5. Open a pull request.
 
 ## 📝 License
 
-This project is licensed under the MIT License - see the [LICENSE](LICENSE.md) file for details.
+This project is licensed under the MIT License. See the [LICENSE](LICENSE.md) file for details.
 
 ## ✨ Acknowledgments
 
--   Built on top of the excellent [Huma](https://huma.rocks/) framework
--   Inspired by best practices in the Go community
--   Thanks to all contributors who have helped shape GoCRUD
+-   Built on top of the [Huma](https://huma.rocks/) framework.
+-   Inspired by best practices in the Go community.
+-   Thanks to all contributors who have helped shape GoCRUD.
 
 ---
 
