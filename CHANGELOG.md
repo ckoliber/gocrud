@@ -1,3 +1,10 @@
+# [1.2.0](https://github.com/ckoliber/gocrud/compare/v1.1.0...v1.2.0) (2025-04-08)
+
+
+### Features
+
+* add docs pages ([b46e728](https://github.com/ckoliber/gocrud/commit/b46e728ab51af8a66273dcc6d12787caf45cad77))
+
 # [1.1.0](https://github.com/ckoliber/gocrud/compare/v1.0.0...v1.1.0) (2025-04-08)
 
 
