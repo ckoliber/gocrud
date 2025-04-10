@@ -62,13 +62,12 @@ func NewSQLBuilder[Model any](operations map[string]func(string, ...string) stri
 			}
 		} else {
 			if tag := _field.Tag.Get("db"); tag != "" {
-				json := _field.Tag.Get("json")
-				if strings.Contains(json, "-") {
-					relations[strings.Split(json, ",")[1]] = Relation{
+				if _field.Tag.Get("json") == "-" {
+					relations[tag] = Relation{
 						one:   _field.Type.Kind() == reflect.Struct,
-						src:   strings.Split(tag, ",")[0],
-						dest:  strings.Split(tag, ",")[1],
-						table: strings.Split(json, ",")[1],
+						src:   _field.Tag.Get("src"),
+						dest:  _field.Tag.Get("dest"),
+						table: _field.Tag.Get("table"),
 					}
 				} else {
 					fields = append(fields, Field{idx, strings.Split(tag, ",")[0]})

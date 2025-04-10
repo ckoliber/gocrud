@@ -62,14 +62,16 @@ func (w *Where[Model]) Schema(r huma.Registry) *huma.Schema {
 
 	// Add field-specific properties to the schema
 	_type := reflect.TypeFor[Model]()
-	for i := range _type.NumField() {
-		if json := _type.Field(i).Tag.Get("json"); json != "" && json != "-" {
-			if _schema := w.FieldSchema(_type.Field(i)); _schema != nil {
-				keys := strings.Split(json, ",")
-				if keys[0] != "-" {
-					schema.Properties[keys[0]] = _schema
-				} else {
-					schema.Properties[keys[1]] = _schema
+	for idx := range _type.NumField() {
+		_field := _type.Field(idx)
+		if _field.Name != "_" {
+			if tag := _field.Tag.Get("json"); tag != "" {
+				if _schema := w.FieldSchema(_field); _schema != nil {
+					if tag == "-" {
+						schema.Properties[_field.Tag.Get("db")] = _schema
+					} else {
+						schema.Properties[strings.Split(tag, ",")[0]] = _schema
+					}
 				}
 			}
 		}

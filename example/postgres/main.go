@@ -26,7 +26,7 @@ type User struct {
 	ID        *int       `db:"id" json:"id" required:"false"`
 	Name      *string    `db:"name" json:"name" required:"false" maxLength:"30" example:"David" doc:"User name"`
 	Age       *int       `db:"age" json:"age" required:"false" minimum:"1" maximum:"120" example:"25" doc:"User age from 1 to 120"`
-	Documents []Document `db:"id,userId" json:"-,documents"`
+	Documents []Document `db:"documents" src:"id" dest:"userId" table:"documents" json:"-"`
 }
 
 type Document struct {
@@ -35,7 +35,7 @@ type Document struct {
 	Title   string   `db:"title" json:"title" maxLength:"50" doc:"Document title"`
 	Content string   `db:"content" json:"content" maxLength:"500" doc:"Document content"`
 	UserID  int      `db:"userId" json:"userId" doc:"Document userId"`
-	User    User     `db:"userId,id" json:"-,users"`
+	User    User     `db:"user" src:"userId" dest:"id" table:"users" json:"-"`
 }
 
 func main() {
