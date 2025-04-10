@@ -54,7 +54,7 @@ func NewPostgresRepository[Model any](db *sql.DB) *PostgresRepository[Model] {
 func (r *PostgresRepository[Model]) Get(ctx context.Context, where *map[string]any, order *map[string]any, limit *int, skip *int) ([]Model, error) {
 	args := []any{}
 	query := fmt.Sprintf("SELECT %s FROM %s", r.builder.Fields(""), r.builder.Table())
-	if expr := r.builder.Where(where, &args); expr != "" {
+	if expr := r.builder.Where(where, &args, nil); expr != "" {
 		query += fmt.Sprintf(" WHERE %s", expr)
 	}
 	if expr := r.builder.Order(order); expr != "" {
@@ -95,7 +95,7 @@ func (r *PostgresRepository[Model]) Put(ctx context.Context, models *[]Model) ([
 		args := []any{}
 		where := map[string]any{}
 		query := fmt.Sprintf("UPDATE %s SET %s", r.builder.Table(), r.builder.Set(&model, &args, &where))
-		if expr := r.builder.Where(&where, &args); expr != "" {
+		if expr := r.builder.Where(&where, &args, nil); expr != "" {
 			query += fmt.Sprintf(" WHERE %s", expr)
 		}
 		query += fmt.Sprintf(" RETURNING %s", r.builder.Fields(""))
@@ -146,7 +146,7 @@ func (r *PostgresRepository[Model]) Post(ctx context.Context, models *[]Model) (
 func (r *PostgresRepository[Model]) Delete(ctx context.Context, where *map[string]any) ([]Model, error) {
 	args := []any{}
 	query := fmt.Sprintf("DELETE FROM %s", r.builder.Table())
-	if expr := r.builder.Where(where, &args); expr != "" {
+	if expr := r.builder.Where(where, &args, nil); expr != "" {
 		query += fmt.Sprintf(" WHERE %s", expr)
 	}
 	query += fmt.Sprintf(" RETURNING %s", r.builder.Fields(""))

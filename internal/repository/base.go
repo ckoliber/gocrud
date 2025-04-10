@@ -41,7 +41,7 @@ type SQLBuilder[Model any] struct {
 
 type SQLBuilderInterface interface {
 	Table() string
-	Where(where *map[string]any, args *[]any) string
+	Where(where *map[string]any, args *[]any, run func(string) []string) string
 }
 
 var registry = map[string]SQLBuilderInterface{}
@@ -76,7 +76,7 @@ func NewSQLBuilder[Model any](operations map[string]func(string, ...string) stri
 		}
 	}
 
-	slog.Debug("SQLBuilder initialized", slog.String("table", table), slog.Any("fields", fields))
+	slog.Debug("SQLBuilder initialized", slog.String("table", table), slog.Any("fields", fields), slog.Any("relations", relations))
 
 	result := &SQLBuilder[Model]{
 		table:      table,
@@ -206,7 +206,7 @@ func (b *SQLBuilder[Model]) Order(order *map[string]any) string {
 	return strings.Join(result, ",")
 }
 
-func (b *SQLBuilder[Model]) Where(where *map[string]any, args *[]any) string {
+func (b *SQLBuilder[Model]) Where(where *map[string]any, args *[]any, run func(string) []string) string {
 	// Constructs the WHERE clause for a query
 	if where == nil {
 		return ""
@@ -215,12 +215,12 @@ func (b *SQLBuilder[Model]) Where(where *map[string]any, args *[]any) string {
 	if item, ok := (*where)["_not"]; ok {
 		expr := item.(map[string]any)
 
-		return "NOT (" + b.Where(&expr, args) + ")"
+		return "NOT (" + b.Where(&expr, args, run) + ")"
 	} else if items, ok := (*where)["_and"]; ok {
 		result := []string{}
 		for _, item := range items.([]any) {
 			expr := item.(map[string]any)
-			result = append(result, b.Where(&expr, args))
+			result = append(result, b.Where(&expr, args, run))
 		}
 
 		return "(" + strings.Join(result, " AND ") + ")"
@@ -228,7 +228,7 @@ func (b *SQLBuilder[Model]) Where(where *map[string]any, args *[]any) string {
 		result := []string{}
 		for _, item := range items.([]any) {
 			expr := item.(map[string]any)
-			result = append(result, b.Where(&expr, args))
+			result = append(result, b.Where(&expr, args, run))
 		}
 
 		return "(" + strings.Join(result, " OR ") + ")"
@@ -253,13 +253,20 @@ func (b *SQLBuilder[Model]) Where(where *map[string]any, args *[]any) string {
 			} else {
 				if relation, ok := b.relations[key]; ok {
 					builder := registry[relation.table]
-					query := fmt.Sprintf("SELECT %s FROM %s", b.identifier(relation.dest), builder.Table())
+
+					args_ := []any{}
 					where := item.(map[string]any)
-					if expr := builder.Where(&where, args); expr != "" {
+					query := fmt.Sprintf("SELECT %s FROM %s", b.identifier(relation.dest), builder.Table())
+					if expr := builder.Where(&where, &args_, run); expr != "" {
 						query += fmt.Sprintf(" WHERE %s", expr)
 					}
 
-					result = append(result, b.operations["_in"](b.identifier(relation.src), query))
+					if run == nil {
+						*args = append(*args, args_...)
+						result = append(result, b.operations["_in"](b.identifier(relation.src), query))
+					} else {
+						result = append(result, b.operations["_in"](b.identifier(relation.src), run(query)...))
+					}
 				}
 			}
 		}

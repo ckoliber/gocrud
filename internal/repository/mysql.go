@@ -54,7 +54,7 @@ func NewMySQLRepository[Model any](db *sql.DB) *MySQLRepository[Model] {
 func (r *MySQLRepository[Model]) Get(ctx context.Context, where *map[string]any, order *map[string]any, limit *int, skip *int) ([]Model, error) {
 	args := []any{}
 	query := fmt.Sprintf("SELECT %s FROM %s", r.builder.Fields(""), r.builder.Table())
-	if expr := r.builder.Where(where, &args); expr != "" {
+	if expr := r.builder.Where(where, &args, nil); expr != "" {
 		query += fmt.Sprintf(" WHERE %s", expr)
 	}
 	if expr := r.builder.Order(order); expr != "" {
@@ -95,7 +95,7 @@ func (r *MySQLRepository[Model]) Put(ctx context.Context, models *[]Model) ([]Mo
 		args := []any{}
 		where := map[string]any{}
 		query := fmt.Sprintf("UPDATE %s SET %s", r.builder.Table(), r.builder.Set(&model, &args, &where))
-		if expr := r.builder.Where(&where, &args); expr != "" {
+		if expr := r.builder.Where(&where, &args, nil); expr != "" {
 			query += fmt.Sprintf(" WHERE %s", expr)
 		}
 
@@ -109,7 +109,7 @@ func (r *MySQLRepository[Model]) Put(ctx context.Context, models *[]Model) ([]Mo
 
 		getArgs := []any{}
 		getQuery := fmt.Sprintf("SELECT %s FROM %s", r.builder.Fields(""), r.builder.Table())
-		if expr := r.builder.Where(&where, &getArgs); expr != "" {
+		if expr := r.builder.Where(&where, &getArgs, nil); expr != "" {
 			getQuery += fmt.Sprintf(" WHERE %s", expr)
 		}
 
@@ -168,7 +168,7 @@ func (r *MySQLRepository[Model]) Post(ctx context.Context, models *[]Model) ([]M
 	getArgs := []any{}
 	getWhere := map[string]any{r.builder.keys[0]: map[string]any{"_in": ids}}
 	getQuery := fmt.Sprintf("SELECT %s FROM %s", r.builder.Fields(""), r.builder.Table())
-	if expr := r.builder.Where(&getWhere, &getArgs); expr != "" {
+	if expr := r.builder.Where(&getWhere, &getArgs, nil); expr != "" {
 		getQuery += fmt.Sprintf(" WHERE %s", expr)
 	}
 
@@ -202,7 +202,7 @@ func (r *MySQLRepository[Model]) Delete(ctx context.Context, where *map[string]a
 
 	getArgs := []any{}
 	getQuery := fmt.Sprintf("SELECT %s FROM %s", r.builder.Fields(""), r.builder.Table())
-	if expr := r.builder.Where(where, &getArgs); expr != "" {
+	if expr := r.builder.Where(where, &getArgs, nil); expr != "" {
 		getQuery += fmt.Sprintf(" WHERE %s", expr)
 	}
 
@@ -218,7 +218,7 @@ func (r *MySQLRepository[Model]) Delete(ctx context.Context, where *map[string]a
 
 	args := []any{}
 	query := fmt.Sprintf("DELETE FROM %s", r.builder.Table())
-	if expr := r.builder.Where(where, &args); expr != "" {
+	if expr := r.builder.Where(where, &args, nil); expr != "" {
 		query += fmt.Sprintf(" WHERE %s", expr)
 	}
 
