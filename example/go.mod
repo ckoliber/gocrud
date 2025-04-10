@@ -5,7 +5,7 @@ go 1.24.2
 replace github.com/ckoliber/gocrud => ../
 
 require (
-	github.com/ckoliber/gocrud v0.0.0
+	github.com/ckoliber/gocrud v1.2.1
 	github.com/danielgtaylor/huma/v2 v2.32.0
 	github.com/go-sql-driver/mysql v1.9.2
 	github.com/lib/pq v1.10.9
