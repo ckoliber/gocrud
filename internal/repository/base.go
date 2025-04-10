@@ -39,6 +39,13 @@ type SQLBuilder[Model any] struct {
 	generator  func(reflect.StructField, *[]any) string
 }
 
+type SQLBuilderInterface interface {
+	Table() string
+	Where(where *map[string]any, args *[]any) string
+}
+
+var registry = map[string]SQLBuilderInterface{}
+
 func NewSQLBuilder[Model any](operations map[string]func(string, ...string) string, identifier func(string) string, parameter func(reflect.Value, *[]any) string, generator func(reflect.StructField, *[]any) string) *SQLBuilder[Model] {
 	// Initialize SQLBuilder with table name and fields based on the Model type
 	// Logs the table name and fields for debugging
@@ -72,7 +79,7 @@ func NewSQLBuilder[Model any](operations map[string]func(string, ...string) stri
 
 	slog.Debug("SQLBuilder initialized", slog.String("table", table), slog.Any("fields", fields))
 
-	return &SQLBuilder[Model]{
+	result := &SQLBuilder[Model]{
 		table:      table,
 		keys:       []string{fields[0].name},
 		fields:     fields,
@@ -82,6 +89,10 @@ func NewSQLBuilder[Model any](operations map[string]func(string, ...string) stri
 		parameter:  parameter,
 		generator:  generator,
 	}
+
+	registry[table] = result
+
+	return result
 }
 
 func (b *SQLBuilder[Model]) Table() string {
@@ -241,11 +252,15 @@ func (b *SQLBuilder[Model]) Where(where *map[string]any, args *[]any) string {
 					result = append(result, handler(b.identifier(key), items...))
 				}
 			} else {
-				// relation
 				if relation, ok := b.relations[key]; ok {
-					if handler, ok := b.operations["_in"]; ok {
-						result = append(result, handler(b.identifier(relation.src), fmt.Sprintf("SELECT %s FROM %s", b.identifier(relation.dest), b.identifier(relation.table))))
+					builder := registry[relation.table]
+					query := fmt.Sprintf("SELECT %s FROM %s", b.identifier(relation.dest), builder.Table())
+					where := item.(map[string]any)
+					if expr := builder.Where(&where, args); expr != "" {
+						query += fmt.Sprintf(" WHERE %s", expr)
 					}
+
+					result = append(result, b.operations["_in"](b.identifier(relation.src), query))
 				}
 			}
 		}
