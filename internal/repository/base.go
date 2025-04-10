@@ -21,31 +21,51 @@ type Field struct {
 	name string
 }
 
+type Relation struct {
+	one   bool
+	src   string
+	dest  string
+	table string
+}
+
 type SQLBuilder[Model any] struct {
 	table      string
 	keys       []string
 	fields     []Field
-	operators  map[string]func(string, ...string) string
-	generator  func(reflect.StructField, *[]any) string
-	parameter  func(reflect.Value, *[]any) string
+	relations  map[string]Relation
+	operations map[string]func(string, ...string) string
 	identifier func(string) string
+	parameter  func(reflect.Value, *[]any) string
+	generator  func(reflect.StructField, *[]any) string
 }
 
-func NewSQLBuilder[Model any](operators map[string]func(string, ...string) string, generator func(reflect.StructField, *[]any) string, parameter func(reflect.Value, *[]any) string, identifier func(string) string) *SQLBuilder[Model] {
+func NewSQLBuilder[Model any](operations map[string]func(string, ...string) string, identifier func(string) string, parameter func(reflect.Value, *[]any) string, generator func(reflect.StructField, *[]any) string) *SQLBuilder[Model] {
 	// Initialize SQLBuilder with table name and fields based on the Model type
 	// Logs the table name and fields for debugging
 	_type := reflect.TypeFor[Model]()
 
 	table := strings.ToLower(_type.Name())
 	fields := []Field{}
+	relations := map[string]Relation{}
 	for idx := range _type.NumField() {
-		if _type.Field(idx).Name == "_" {
-			if tag := _type.Field(idx).Tag.Get("db"); tag != "" {
+		_field := _type.Field(idx)
+		if _field.Name == "_" {
+			if tag := _field.Tag.Get("db"); tag != "" {
 				table = strings.Split(tag, ",")[0]
 			}
 		} else {
-			if tag := _type.Field(idx).Tag.Get("db"); tag != "" {
-				fields = append(fields, Field{idx, strings.Split(tag, ",")[0]})
+			if tag := _field.Tag.Get("db"); tag != "" {
+				json := _field.Tag.Get("json")
+				if strings.Contains(json, "-") {
+					relations[strings.Split(json, ",")[1]] = Relation{
+						one:   _field.Type.Kind() == reflect.Struct,
+						src:   strings.Split(tag, ",")[0],
+						dest:  strings.Split(tag, ",")[1],
+						table: strings.Split(json, ",")[1],
+					}
+				} else {
+					fields = append(fields, Field{idx, strings.Split(tag, ",")[0]})
+				}
 			}
 		}
 	}
@@ -56,10 +76,11 @@ func NewSQLBuilder[Model any](operators map[string]func(string, ...string) strin
 		table:      table,
 		keys:       []string{fields[0].name},
 		fields:     fields,
-		operators:  operators,
-		generator:  generator,
-		parameter:  parameter,
+		relations:  relations,
+		operations: operations,
 		identifier: identifier,
+		parameter:  parameter,
+		generator:  generator,
 	}
 }
 
@@ -206,18 +227,25 @@ func (b *SQLBuilder[Model]) Where(where *map[string]any, args *[]any) string {
 	result := []string{}
 	for key, item := range *where {
 		for op, value := range item.(map[string]any) {
-			if handler, ok := b.operators[op]; ok {
+			if handler, ok := b.operations[op]; ok {
 				_value := reflect.ValueOf(value)
 
 				if _value.Kind() == reflect.String {
 					result = append(result, handler(b.identifier(key), b.parameter(_value, args)))
-				} else if _value.Kind() == reflect.Slice {
+				} else if _value.Kind() == reflect.Slice || _value.Kind() == reflect.Array {
 					items := []string{}
 					for i := range _value.Len() {
 						items = append(items, b.parameter(_value.Index(i), args))
 					}
 
 					result = append(result, handler(b.identifier(key), items...))
+				}
+			} else {
+				// relation
+				if relation, ok := b.relations[key]; ok {
+					if handler, ok := b.operations["_in"]; ok {
+						result = append(result, handler(b.identifier(relation.src), fmt.Sprintf("SELECT %s FROM %s", b.identifier(relation.dest), b.identifier(relation.table))))
+					}
 				}
 			}
 		}

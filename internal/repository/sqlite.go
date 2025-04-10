@@ -18,7 +18,7 @@ type SQLiteRepository[Model any] struct {
 // NewSQLiteRepository initializes a new SQLiteRepository
 func NewSQLiteRepository[Model any](db *sql.DB) *SQLiteRepository[Model] {
 	// Define SQL operators and helper functions for query building
-	operators := map[string]func(string, ...string) string{
+	operations := map[string]func(string, ...string) string{
 		"_eq":     func(key string, values ...string) string { return fmt.Sprintf("%s = %s", key, values[0]) },
 		"_neq":    func(key string, values ...string) string { return fmt.Sprintf("%s != %s", key, values[0]) },
 		"_gt":     func(key string, values ...string) string { return fmt.Sprintf("%s > %s", key, values[0]) },
@@ -36,17 +36,17 @@ func NewSQLiteRepository[Model any](db *sql.DB) *SQLiteRepository[Model] {
 			return fmt.Sprintf("%s NOT IN (%s)", key, strings.Join(values, ","))
 		},
 	}
+	identifier := func(name string) string {
+		return fmt.Sprintf("\"%s\"", name)
+	}
 	parameter := func(value reflect.Value, args *[]any) string {
 		*args = append(*args, value.Interface())
 		return fmt.Sprintf("$%d", len(*args))
 	}
-	identifier := func(name string) string {
-		return fmt.Sprintf("\"%s\"", name)
-	}
 
 	return &SQLiteRepository[Model]{
 		db:      db,
-		builder: NewSQLBuilder[Model](operators, nil, parameter, identifier),
+		builder: NewSQLBuilder[Model](operations, identifier, parameter, nil),
 	}
 }
 
