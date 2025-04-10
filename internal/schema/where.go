@@ -63,8 +63,38 @@ func (w *Where[Model]) Schema(r huma.Registry) *huma.Schema {
 	// Add field-specific properties to the schema
 	_type := reflect.TypeFor[Model]()
 	for i := range _type.NumField() {
-		field := _type.Field(i)
-		schema.Properties[strings.Split(field.Tag.Get("json"), ",")[0]] = &huma.Schema{
+		if json := _type.Field(i).Tag.Get("json"); json != "" && json != "-" {
+			if _schema := w.FieldSchema(_type.Field(i)); _schema != nil {
+				keys := strings.Split(json, ",")
+				if keys[0] != "-" {
+					schema.Properties[keys[0]] = _schema
+				} else {
+					schema.Properties[keys[1]] = _schema
+				}
+			}
+		}
+	}
+
+	// Precompute messages and update the registry
+	schema.PrecomputeMessages()
+	r.Map()[name] = schema
+	whereRegistry = r
+
+	slog.Debug("Schema generated for Where", slog.String("name", name), slog.Any("schema", schema))
+	return &huma.Schema{
+		Type: huma.TypeString,
+	}
+}
+
+func (w *Where[Model]) FieldSchema(field reflect.StructField) *huma.Schema {
+	_field := field.Type
+	for _field.Kind() == reflect.Array || _field.Kind() == reflect.Slice || _field.Kind() == reflect.Pointer {
+		_field = _field.Elem()
+	}
+
+	switch _field.Kind() {
+	case reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Float32, reflect.Float64, reflect.Complex64, reflect.Complex128, reflect.String:
+		return &huma.Schema{
 			Type: huma.TypeObject,
 			Properties: map[string]*huma.Schema{
 				"_eq":     {Type: huma.TypeString},
@@ -82,15 +112,13 @@ func (w *Where[Model]) Schema(r huma.Registry) *huma.Schema {
 			},
 			AdditionalProperties: false,
 		}
+	case reflect.Struct:
+		name := "Where" + huma.DefaultSchemaNamer(_field, "")
+		return &huma.Schema{
+			Ref: "#/components/schemas/" + name,
+		}
 	}
 
-	// Precompute messages and update the registry
-	schema.PrecomputeMessages()
-	r.Map()[name] = schema
-	whereRegistry = r
-
-	slog.Debug("Schema generated for Where", slog.String("name", name), slog.Any("schema", schema))
-	return &huma.Schema{
-		Type: huma.TypeString,
-	}
+	slog.Debug("Unsupported field type for Where", slog.Any("field", field))
+	return nil
 }

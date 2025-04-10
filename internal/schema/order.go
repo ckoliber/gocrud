@@ -44,12 +44,16 @@ func (o *Order[Model]) Schema(r huma.Registry) *huma.Schema {
 		AdditionalProperties: false,
 	}
 
+	// Add field-specific properties to the schema
 	_type := reflect.TypeFor[Model]()
 	for i := range _type.NumField() {
-		field := _type.Field(i)
-		schema.Properties[strings.Split(field.Tag.Get("json"), ",")[0]] = &huma.Schema{
-			Type: huma.TypeString,
-			Enum: []any{"ASC", "DESC"},
+		if json := _type.Field(i).Tag.Get("json"); json != "" && json != "-" {
+			if _schema := o.FieldSchema(_type.Field(i)); _schema != nil {
+				keys := strings.Split(json, ",")
+				if keys[0] != "-" {
+					schema.Properties[keys[0]] = _schema
+				}
+			}
 		}
 	}
 
@@ -62,4 +66,22 @@ func (o *Order[Model]) Schema(r huma.Registry) *huma.Schema {
 	return &huma.Schema{
 		Type: huma.TypeString,
 	}
+}
+
+func (o *Order[Model]) FieldSchema(field reflect.StructField) *huma.Schema {
+	_field := field.Type
+	for _field.Kind() == reflect.Array || _field.Kind() == reflect.Slice || _field.Kind() == reflect.Pointer {
+		_field = _field.Elem()
+	}
+
+	switch _field.Kind() {
+	case reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Float32, reflect.Float64, reflect.Complex64, reflect.Complex128, reflect.String:
+		return &huma.Schema{
+			Type: huma.TypeString,
+			Enum: []any{"ASC", "DESC"},
+		}
+	}
+
+	slog.Debug("Unsupported field type for Order", slog.Any("field", field))
+	return nil
 }
