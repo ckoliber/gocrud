@@ -33,7 +33,7 @@ markdown_extensions:
           line_spans: __span
           pygments_lang_class: true
 nav:
-    - Introduction: introduction.md
+    - Introduction: index.md
     - Getting Started: getting-started.md
     - Configuration: configuration.md
     - CRUD Operations: crud-operations.md
