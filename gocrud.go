@@ -1,6 +1,7 @@
 package gocrud
 
 import (
+	"context"
 	"database/sql"
 	"fmt"
 	"log/slog"
@@ -27,13 +28,30 @@ type Config[Model any] struct {
 	PostMode   Mode
 	DeleteMode Mode
 
-	service.CRUDHooks[Model]
+	BeforeGet    func(ctx context.Context, where *map[string]any, order *map[string]any, limit *int, skip *int) error
+	BeforePut    func(ctx context.Context, models *[]Model) error
+	BeforePost   func(ctx context.Context, models *[]Model) error
+	BeforeDelete func(ctx context.Context, where *map[string]any) error
+
+	AfterGet    func(ctx context.Context, models *[]Model) error
+	AfterPut    func(ctx context.Context, models *[]Model) error
+	AfterPost   func(ctx context.Context, models *[]Model) error
+	AfterDelete func(ctx context.Context, models *[]Model) error
 }
 
 // Register sets up CRUD operations for the given API and repository based on the provided configuration.
 func Register[Model any](api huma.API, repo repository.Repository[Model], config *Config[Model]) {
 	// Initialize CRUD service with hooks
-	svc := service.NewCRUDService(repo, &config.CRUDHooks)
+	svc := service.NewCRUDService(repo, &service.CRUDHooks[Model]{
+		BeforeGet:    config.BeforeGet,
+		BeforePut:    config.BeforePut,
+		BeforePost:   config.BeforePost,
+		BeforeDelete: config.BeforeDelete,
+		AfterGet:     config.AfterGet,
+		AfterPut:     config.AfterPut,
+		AfterPost:    config.AfterPost,
+		AfterDelete:  config.AfterDelete,
+	})
 
 	// Register Get operations
 	if config.GetMode <= Single {
