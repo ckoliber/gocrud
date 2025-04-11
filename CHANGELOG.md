@@ -1,3 +1,20 @@
+# [1.3.0](https://github.com/ckoliber/gocrud/compare/v1.2.1...v1.3.0) (2025-04-11)
+
+
+### Bug Fixes
+
+* change relation resolver reflect tags ([eaa33ff](https://github.com/ckoliber/gocrud/commit/eaa33ff1f58fd0a61a93e86b504db7d86d9e8b22))
+* change schema field checking conditions ([e0cecd8](https://github.com/ckoliber/gocrud/commit/e0cecd83d53b05a37d96b8d89c9d00fdd4eb56e3))
+
+
+### Features
+
+* add custom operations per field of model ([2b09395](https://github.com/ckoliber/gocrud/commit/2b093952e3f24cd5d38e7c68130c97bd40cab89e))
+* add relations generator to Order, Where schema ([e7f8c71](https://github.com/ckoliber/gocrud/commit/e7f8c718332e6f3072c108411e094ebae5c5ccbb))
+* add relations to base repository ([b8250ba](https://github.com/ckoliber/gocrud/commit/b8250bab4d7a340bbd95770de9dba7a7322edc95))
+* add runnable method to Where for relation condition resolving (for drivers which doesn't support select in where) ([7723b18](https://github.com/ckoliber/gocrud/commit/7723b183a3c971030806725e9c18b4acfc87d0ed))
+* add SQLBuilder registry and recursive relation resolver ([a335ea1](https://github.com/ckoliber/gocrud/commit/a335ea16eb3f956ec3d3555156f79267487f6fd3))
+
 ## [1.2.1](https://github.com/ckoliber/gocrud/compare/v1.2.0...v1.2.1) (2025-04-08)
 
 
