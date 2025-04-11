@@ -5,7 +5,7 @@
     "enabledManagers": ["gomod", "github-actions"],
     "packageRules": [
         {
-            "matchPackageNames": ["gocrud"],
+            "matchPackageNames": ["**/gocrud"],
             "enabled": false
         }
     ]
