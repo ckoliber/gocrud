@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+    <url>
+         <loc>https://ckoliber.dev/gocrud/</loc>
+         <lastmod>2025-04-11</lastmod>
+    </url>
+    <url>
+         <loc>https://ckoliber.dev/gocrud/FAQ/</loc>
+         <lastmod>2025-04-11</lastmod>
+    </url>
+    <url>
+         <loc>https://ckoliber.dev/gocrud/advanced-topics/</loc>
+         <lastmod>2025-04-11</lastmod>
+    </url>
+    <url>
+         <loc>https://ckoliber.dev/gocrud/configuration/</loc>
+         <lastmod>2025-04-11</lastmod>
+    </url>
+    <url>
+         <loc>https://ckoliber.dev/gocrud/crud-hooks/</loc>
+         <lastmod>2025-04-11</lastmod>
+    </url>
+    <url>
+         <loc>https://ckoliber.dev/gocrud/crud-operations/</loc>
+         <lastmod>2025-04-11</lastmod>
+    </url>
+    <url>
+         <loc>https://ckoliber.dev/gocrud/getting-started/</loc>
+         <lastmod>2025-04-11</lastmod>
+    </url>
+</urlset>
