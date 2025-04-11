@@ -48,13 +48,17 @@ func (o *Order[Model]) Schema(r huma.Registry) *huma.Schema {
 	_type := reflect.TypeFor[Model]()
 	for idx := range _type.NumField() {
 		_field := _type.Field(idx)
-		if _field.Name != "_" {
-			if tag := _field.Tag.Get("json"); tag != "" {
-				if _schema := o.FieldSchema(_field); _schema != nil {
-					if tag != "-" {
-						// primitive fields detected, name it with the json tag
-						schema.Properties[strings.Split(tag, ",")[0]] = _schema
-					}
+
+		// Skip model information field
+		if _field.Name == "_" {
+			continue
+		}
+
+		if tag := _field.Tag.Get("json"); tag != "" {
+			if _schema := o.FieldSchema(_field); _schema != nil {
+				if tag != "-" {
+					// primitive fields detected, name it with the json tag
+					schema.Properties[strings.Split(tag, ",")[0]] = _schema
 				}
 			}
 		}
