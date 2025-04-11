@@ -1,3 +1,10 @@
+# [1.4.0](https://github.com/ckoliber/gocrud/compare/v1.3.0...v1.4.0) (2025-04-11)
+
+
+### Features
+
+* add optional skip, limit parameters type ([1410fb1](https://github.com/ckoliber/gocrud/commit/1410fb17722952137b8f277919cbcbf8c4764f29))
+
 # [1.3.0](https://github.com/ckoliber/gocrud/compare/v1.2.1...v1.3.0) (2025-04-11)
 
 
