@@ -19,6 +19,7 @@ type GetSingleOutput[Model any] struct {
 func (s *CRUDService[Model]) GetSingle(ctx context.Context, i *GetSingleInput[Model]) (*GetSingleOutput[Model], error) {
 	slog.Debug("Executing GetSingle operation", slog.String("id", i.ID))
 
+	// Define the where clause for the get operation
 	where := schema.Where[Model]{s.id: map[string]any{"_eq": i.ID}}
 
 	// Execute BeforeGet hook if defined

@@ -24,11 +24,13 @@ type PutSingleOutput[Model any] struct {
 func (s *CRUDService[Model]) PutSingle(ctx context.Context, i *PutSingleInput[Model]) (*PutSingleOutput[Model], error) {
 	slog.Debug("Executing PutSingle operation", slog.String("id", i.ID), slog.Any("body", i.Body))
 
+	// Get the ID field by name
 	_field := reflect.ValueOf(&i.Body).Elem().FieldByName(s.key)
 	for _field.Kind() == reflect.Pointer {
 		_field = _field.Elem()
 	}
 
+	// Set model ID field value based on path ID value
 	switch _field.Kind() {
 	case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 		value, err := strconv.ParseInt(i.ID, 10, 64)

@@ -47,8 +47,7 @@ type SQLBuilderInterface interface {
 var registry = map[string]SQLBuilderInterface{}
 
 func NewSQLBuilder[Model any](operations map[string]func(string, ...string) string, identifier func(string) string, parameter func(reflect.Value, *[]any) string, generator func(reflect.StructField, *[]any) string) *SQLBuilder[Model] {
-	// Initialize SQLBuilder with table name and fields based on the Model type
-	// Logs the table name and fields for debugging
+	// Reflect on the Model type to extract metadata
 	_type := reflect.TypeFor[Model]()
 
 	table := strings.ToLower(_type.Name())
@@ -57,13 +56,17 @@ func NewSQLBuilder[Model any](operations map[string]func(string, ...string) stri
 	operations_ := map[string]func(string, ...string) string{}
 	for idx := range _type.NumField() {
 		_field := _type.Field(idx)
+
 		if _field.Name == "_" {
+			// Field named "_" is model information
 			if tag := _field.Tag.Get("db"); tag != "" {
 				table = strings.Split(tag, ",")[0]
 			}
 		} else {
+			// Other fields are model attributes
 			if tag := _field.Tag.Get("db"); tag != "" {
 				if _field.Tag.Get("json") == "-" {
+					// Relation field detected
 					relations[tag] = Relation{
 						one:   _field.Type.Kind() == reflect.Struct,
 						src:   _field.Tag.Get("src"),
@@ -71,13 +74,17 @@ func NewSQLBuilder[Model any](operations map[string]func(string, ...string) stri
 						table: _field.Tag.Get("table"),
 					}
 				} else {
+					// Primitive fields detected
 					name := strings.Split(tag, ",")[0]
 					fields = append(fields, Field{idx, name})
 
+					// Add base operations for the field
 					for key, value := range operations {
 						operations_[name+key] = value
 					}
 
+					// Check if the field has a method named "Operations"
+					// Then add its custom defined operations for the field
 					if _method, ok := _field.Type.MethodByName("Operations"); ok {
 						var model Model
 						value := reflect.ValueOf(model).FieldByName(_field.Name)
@@ -109,51 +116,61 @@ func NewSQLBuilder[Model any](operations map[string]func(string, ...string) stri
 	return result
 }
 
+// Returns the table name with proper identifier formatting
 func (b *SQLBuilder[Model]) Table() string {
-	// Returns the table name with proper identifier formatting
 	slog.Debug("Fetching table name", slog.String("table", b.table))
 	return b.identifier(b.table)
 }
 
+// Returns a comma-separated list of field names with proper identifier formatting
 func (b *SQLBuilder[Model]) Fields(prefix string) string {
-	// Returns a comma-separated list of field names with proper identifier formatting
 	result := []string{}
 	for _, field := range b.fields {
 		result = append(result, prefix+b.identifier(field.name))
 	}
+
 	slog.Debug("Fetching fields", slog.Any("fields", result))
 	return strings.Join(result, ",")
 }
 
+// Constructs the VALUES clause for an INSERT query
 func (b *SQLBuilder[Model]) Values(values *[]Model, args *[]any, keys *[]any) (string, string) {
-	// Constructs the VALUES clause for an INSERT query
 	if values == nil {
 		return "", ""
 	}
 
+	// Generate the field names for the VALUES clause
 	fields := []string{}
 	for idx, field := range b.fields {
 		if idx == 0 {
+			// The first field is the primary key
 			if b.generator != nil {
+				// If a generator function is provided, primary key will be generated
 				fields = append(fields, b.identifier(field.name))
 			}
 		} else {
+			// Other fields are added to the VALUES clause
 			fields = append(fields, b.identifier(field.name))
 		}
 	}
 
+	// Generate the field values for the VALUES clause
 	result := []string{}
 	for _, model := range *values {
 		_type := reflect.TypeOf(model)
 		_value := reflect.ValueOf(model)
 
+		// Generate the values for the current model
 		items := []string{}
 		for idx, field := range b.fields {
 			if idx == 0 {
+				// The first field is the primary key
 				if b.generator != nil {
+					// If a generator function is provided, use it to generate the key
 					items = append(items, b.generator(_type.Field(field.idx), keys))
 				}
 			} else {
+				// Other fields are added to the VALUES clause
 				items = append(items, b.parameter(_value.Field(field.idx), args))
 			}
 		}
@@ -165,23 +182,28 @@ func (b *SQLBuilder[Model]) Values(values *[]Model, args *[]any, keys *[]any) (s
 	return strings.Join(fields, ","), strings.Join(result, ",")
 }
 
+// Constructs the SET clause for an UPDATE query
 func (b *SQLBuilder[Model]) Set(set *Model, args *[]any, where *map[string]any) string {
-	// Constructs the SET clause for an UPDATE query
 	if set == nil {
 		return ""
 	}
 
 	_value := reflect.ValueOf(*set)
 
+	// Generate the field names for the SET clause
 	result := []string{}
 	for idx, field := range b.fields {
 		if idx == 0 {
+			// The first field is the primary key
+			// Use it to construct the WHERE clause
 			if where != nil {
+				// Get the field value
 				_field := _value.Field(field.idx)
 				for _field.Kind() == reflect.Pointer {
 					_field = _field.Elem()
 				}
 
+				// Set the WHERE clause condition based on the field type
 				switch _field.Kind() {
 				case reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64:
 					(*where)[field.name] = map[string]any{"_eq": fmt.Sprintf("%d", _field.Int())}
@@ -198,6 +220,7 @@ func (b *SQLBuilder[Model]) Set(set *Model, args *[]any, where *map[string]any) 
 				}
 			}
 		} else {
+			// Other fields are added to the SET clause
 			result = append(result, field.name+"="+b.parameter(_value.Field(field.idx), args))
 		}
 	}
@@ -206,12 +229,13 @@ func (b *SQLBuilder[Model]) Set(set *Model, args *[]any, where *map[string]any) 
 	return strings.Join(result, ",")
 }
 
+// Constructs the ORDER BY clause for a query
 func (b *SQLBuilder[Model]) Order(order *map[string]any) string {
-	// Constructs the ORDER BY clause for a query
 	if order == nil {
 		return ""
 	}
 
+	// Generate the field names for the ORDER BY clause
 	result := []string{}
 	for key, val := range *order {
 		result = append(result, fmt.Sprintf("%s %s", b.identifier(key), val))
@@ -221,12 +245,14 @@ func (b *SQLBuilder[Model]) Order(order *map[string]any) string {
 	return strings.Join(result, ",")
 }
 
+// Constructs the WHERE clause for a query
 func (b *SQLBuilder[Model]) Where(where *map[string]any, args *[]any, run func(string) []string) string {
-	// Constructs the WHERE clause for a query
 	if where == nil {
 		return ""
 	}
 
+	// Check for special conditions
+	// _not, _and, and _or are used for logical operations
 	if item, ok := (*where)["_not"]; ok {
 		expr := item.(map[string]any)
 
@@ -249,15 +275,19 @@ func (b *SQLBuilder[Model]) Where(where *map[string]any, args *[]any, run func(s
 		return "(" + strings.Join(result, " OR ") + ")"
 	}
 
+	// Otherwise, construct the WHERE clause based on the field names and operations
 	result := []string{}
 	for key, item := range *where {
 		for op, value := range item.(map[string]any) {
 			if handler, ok := b.operations[key+op]; ok {
+				// Primitive field condition detected
 				_value := reflect.ValueOf(value)
 
 				if _value.Kind() == reflect.String {
+					// String values are passed to operation handler as single parameter
 					result = append(result, handler(b.identifier(key), b.parameter(_value, args)))
 				} else if _value.Kind() == reflect.Slice || _value.Kind() == reflect.Array {
+					// Slice or array values are passed to operation handler as a list of parameters
 					items := []string{}
 					for i := range _value.Len() {
 						items = append(items, b.parameter(_value.Index(i), args))
@@ -266,9 +296,12 @@ func (b *SQLBuilder[Model]) Where(where *map[string]any, args *[]any, run func(s
 					result = append(result, handler(b.identifier(key), items...))
 				}
 			} else {
+				// Relation field condition detected
 				if relation, ok := b.relations[key]; ok {
+					// Get the target SQLBuilder for the relation
 					builder := registry[relation.table]
 
+					// Construct the sub-query for the related table
 					args_ := []any{}
 					where := item.(map[string]any)
 					query := fmt.Sprintf("SELECT %s FROM %s", b.identifier(relation.dest), builder.Table())
@@ -277,9 +310,11 @@ func (b *SQLBuilder[Model]) Where(where *map[string]any, args *[]any, run func(s
 					}
 
 					if run == nil {
+						// If no run function is provided, sub-query is added to the main query
 						*args = append(*args, args_...)
 						result = append(result, b.operations["_in"](b.identifier(relation.src), query))
 					} else {
+						// If a run function is provided, sub-query is executed and its result is added to the main query
 						result = append(result, b.operations["_in"](b.identifier(relation.src), run(query)...))
 					}
 				}
@@ -291,24 +326,27 @@ func (b *SQLBuilder[Model]) Where(where *map[string]any, args *[]any, run func(s
 	return strings.Join(result, " AND ")
 }
 
+// Scans the rows returned by a query into a slice of Model
 func (b *SQLBuilder[Model]) Scan(rows *sql.Rows, err error) ([]Model, error) {
-	// Scans the rows returned by a query into a slice of Model
 	if err != nil {
 		slog.Error("Error during query execution", slog.Any("error", err))
 		return nil, err
 	}
 	defer rows.Close()
 
+	// Iterate over the rows and scan each one into a Model instance
 	result := []Model{}
 	for rows.Next() {
 		var model Model
 		_value := reflect.ValueOf(&model).Elem()
 
+		// Create a slice of addresses to scan the values into
 		_addrs := []any{}
 		for _, field := range b.fields {
 			_addrs = append(_addrs, _value.Field(field.idx).Addr().Interface())
 		}
 
+		// Scan the row into the addresses
 		if err := rows.Scan(_addrs...); err != nil {
 			return nil, err
 		}

@@ -10,9 +10,9 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 )
 
-type Where[Model any] map[string]any
-
 var whereRegistry huma.Registry
+
+type Where[Model any] map[string]any
 
 func (w *Where[Model]) UnmarshalText(text []byte) error {
 	// Unmarshal the text into the Where map
@@ -68,8 +68,10 @@ func (w *Where[Model]) Schema(r huma.Registry) *huma.Schema {
 			if tag := _field.Tag.Get("json"); tag != "" {
 				if _schema := w.FieldSchema(_field); _schema != nil {
 					if tag == "-" {
+						// Relation field detected, name it with the db tag
 						schema.Properties[_field.Tag.Get("db")] = _schema
 					} else {
+						// Primitive fields detected, name it with the json tag
 						schema.Properties[strings.Split(tag, ",")[0]] = _schema
 					}
 				}
@@ -89,6 +91,7 @@ func (w *Where[Model]) Schema(r huma.Registry) *huma.Schema {
 }
 
 func (w *Where[Model]) FieldSchema(field reflect.StructField) *huma.Schema {
+	// Get the field deep inside array or slice or pointer types
 	_field := field.Type
 	for _field.Kind() == reflect.Array || _field.Kind() == reflect.Slice || _field.Kind() == reflect.Pointer {
 		_field = _field.Elem()
@@ -96,6 +99,7 @@ func (w *Where[Model]) FieldSchema(field reflect.StructField) *huma.Schema {
 
 	switch _field.Kind() {
 	case reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Float32, reflect.Float64, reflect.Complex64, reflect.Complex128, reflect.String:
+		// For fields of primitive types, return a schema with operations
 		result := &huma.Schema{
 			Type: huma.TypeObject,
 			Properties: map[string]*huma.Schema{
@@ -115,6 +119,8 @@ func (w *Where[Model]) FieldSchema(field reflect.StructField) *huma.Schema {
 			AdditionalProperties: false,
 		}
 
+		// Check if the field has a method named "Operations"
+		// Then add its custom defined operations to the field schema
 		if _method, ok := field.Type.MethodByName("Operations"); ok {
 			var model Model
 			value := reflect.ValueOf(model).FieldByName(field.Name)
@@ -129,6 +135,7 @@ func (w *Where[Model]) FieldSchema(field reflect.StructField) *huma.Schema {
 
 		return result
 	case reflect.Struct:
+		// For fields of struct types, return a schema with a reference to the struct
 		name := "Where" + huma.DefaultSchemaNamer(_field, "")
 		return &huma.Schema{
 			Ref: "#/components/schemas/" + name,

@@ -18,6 +18,7 @@ type DeleteSingleOutput[Model any] struct {
 func (s *CRUDService[Model]) DeleteSingle(ctx context.Context, i *DeleteSingleInput[Model]) (*DeleteSingleOutput[Model], error) {
 	slog.Debug("Executing DeleteSingle operation", slog.String("id", i.ID))
 
+	// Define the where clause for the delete operation
 	where := schema.Where[Model]{s.id: map[string]any{"_eq": i.ID}}
 
 	// Execute BeforeDelete hook if defined

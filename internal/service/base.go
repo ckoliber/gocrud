@@ -38,6 +38,7 @@ func NewCRUDService[Model any](repo repository.Repository[Model], hooks *CRUDHoo
 	// Reflect on the Model type to extract metadata
 	_type := reflect.TypeFor[Model]()
 
+	// Extract the ID field from the model
 	idField := _type.Field(0)
 	if idField.Name == "_" {
 		idField = _type.Field(1)

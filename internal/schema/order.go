@@ -10,9 +10,9 @@ import (
 	"github.com/danielgtaylor/huma/v2"
 )
 
-type Order[Model any] map[string]any
-
 var orderRegistry huma.Registry
+
+type Order[Model any] map[string]any
 
 func (o *Order[Model]) UnmarshalText(text []byte) error {
 	// Unmarshal the text into the Order map
@@ -52,6 +52,7 @@ func (o *Order[Model]) Schema(r huma.Registry) *huma.Schema {
 			if tag := _field.Tag.Get("json"); tag != "" {
 				if _schema := o.FieldSchema(_field); _schema != nil {
 					if tag != "-" {
+						// primitive fields detected, name it with the json tag
 						schema.Properties[strings.Split(tag, ",")[0]] = _schema
 					}
 				}
@@ -71,6 +72,7 @@ func (o *Order[Model]) Schema(r huma.Registry) *huma.Schema {
 }
 
 func (o *Order[Model]) FieldSchema(field reflect.StructField) *huma.Schema {
+	// Get the field deep inside array or slice or pointer types
 	_field := field.Type
 	for _field.Kind() == reflect.Array || _field.Kind() == reflect.Slice || _field.Kind() == reflect.Pointer {
 		_field = _field.Elem()
@@ -78,6 +80,7 @@ func (o *Order[Model]) FieldSchema(field reflect.StructField) *huma.Schema {
 
 	switch _field.Kind() {
 	case reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Float32, reflect.Float64, reflect.Complex64, reflect.Complex128, reflect.String:
+		// For fields of primitive types, return a schema with enum values
 		return &huma.Schema{
 			Type: huma.TypeString,
 			Enum: []any{"ASC", "DESC"},
