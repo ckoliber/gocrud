@@ -96,7 +96,7 @@ func (w *Where[Model]) FieldSchema(field reflect.StructField) *huma.Schema {
 
 	switch _field.Kind() {
 	case reflect.Bool, reflect.Int, reflect.Int8, reflect.Int16, reflect.Int32, reflect.Int64, reflect.Uint, reflect.Uint8, reflect.Uint16, reflect.Uint32, reflect.Uint64, reflect.Float32, reflect.Float64, reflect.Complex64, reflect.Complex128, reflect.String:
-		return &huma.Schema{
+		result := &huma.Schema{
 			Type: huma.TypeObject,
 			Properties: map[string]*huma.Schema{
 				"_eq":     {Type: huma.TypeString},
@@ -114,6 +114,20 @@ func (w *Where[Model]) FieldSchema(field reflect.StructField) *huma.Schema {
 			},
 			AdditionalProperties: false,
 		}
+
+		if _method, ok := field.Type.MethodByName("Operations"); ok {
+			var model Model
+			value := reflect.ValueOf(model).FieldByName(field.Name)
+			operations := _method.Func.Call([]reflect.Value{value})[0].Interface()
+			for key := range operations.(map[string]func(string, ...string) string) {
+				result.Properties[key] = &huma.Schema{
+					Type:  huma.TypeString,
+					Items: &huma.Schema{Type: huma.TypeString},
+				}
+			}
+		}
+
+		return result
 	case reflect.Struct:
 		name := "Where" + huma.DefaultSchemaNamer(_field, "")
 		return &huma.Schema{

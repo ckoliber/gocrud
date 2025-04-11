@@ -54,6 +54,7 @@ func NewSQLBuilder[Model any](operations map[string]func(string, ...string) stri
 	table := strings.ToLower(_type.Name())
 	fields := []Field{}
 	relations := map[string]Relation{}
+	operations_ := map[string]func(string, ...string) string{}
 	for idx := range _type.NumField() {
 		_field := _type.Field(idx)
 		if _field.Name == "_" {
@@ -70,7 +71,21 @@ func NewSQLBuilder[Model any](operations map[string]func(string, ...string) stri
 						table: _field.Tag.Get("table"),
 					}
 				} else {
-					fields = append(fields, Field{idx, strings.Split(tag, ",")[0]})
+					name := strings.Split(tag, ",")[0]
+					fields = append(fields, Field{idx, name})
+
+					for key, value := range operations {
+						operations_[name+key] = value
+					}
+
+					if _method, ok := _field.Type.MethodByName("Operations"); ok {
+						var model Model
+						value := reflect.ValueOf(model).FieldByName(_field.Name)
+						operations := _method.Func.Call([]reflect.Value{value})[0].Interface()
+						for key, value := range operations.(map[string]func(string, ...string) string) {
+							operations_[name+key] = value
+						}
+					}
 				}
 			}
 		}
@@ -83,7 +98,7 @@ func NewSQLBuilder[Model any](operations map[string]func(string, ...string) stri
 		keys:       []string{fields[0].name},
 		fields:     fields,
 		relations:  relations,
-		operations: operations,
+		operations: operations_,
 		identifier: identifier,
 		parameter:  parameter,
 		generator:  generator,
@@ -237,7 +252,7 @@ func (b *SQLBuilder[Model]) Where(where *map[string]any, args *[]any, run func(s
 	result := []string{}
 	for key, item := range *where {
 		for op, value := range item.(map[string]any) {
-			if handler, ok := b.operations[op]; ok {
+			if handler, ok := b.operations[key+op]; ok {
 				_value := reflect.ValueOf(value)
 
 				if _value.Kind() == reflect.String {

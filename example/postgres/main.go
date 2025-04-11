@@ -21,9 +21,19 @@ type Options struct {
 	Port int `help:"Port to listen on" short:"p" default:"8888"`
 }
 
+type ID int
+
+func (_ *ID) Operations() map[string]func(string, ...string) string {
+	return map[string]func(string, ...string) string{
+		"_regex": func(key string, values ...string) string {
+			return fmt.Sprintf("%s REGEXP %s", key, values[0])
+		},
+	}
+}
+
 type User struct {
 	_         struct{}   `db:"users" json:"-"`
-	ID        *int       `db:"id" json:"id" required:"false"`
+	ID        *ID        `db:"id" json:"id" required:"false"`
 	Name      *string    `db:"name" json:"name" required:"false" maxLength:"30" example:"David" doc:"User name"`
 	Age       *int       `db:"age" json:"age" required:"false" minimum:"1" maximum:"120" example:"25" doc:"User age from 1 to 120"`
 	Documents []Document `db:"documents" src:"id" dest:"userId" table:"documents" json:"-"`
@@ -31,7 +41,7 @@ type User struct {
 
 type Document struct {
 	_       struct{} `db:"documents" json:"-"`
-	ID      *int     `db:"id" json:"id" required:"false"`
+	ID      *ID      `db:"id" json:"id" required:"false"`
 	Title   string   `db:"title" json:"title" maxLength:"50" doc:"Document title"`
 	Content string   `db:"content" json:"content" maxLength:"500" doc:"Document content"`
 	UserID  int      `db:"userId" json:"userId" doc:"Document userId"`
