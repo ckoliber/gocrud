@@ -24,14 +24,14 @@ func (s *CRUDService[Model]) GetSingle(ctx context.Context, i *GetSingleInput[Mo
 
 	// Execute BeforeGet hook if defined
 	if s.hooks.BeforeGet != nil {
-		if err := s.hooks.BeforeGet(ctx, (*map[string]any)(&where), nil, nil, nil); err != nil {
+		if err := s.hooks.BeforeGet(ctx, where.Addr(), nil, nil, nil); err != nil {
 			slog.Error("BeforeGet hook failed", slog.Any("error", err))
 			return nil, err
 		}
 	}
 
 	// Fetch the resource from the repository
-	result, err := s.repo.Get(ctx, (*map[string]any)(&where), nil, nil, nil)
+	result, err := s.repo.Get(ctx, where.Addr(), nil, nil, nil)
 	if err != nil {
 		slog.Error("Failed to fetch resource in GetSingle", slog.Any("error", err))
 		return nil, err

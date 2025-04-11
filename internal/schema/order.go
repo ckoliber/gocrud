@@ -16,7 +16,7 @@ type Order[Model any] map[string]any
 
 func (o *Order[Model]) UnmarshalText(text []byte) error {
 	// Unmarshal the text into the Order map
-	if err := json.Unmarshal(text, (*map[string]any)(o)); err != nil {
+	if err := json.Unmarshal(text, o.Addr()); err != nil {
 		slog.Error("Failed to unmarshal text into Order", slog.Any("error", err))
 		return err
 	}
@@ -25,7 +25,7 @@ func (o *Order[Model]) UnmarshalText(text []byte) error {
 	name := "Order" + huma.DefaultSchemaNamer(reflect.TypeFor[Model](), "")
 	schema := orderRegistry.Map()[name]
 	result := huma.ValidateResult{}
-	huma.Validate(orderRegistry, schema, huma.NewPathBuffer([]byte(""), 0), huma.ModeReadFromServer, (map[string]any)(*o), &result)
+	huma.Validate(orderRegistry, schema, huma.NewPathBuffer([]byte(""), 0), huma.ModeReadFromServer, *o.Addr(), &result)
 	if len(result.Errors) > 0 {
 		slog.Error("Validation errors in Order", slog.Any("errors", result.Errors))
 		return errors.Join(result.Errors...)
@@ -93,4 +93,8 @@ func (o *Order[Model]) FieldSchema(field reflect.StructField) *huma.Schema {
 
 	slog.Debug("Unsupported field type for Order", slog.Any("field", field))
 	return nil
+}
+
+func (o *Order[Model]) Addr() *map[string]any {
+	return (*map[string]any)(o)
 }

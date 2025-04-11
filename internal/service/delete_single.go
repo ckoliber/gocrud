@@ -23,14 +23,14 @@ func (s *CRUDService[Model]) DeleteSingle(ctx context.Context, i *DeleteSingleIn
 
 	// Execute BeforeDelete hook if defined
 	if s.hooks.BeforeDelete != nil {
-		if err := s.hooks.BeforeDelete(ctx, (*map[string]any)(&where)); err != nil {
+		if err := s.hooks.BeforeDelete(ctx, where.Addr()); err != nil {
 			slog.Error("BeforeDelete hook failed", slog.Any("error", err))
 			return nil, err
 		}
 	}
 
 	// Delete the resource in the repository
-	result, err := s.repo.Delete(ctx, (*map[string]any)(&where))
+	result, err := s.repo.Delete(ctx, where.Addr())
 	if err != nil {
 		slog.Error("Failed to delete resource in DeleteSingle", slog.Any("error", err))
 		return nil, err

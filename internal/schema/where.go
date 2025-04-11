@@ -16,7 +16,7 @@ type Where[Model any] map[string]any
 
 func (w *Where[Model]) UnmarshalText(text []byte) error {
 	// Unmarshal the text into the Where map
-	if err := json.Unmarshal(text, (*map[string]any)(w)); err != nil {
+	if err := json.Unmarshal(text, w.Addr()); err != nil {
 		slog.Error("Failed to unmarshal text into Where", slog.Any("error", err))
 		return err
 	}
@@ -25,7 +25,7 @@ func (w *Where[Model]) UnmarshalText(text []byte) error {
 	name := "Where" + huma.DefaultSchemaNamer(reflect.TypeFor[Model](), "")
 	schema := whereRegistry.Map()[name]
 	result := huma.ValidateResult{}
-	huma.Validate(whereRegistry, schema, huma.NewPathBuffer([]byte(""), 0), huma.ModeReadFromServer, (map[string]any)(*w), &result)
+	huma.Validate(whereRegistry, schema, huma.NewPathBuffer([]byte(""), 0), huma.ModeReadFromServer, *w.Addr(), &result)
 	if len(result.Errors) > 0 {
 		slog.Error("Validation errors in Where", slog.Any("errors", result.Errors))
 		return errors.Join(result.Errors...)
@@ -149,4 +149,8 @@ func (w *Where[Model]) FieldSchema(field reflect.StructField) *huma.Schema {
 
 	slog.Debug("Unsupported field type for Where", slog.Any("field", field))
 	return nil
+}
+
+func (w *Where[Model]) Addr() *map[string]any {
+	return (*map[string]any)(w)
 }

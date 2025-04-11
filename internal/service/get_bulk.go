@@ -9,10 +9,10 @@ import (
 
 // GetBulkInput defines the input parameters for the GetBulk operation
 type GetBulkInput[Model any] struct {
-	Where schema.Where[Model] `query:"where" doc:"Entity where" example:"{}"`
-	Order schema.Order[Model] `query:"order" doc:"Entity order" example:"{}"`
-	Limit int                 `query:"limit" min:"1" doc:"Entity limit" example:"50"`
-	Skip  int                 `query:"skip" min:"0" doc:"Entity skip" example:"0"`
+	Where schema.Where[Model]  `query:"where" doc:"Entity where" example:"{}"`
+	Order schema.Order[Model]  `query:"order" doc:"Entity order" example:"{}"`
+	Limit schema.Optional[int] `query:"limit" min:"1" doc:"Entity limit" example:"50"`
+	Skip  schema.Optional[int] `query:"skip" min:"0" doc:"Entity skip" example:"0"`
 }
 
 // GetBulkOutput defines the output structure for the GetBulk operation
@@ -26,14 +26,14 @@ func (s *CRUDService[Model]) GetBulk(ctx context.Context, i *GetBulkInput[Model]
 
 	// Execute BeforeGet hook if defined
 	if s.hooks.BeforeGet != nil {
-		if err := s.hooks.BeforeGet(ctx, (*map[string]any)(&i.Where), (*map[string]any)(&i.Order), &i.Limit, &i.Skip); err != nil {
+		if err := s.hooks.BeforeGet(ctx, i.Where.Addr(), i.Order.Addr(), i.Limit.Addr(), i.Skip.Addr()); err != nil {
 			slog.Error("BeforeGet hook failed", slog.Any("error", err))
 			return nil, err
 		}
 	}
 
 	// Fetch resources from the repository
-	result, err := s.repo.Get(ctx, (*map[string]any)(&i.Where), (*map[string]any)(&i.Order), &i.Limit, &i.Skip)
+	result, err := s.repo.Get(ctx, i.Where.Addr(), i.Order.Addr(), i.Limit.Addr(), i.Skip.Addr())
 	if err != nil {
 		slog.Error("Failed to fetch resources in GetBulk", slog.Any("error", err))
 		return nil, err
