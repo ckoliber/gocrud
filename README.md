@@ -1,5 +1,7 @@
 # GoCRUD
 
+![GoCRUD](./docs/icon.svg)
+
 GoCRUD is a powerful Go module that extends [Huma](https://huma.rocks/) to automatically generate CRUD APIs with built-in support for input validation and customizable hooks. It simplifies API development by automating repetitive tasks, allowing you to focus on your business logic.
 
 ## 🚀 Features
@@ -101,11 +103,68 @@ config := &gocrud.Config[User]{
 }
 ```
 
-## 📚 Advanced Features
+## 🔰 Advanced Features
 
-### Future Enhancements
+### Relation Filtering
 
--   **Relationships**: Support for one-to-one, one-to-many, and many-to-many relationships will be added in future versions.
+GoCRUD supports filtering through relationships. You can query parent entities based on their related entities' properties:
+
+```go
+type User struct {
+    _         struct{}   `db:"users" json:"-"`
+    ID        *int       `db:"id" json:"id"`
+    Name      *string    `db:"name" json:"name"`
+    Documents []Document `db:"documents" src:"id" dest:"userId" table:"documents" json:"-"`
+}
+
+type Document struct {
+    _      struct{} `db:"documents" json:"-"`
+    ID     *int     `db:"id" json:"id"`
+    Title  string   `db:"title" json:"title"`
+    UserID int      `db:"userId" json:"userId"`
+}
+```
+
+You can then filter users by their documents:
+
+```http
+GET /users?where={"documents":{"title":{"_eq":"Doc4"}}}
+```
+
+This will return users who have documents with title "Doc4".
+
+### Custom Field Operations
+
+You can define custom operations for your model fields by implementing the `Operations` method:
+
+```go
+type ID int
+
+func (_ *ID) Operations() map[string]func(string, ...string) string {
+    return map[string]func(string, ...string) string{
+        "_regexp": func(key string, values ...string) string {
+            return fmt.Sprintf("%s REGEXP %s", key, values[0])
+        },
+        "_iregexp": func(key string, values ...string) string {
+            return fmt.Sprintf("%s IREGEXP %s", key, values[0])
+        },
+    }
+}
+
+type User struct {
+    _    struct{} `db:"users" json:"-"`
+    ID   *ID      `db:"id" json:"id"`
+    Name *string  `db:"name" json:"name"`
+}
+```
+
+Now you can use these custom operations in your queries:
+
+```http
+GET /users?where={"id":{"_regexp":"5"}}
+```
+
+The operations are type-safe and validated against the field's defined operations.
 
 ## 🤝 Contributing
 
