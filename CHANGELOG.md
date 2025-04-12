@@ -1,3 +1,10 @@
+## [1.4.1](https://github.com/ckoliber/gocrud/compare/v1.4.0...v1.4.1) (2025-04-12)
+
+
+### Bug Fixes
+
+* remove nil Addr on Optional types ([032e5ad](https://github.com/ckoliber/gocrud/commit/032e5ad23bd66a772110ea92dc4fb09261aff3bf))
+
 # [1.4.0](https://github.com/ckoliber/gocrud/compare/v1.3.0...v1.4.0) (2025-04-11)
 
 
