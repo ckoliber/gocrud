@@ -60,10 +60,10 @@ func (r *PostgresRepository[Model]) Get(ctx context.Context, where *map[string]a
 	if expr := r.builder.Order(order); expr != "" {
 		query += fmt.Sprintf(" ORDER BY %s", expr)
 	}
-	if limit != nil {
+	if *limit > 0 {
 		query += fmt.Sprintf(" LIMIT %d", *limit)
 	}
-	if skip != nil {
+	if *skip > 0 {
 		query += fmt.Sprintf(" OFFSET %d", *skip)
 	}
 

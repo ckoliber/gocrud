@@ -34,6 +34,10 @@ func main() {
 
 	gocrud.Register(api, gocrud.NewSQLRepository[User](db), &gocrud.Config[User]{
 		BeforeGet: func(ctx context.Context, where *map[string]any, order *map[string]any, limit *int, skip *int) error {
+			if *limit > 50 {
+				*limit = 50
+			}
+
 			return nil
 		},
 		BeforePut: func(ctx context.Context, models *[]User) error {

@@ -28,9 +28,5 @@ func (o *Optional[Type]) OnParamSet(isSet bool, parsed any) {
 
 // Get the value of the wrapped type
 func (o *Optional[Type]) Addr() *Type {
-	if o.IsSet {
-		return &o.Value
-	}
-
-	return nil
+	return &o.Value
 }

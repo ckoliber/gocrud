@@ -60,10 +60,10 @@ func (r *MSSQLRepository[Model]) Get(ctx context.Context, where *map[string]any,
 	if expr := r.builder.Order(order); expr != "" {
 		query += fmt.Sprintf(" ORDER BY %s", expr)
 	}
-	if skip != nil {
+	if *skip > 0 {
 		query += fmt.Sprintf(" OFFSET %d ROWS", *skip)
 	}
-	if limit != nil {
+	if *limit > 0 {
 		query += fmt.Sprintf(" FETCH NEXT %d ROWS ONLY", *limit)
 	}
 
