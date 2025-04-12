@@ -82,7 +82,17 @@ type Config[Model any] struct {
     PostMode   Mode // Configure POST behavior
     DeleteMode Mode // Configure DELETE behavior
 
-    CRUDHooks[Model] // Add hooks for custom logic
+    // Add before hooks for custom logic
+    BeforeGet    func(ctx context.Context, where *map[string]any, order *map[string]any, limit *int, skip *int) error
+	BeforePut    func(ctx context.Context, models *[]Model) error
+	BeforePost   func(ctx context.Context, models *[]Model) error
+	BeforeDelete func(ctx context.Context, where *map[string]any) error
+
+    // Add after hooks for custom logic
+	AfterGet    func(ctx context.Context, models *[]Model) error
+	AfterPut    func(ctx context.Context, models *[]Model) error
+	AfterPost   func(ctx context.Context, models *[]Model) error
+	AfterDelete func(ctx context.Context, models *[]Model) error
 }
 ```
 
@@ -90,15 +100,13 @@ type Config[Model any] struct {
 
 ```go
 config := &gocrud.Config[User]{
-    CRUDHooks: gocrud.CRUDHooks[User]{
-        BeforePost: func(ctx context.Context, models *[]User) error {
-            for _, user := range *models {
-                if user.Age < 18 {
-                    return fmt.Errorf("user must be at least 18 years old")
-                }
+    BeforePost: func(ctx context.Context, models *[]User) error {
+        for _, user := range *models {
+            if user.Age < 18 {
+                return fmt.Errorf("user must be at least 18 years old")
             }
-            return nil
-        },
+        }
+        return nil
     },
 }
 ```
