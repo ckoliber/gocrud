@@ -1,3 +1,10 @@
+## [1.4.2](https://github.com/ckoliber/gocrud/compare/v1.4.1...v1.4.2) (2025-04-17)
+
+
+### Bug Fixes
+
+* **deps:** update module github.com/mattn/go-sqlite3 to v1.14.28 ([3bbe7cf](https://github.com/ckoliber/gocrud/commit/3bbe7cff5084fadacf15a43b3cdab60fd10e8e2c))
+
 ## [1.4.1](https://github.com/ckoliber/gocrud/compare/v1.4.0...v1.4.1) (2025-04-12)
 
 
