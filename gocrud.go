@@ -61,20 +61,20 @@ func Register[Model any](api huma.API, repo repository.Repository[Model], config
 		slog.Debug("Registering GetSingle operation", slog.String("path", path+"/{id}"))
 		huma.Register(api, huma.Operation{
 			OperationID: fmt.Sprintf("get-single-%s", svc.GetName()),
-			Path:        path + "/{id}",
-			Method:      http.MethodGet,
 			Summary:     fmt.Sprintf("Get single-%s", svc.GetName()),
 			Description: fmt.Sprintf("Retrieves a single %s by its unique identifier. Returns full resource representation.", svc.GetName()),
+			Path:        path + "/{id}",
+			Method:      http.MethodGet,
 		}, svc.GetSingle)
 	}
 	if config.GetMode <= BulkSingle {
 		slog.Debug("Registering GetBulk operation", slog.String("path", path))
 		huma.Register(api, huma.Operation{
 			OperationID: fmt.Sprintf("get-bulk-%s", svc.GetName()),
-			Path:        path,
-			Method:      http.MethodGet,
 			Summary:     fmt.Sprintf("Get bulk-%s", svc.GetName()),
 			Description: fmt.Sprintf("Returns a paginated list of %s resources. Supports filtering, sorting and pagination parameters.", svc.GetName()),
+			Path:        path,
+			Method:      http.MethodGet,
 		}, svc.GetBulk)
 	}
 
@@ -83,20 +83,20 @@ func Register[Model any](api huma.API, repo repository.Repository[Model], config
 		slog.Debug("Registering PutSingle operation", slog.String("path", path+"/{id}"))
 		huma.Register(api, huma.Operation{
 			OperationID: fmt.Sprintf("put-single-%s", svc.GetName()),
-			Path:        path + "/{id}",
-			Method:      http.MethodPut,
 			Summary:     fmt.Sprintf("Put single-%s", svc.GetName()),
 			Description: fmt.Sprintf("Full update operation for a %s resource. Requires complete resource representation.", svc.GetName()),
+			Path:        path + "/{id}",
+			Method:      http.MethodPut,
 		}, svc.PutSingle)
 	}
 	if config.PutMode <= BulkSingle {
 		slog.Debug("Registering PutBulk operation", slog.String("path", path))
 		huma.Register(api, huma.Operation{
 			OperationID: fmt.Sprintf("put-bulk-%s", svc.GetName()),
-			Path:        path,
-			Method:      http.MethodPut,
 			Summary:     fmt.Sprintf("Put bulk-%s", svc.GetName()),
 			Description: fmt.Sprintf("Batch update operation for multiple %s resources. Each resource requires complete representation.", svc.GetName()),
+			Path:        path,
+			Method:      http.MethodPut,
 		}, svc.PutBulk)
 	}
 
@@ -105,20 +105,20 @@ func Register[Model any](api huma.API, repo repository.Repository[Model], config
 		slog.Debug("Registering PostSingle operation", slog.String("path", path+"/one"))
 		huma.Register(api, huma.Operation{
 			OperationID: fmt.Sprintf("post-single-%s", svc.GetName()),
-			Path:        path + "/one",
-			Method:      http.MethodPost,
 			Summary:     fmt.Sprintf("Post single-%s", svc.GetName()),
 			Description: fmt.Sprintf("Creates a new %s resource. Returns the created resource with generated identifier.", svc.GetName()),
+			Path:        path + "/one",
+			Method:      http.MethodPost,
 		}, svc.PostSingle)
 	}
 	if config.PostMode <= BulkSingle {
 		slog.Debug("Registering PostBulk operation", slog.String("path", path))
 		huma.Register(api, huma.Operation{
 			OperationID: fmt.Sprintf("post-bulk-%s", svc.GetName()),
-			Path:        path,
-			Method:      http.MethodPost,
 			Summary:     fmt.Sprintf("Post bulk-%s", svc.GetName()),
 			Description: fmt.Sprintf("Batch creation operation for multiple %s resources. Returns created resources with generated identifiers.", svc.GetName()),
+			Path:        path,
+			Method:      http.MethodPost,
 		}, svc.PostBulk)
 	}
 
@@ -127,20 +127,20 @@ func Register[Model any](api huma.API, repo repository.Repository[Model], config
 		slog.Debug("Registering DeleteSingle operation", slog.String("path", path+"/{id}"))
 		huma.Register(api, huma.Operation{
 			OperationID: fmt.Sprintf("delete-single-%s", svc.GetName()),
-			Path:        path + "/{id}",
-			Method:      http.MethodDelete,
 			Summary:     fmt.Sprintf("Delete single-%s", svc.GetName()),
 			Description: fmt.Sprintf("Permanently removes a %s resource by its identifier. This operation cannot be undone.", svc.GetName()),
+			Path:        path + "/{id}",
+			Method:      http.MethodDelete,
 		}, svc.DeleteSingle)
 	}
 	if config.DeleteMode <= BulkSingle {
 		slog.Debug("Registering DeleteBulk operation", slog.String("path", path))
 		huma.Register(api, huma.Operation{
 			OperationID: fmt.Sprintf("delete-bulk-%s", svc.GetName()),
-			Path:        path,
-			Method:      http.MethodDelete,
 			Summary:     fmt.Sprintf("Delete bulk-%s", svc.GetName()),
 			Description: fmt.Sprintf("Batch deletion operation for multiple %s resources. This operation cannot be undone.", svc.GetName()),
+			Path:        path,
+			Method:      http.MethodDelete,
 		}, svc.DeleteBulk)
 	}
 }
