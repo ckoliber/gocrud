@@ -1,3 +1,11 @@
+# [1.5.0](https://github.com/ckoliber/gocrud/compare/v1.4.2...v1.5.0) (2025-04-22)
+
+
+### Features
+
+* add auth example ([8a01545](https://github.com/ckoliber/gocrud/commit/8a01545bd8d67df7b0119a91e3e726bf593f1393))
+* add base path of operations ([db70b64](https://github.com/ckoliber/gocrud/commit/db70b641733b1cfc88c86ab9c095c01445a9e6b3))
+
 ## [1.4.2](https://github.com/ckoliber/gocrud/compare/v1.4.1...v1.4.2) (2025-04-17)
 
 
