@@ -1,3 +1,11 @@
+# [1.6.0](https://github.com/ckoliber/gocrud/compare/v1.5.0...v1.6.0) (2025-05-02)
+
+
+### Features
+
+* add tests ([761c950](https://github.com/ckoliber/gocrud/commit/761c950d5dd416e1070a85526decc82f82c59d2b))
+* add tests to CI ([7ac873c](https://github.com/ckoliber/gocrud/commit/7ac873c9fa37fb801b306cfa5ac442c3b1cf0d10))
+
 # [1.5.0](https://github.com/ckoliber/gocrud/compare/v1.4.2...v1.5.0) (2025-04-22)
 
 
