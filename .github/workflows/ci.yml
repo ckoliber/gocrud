@@ -28,6 +28,7 @@ jobs:
 
             - run: go get
             - run: go build
+            - run: go test ./...
 
     release:
         needs: build

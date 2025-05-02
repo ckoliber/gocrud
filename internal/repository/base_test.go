@@ -57,9 +57,9 @@ func UnitTests(ctx context.Context, t *testing.T, repo Repository[User]) {
 
 	t.Run("Put", func(t *testing.T) {
 		users := []User{
-			{ID: &[]int{2}[0], Name: "Alice Updated", Age: 26},
-			{ID: &[]int{3}[0], Name: "Bob Updated", Age: 36},
-			{ID: &[]int{4}[0], Name: "Charlie Updated", Age: 46},
+			{ID: &[]int{1}[0], Name: "Alice Updated", Age: 26},
+			{ID: &[]int{2}[0], Name: "Bob Updated", Age: 36},
+			{ID: &[]int{3}[0], Name: "Charlie Updated", Age: 46},
 		}
 
 		result, err := repo.Put(ctx, &users)
@@ -81,7 +81,7 @@ func UnitTests(ctx context.Context, t *testing.T, repo Repository[User]) {
 	})
 
 	t.Run("DeleteWithFilters", func(t *testing.T) {
-		where := map[string]any{"age": map[string]any{"_lt": "30"}}
+		where := map[string]any{"age": map[string]any{"_gt": "30"}}
 		result, err := repo.Delete(ctx, &where)
 		assert.NoError(t, err)
 		assert.NotEmpty(t, result)
