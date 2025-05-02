@@ -1,3 +1,10 @@
+## [1.6.1](https://github.com/ckoliber/gocrud/compare/v1.6.0...v1.6.1) (2025-05-02)
+
+
+### Bug Fixes
+
+* **deps:** update module github.com/stretchr/testify to v1.10.0 ([4db5b67](https://github.com/ckoliber/gocrud/commit/4db5b676f6e52a5e6fd318dc03967de6b915cae9))
+
 # [1.6.0](https://github.com/ckoliber/gocrud/compare/v1.5.0...v1.6.0) (2025-05-02)
 
 
