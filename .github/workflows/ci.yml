@@ -19,7 +19,7 @@ jobs:
             id-token: write
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
 
             - name: Setup Golang
               uses: actions/setup-go@v5
@@ -36,7 +36,7 @@ jobs:
         if: github.ref_protected && !startsWith(github.event.head_commit.message, 'chore')
         steps:
             - name: Checkout repository
-              uses: actions/checkout@v4
+              uses: actions/checkout@v6
               with:
                   persist-credentials: false
 
