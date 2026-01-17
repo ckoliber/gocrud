@@ -1,6 +1,6 @@
 module github.com/ckoliber/gocrud
 
-go 1.24.1
+go 1.25.5
 
 require (
 	github.com/danielgtaylor/huma/v2 v2.34.2
