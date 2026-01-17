@@ -1,3 +1,10 @@
+## [1.6.3](https://github.com/ckoliber/gocrud/compare/v1.6.2...v1.6.3) (2026-01-17)
+
+
+### Bug Fixes
+
+* **deps:** update module github.com/go-sql-driver/mysql to v1.9.3 ([26faf53](https://github.com/ckoliber/gocrud/commit/26faf53985cf59392c4333fa9747d1d825e4f0d1))
+
 ## [1.6.2](https://github.com/ckoliber/gocrud/compare/v1.6.1...v1.6.2) (2026-01-17)
 
 
