@@ -1,3 +1,11 @@
+## [1.6.4](https://github.com/ckoliber/gocrud/compare/v1.6.3...v1.6.4) (2026-01-17)
+
+
+### Bug Fixes
+
+* **deps:** update module github.com/danielgtaylor/huma/v2 to v2.34.2 ([eb24234](https://github.com/ckoliber/gocrud/commit/eb24234258980d9bf2b4b5d8e184cc7bc368ae1a))
+* **deps:** update module github.com/stretchr/testify to v1.11.1 ([5fc2544](https://github.com/ckoliber/gocrud/commit/5fc25448c2aa97fb3b2588f73c63f400d9eea307))
+
 ## [1.6.3](https://github.com/ckoliber/gocrud/compare/v1.6.2...v1.6.3) (2026-01-17)
 
 
