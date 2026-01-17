@@ -1,3 +1,10 @@
+## [1.6.2](https://github.com/ckoliber/gocrud/compare/v1.6.1...v1.6.2) (2026-01-17)
+
+
+### Bug Fixes
+
+* **deps:** update module github.com/microsoft/go-mssqldb to v1.9.6 ([48f7b64](https://github.com/ckoliber/gocrud/commit/48f7b640d38ab27099468826f637ee1284cacd74))
+
 ## [1.6.1](https://github.com/ckoliber/gocrud/compare/v1.6.0...v1.6.1) (2025-05-02)
 
 
