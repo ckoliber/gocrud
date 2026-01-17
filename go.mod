@@ -3,7 +3,7 @@ module github.com/ckoliber/gocrud
 go 1.24.1
 
 require (
-	github.com/danielgtaylor/huma/v2 v2.32.0
+	github.com/danielgtaylor/huma/v2 v2.34.2
 	github.com/mattn/go-sqlite3 v1.14.28
 	github.com/stretchr/testify v1.11.1
 )
