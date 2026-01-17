@@ -1,3 +1,11 @@
+## [1.6.6](https://github.com/ckoliber/gocrud/compare/v1.6.5...v1.6.6) (2026-01-17)
+
+
+### Bug Fixes
+
+* reduce go patch version ([eedabfc](https://github.com/ckoliber/gocrud/commit/eedabfc9fbbf939f2399ff07633fe6564c399e0c))
+* update go version ([4ec57cf](https://github.com/ckoliber/gocrud/commit/4ec57cf99cf059d5d898679ad548185061d4d5bd))
+
 ## [1.6.5](https://github.com/ckoliber/gocrud/compare/v1.6.4...v1.6.5) (2026-01-17)
 
 
