@@ -18,6 +18,8 @@ github.com/danielgtaylor/huma/v2 v2.32.0 h1:ytU9ExG/axC434+soXxwNzv0uaxOb3cyCgjj
 github.com/danielgtaylor/huma/v2 v2.32.0/go.mod h1:9BxJwkeoPPDEJ2Bg4yPwL1mM1rYpAwCAWFKoo723spk=
 github.com/danielgtaylor/huma/v2 v2.34.2 h1:JG8DhmsIlgWAJ4OtTzXcBjqSsEfKUQ1/cEnxmQF8fVk=
 github.com/danielgtaylor/huma/v2 v2.34.2/go.mod h1:3elp5brzdyyZsPlDVvf6w8RLnklKp3abolr+5op3fP0=
+github.com/danielgtaylor/huma/v2 v2.34.3 h1:Ii2h2nBppVVxe6W5V7GSsD4N/kohPEO+x+5NAkjTzYg=
+github.com/danielgtaylor/huma/v2 v2.34.3/go.mod h1:3elp5brzdyyZsPlDVvf6w8RLnklKp3abolr+5op3fP0=
 github.com/danielgtaylor/mexpr v1.9.0 h1:9ZDghCLBJ88ZTUkDn/cxyK4KmAJvStCEe+ECN2EoMa4=
 github.com/danielgtaylor/mexpr v1.9.0/go.mod h1:kAivYNRnBeE/IJinqBvVFvLrX54xX//9zFYwADo4Bc8=
 github.com/danielgtaylor/mexpr v1.9.1 h1:nA9bsGRmNlJeVCPFgGf7WhrLuKag/+iWfOaJ03iKFPI=
@@ -87,6 +89,8 @@ golang.org/x/crypto v0.45.0 h1:jMBrvKuj23MTlT0bQEOBcAE0mjg8mK9RXFhRH6nyF3Q=
 golang.org/x/crypto v0.45.0/go.mod h1:XTGrrkGJve7CYK7J8PEww4aY7gM3qMCElcJQ8n8JdX4=
 golang.org/x/net v0.33.0 h1:74SYHlV8BIgHIFC/LrYkOGIwL19eTYXQ5wc6TBuO36I=
 golang.org/x/net v0.33.0/go.mod h1:HXLR5J+9DxmrqMwG9qjGCxZ+zKXxBru04zlTvWlWuN4=
+golang.org/x/net v0.47.0 h1:Mx+4dIFzqraBXUugkia1OOvlD6LemFo1ALMHjrXDOhY=
+golang.org/x/net v0.47.0/go.mod h1:/jNxtkgq5yWUGYkaZGqo27cfGZ1c5Nen03aYrrKpVRU=
 golang.org/x/sys v0.28.0 h1:Fksou7UEQUWlKvIdsqzJmUmCX3cZuD2+P3XyyzwMhlA=
 golang.org/x/sys v0.28.0/go.mod h1:/VUhepiaJMQUp4+oa/7Zr1D23ma6VTLIYjOOTFZPUcA=
 golang.org/x/text v0.21.0 h1:zyQAAkrwaneQ066sspRyJaG9VNi/YJ1NfzcGB3hZ/qo=
