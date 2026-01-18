@@ -6,7 +6,7 @@ replace github.com/ckoliber/gocrud => ../
 
 require (
 	github.com/ckoliber/gocrud v0.0.0
-	github.com/danielgtaylor/huma/v2 v2.34.2
+	github.com/danielgtaylor/huma/v2 v2.34.3
 	github.com/go-sql-driver/mysql v1.9.3
 	github.com/lib/pq v1.10.9
 	github.com/mattn/go-sqlite3 v1.14.33
@@ -29,5 +29,6 @@ require (
 	github.com/spf13/pflag v1.0.6 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	golang.org/x/crypto v0.45.0 // indirect
+	golang.org/x/net v0.47.0 // indirect
 	golang.org/x/text v0.31.0 // indirect
 )
