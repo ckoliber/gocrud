@@ -1,3 +1,10 @@
+## [1.6.8](https://github.com/ckoliber/gocrud/compare/v1.6.7...v1.6.8) (2026-01-18)
+
+
+### Bug Fixes
+
+* **deps:** update module github.com/danielgtaylor/huma/v2 to v2.35.0 ([6a1e82c](https://github.com/ckoliber/gocrud/commit/6a1e82c008aec243080c4746a46576acdd84d499))
+
 ## [1.6.7](https://github.com/ckoliber/gocrud/compare/v1.6.6...v1.6.7) (2026-01-18)
 
 
