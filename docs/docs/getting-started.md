@@ -58,14 +58,14 @@ func main() {
 
 Your API now has these endpoints:
 
--   `GET /users` - List users (with filtering, pagination)
--   `GET /users/{id}` - Get single user
--   `PUT /users` - Update multiple users
--   `PUT /users/{id}` - Update user
--   `POST /users` - Create multiple users
--   `POST /users/one` - Create single user
--   `DELETE /users` - Delete multiple users (with filtering)
--   `DELETE /users/{id}` - Delete user
+- `GET /users` - List users (with filtering, pagination)
+- `GET /users/{id}` - Get single user
+- `PUT /users` - Update multiple users
+- `PUT /users/{id}` - Update user
+- `POST /users` - Create multiple users
+- `POST /users/one` - Create single user
+- `DELETE /users` - Delete multiple users (with filtering)
+- `DELETE /users/{id}` - Delete user
 
 ## Query Parameters
 
@@ -143,6 +143,6 @@ GET /users?where={"id":{"_regexp":"^10.*"}}
 
 ## Next Steps
 
--   Check out [CRUD Operations](crud-operations.md) for detailed API usage
--   Learn about [Configuration](configuration.md) options
--   Explore [CRUD Hooks](crud-hooks.md) for custom logic
+- Check out [CRUD Operations](crud-operations.md) for detailed API usage
+- Learn about [Configuration](configuration.md) options
+- Explore [CRUD Hooks](crud-hooks.md) for custom logic

@@ -25,11 +25,11 @@ type Document struct {
 
 Relation tags:
 
--   `db`: Name of the related table
--   `src`: Source field in the current model
--   `dest`: Destination field in the related model
--   `table`: Target table name
--   `json`: Usually "-" to exclude from JSON
+- `db`: Name of the related table
+- `src`: Source field in the current model
+- `dest`: Destination field in the related model
+- `table`: Target table name
+- `json`: Usually "-" to exclude from JSON
 
 ### Querying Relations
 
@@ -117,21 +117,20 @@ GET /users?where={
 ### Query Optimization
 
 1. **Use Appropriate Indexes**:
-
-    - Add indexes for frequently filtered fields
-    - Add composite indexes for common filter combinations
+   - Add indexes for frequently filtered fields
+   - Add composite indexes for common filter combinations
 
 2. **Limit Result Sets**:
-    - Always use pagination
-    - Set reasonable default limits
+   - Always use pagination
+   - Set reasonable default limits
 
 ```http
 GET /users?limit=50&skip=0
 ```
 
 3. **Select Specific Fields**:
-    - Coming soon: Field selection support
-    - Will allow retrieving only needed fields
+   - Coming soon: Field selection support
+   - Will allow retrieving only needed fields
 
 ### Bulk Operations
 

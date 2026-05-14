@@ -10,12 +10,12 @@ GoCRUD is a Go module that extends the [Huma](https://huma.rocks/) framework to 
 
 ### Key Features
 
--   **Automatic CRUD Generation**: Generate RESTful endpoints for your models with minimal configuration.
--   **Input Validation**: Built-in validation for your model fields.
--   **Customizable Hooks**: Add custom logic before or after CRUD operations.
--   **Relationship Filtering**: Query through model relationships with type-safe filters.
--   **Custom Field Operations**: Define custom field-specific filtering operations.
--   **Database Agnostic**: Supports PostgreSQL, MySQL, SQLite, and MSSQL.
+- **Automatic CRUD Generation**: Generate RESTful endpoints for your models with minimal configuration.
+- **Input Validation**: Built-in validation for your model fields.
+- **Customizable Hooks**: Add custom logic before or after CRUD operations.
+- **Relationship Filtering**: Query through model relationships with type-safe filters.
+- **Custom Field Operations**: Define custom field-specific filtering operations.
+- **Database Agnostic**: Supports PostgreSQL, MySQL, SQLite, and MSSQL.
 
 ### Relations Support
 
@@ -54,13 +54,13 @@ GET /users?where={"id":{"_regexp":"5"}}
 
 The documentation is organized as follows:
 
--   **[Introduction](introduction.md)**: Learn about GoCRUD and its core concepts.
--   **[Getting Started](getting-started.md)**: Step-by-step guide to set up and use GoCRUD in your project.
--   **[Configuration](configuration.md)**: Detailed explanation of configuration options and examples.
--   **[CRUD Operations](crud-operations.md)**: Learn how to use the generated CRUD endpoints.
--   **[CRUD Hooks](crud-hooks.md)**: Customize your API behavior with hooks.
--   **[Advanced Topics](advanced-topics.md)**: Explore advanced features and future enhancements.
--   **[FAQ](FAQ.md)**: Frequently asked questions and troubleshooting tips.
+- **[Introduction](introduction.md)**: Learn about GoCRUD and its core concepts.
+- **[Getting Started](getting-started.md)**: Step-by-step guide to set up and use GoCRUD in your project.
+- **[Configuration](configuration.md)**: Detailed explanation of configuration options and examples.
+- **[CRUD Operations](crud-operations.md)**: Learn how to use the generated CRUD endpoints.
+- **[CRUD Hooks](crud-hooks.md)**: Customize your API behavior with hooks.
+- **[Advanced Topics](advanced-topics.md)**: Explore advanced features and future enhancements.
+- **[FAQ](FAQ.md)**: Frequently asked questions and troubleshooting tips.
 
 ## 🚀 Getting Started
 

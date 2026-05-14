@@ -8,17 +8,17 @@ GoCRUD provides both "before" and "after" hooks for each CRUD operation:
 
 ### Before Hooks
 
--   `BeforeGet`: Executes before retrieving resources
--   `BeforePut`: Executes before updating resources
--   `BeforePost`: Executes before creating resources
--   `BeforeDelete`: Executes before deleting resources
+- `BeforeGet`: Executes before retrieving resources
+- `BeforePut`: Executes before updating resources
+- `BeforePost`: Executes before creating resources
+- `BeforeDelete`: Executes before deleting resources
 
 ### After Hooks
 
--   `AfterGet`: Executes after retrieving resources
--   `AfterPut`: Executes after updating resources
--   `AfterPost`: Executes after creating resources
--   `AfterDelete`: Executes after deleting resources
+- `AfterGet`: Executes after retrieving resources
+- `AfterPut`: Executes after updating resources
+- `AfterPost`: Executes after creating resources
+- `AfterDelete`: Executes after deleting resources
 
 ## Hook Signatures
 
@@ -116,25 +116,24 @@ AfterDelete: func(ctx context.Context, models *[]User) error {
 ## Hook Execution Order
 
 1. Before hooks execute first, allowing you to:
-
-    - Validate input
-    - Modify query parameters
-    - Check permissions
-    - Cancel the operation by returning an error
+   - Validate input
+   - Modify query parameters
+   - Check permissions
+   - Cancel the operation by returning an error
 
 2. The main operation executes only if the before hook succeeds
 
 3. After hooks execute last, allowing you to:
-    - Modify returned data
-    - Trigger side effects
-    - Log operations
-    - Send notifications
+   - Modify returned data
+   - Trigger side effects
+   - Log operations
+   - Send notifications
 
 ## Error Handling
 
--   Any error returned from a hook will stop the operation
--   Before hook errors prevent the main operation from executing
--   After hook errors are returned to the client even though the main operation succeeded
+- Any error returned from a hook will stop the operation
+- Before hook errors prevent the main operation from executing
+- After hook errors are returned to the client even though the main operation succeeded
 
 Example error handling:
 
@@ -160,8 +159,8 @@ BeforePut: func(ctx context.Context, models *[]User) error {
 4. **Consider Performance**: Avoid expensive operations in hooks
 
 5. **Be Careful with Mutations**:
-    - Before hooks: Modify input parameters only when necessary
-    - After hooks: Be cautious when modifying returned data
+   - Before hooks: Modify input parameters only when necessary
+   - After hooks: Be cautious when modifying returned data
 
 ## Example: Complete Hook Configuration
 

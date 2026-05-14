@@ -6,10 +6,10 @@
 
 GoCRUD supports:
 
--   PostgreSQL
--   MySQL
--   SQLite
--   Microsoft SQL Server
+- PostgreSQL
+- MySQL
+- SQLite
+- Microsoft SQL Server
 
 ### Does GoCRUD support PATCH operations?
 
@@ -43,19 +43,19 @@ Make sure you:
 
 1. Import the correct database driver
 2. Use the supported driver package:
-    - PostgreSQL: `github.com/lib/pq`
-    - MySQL: `github.com/go-sql-driver/mysql`
-    - SQLite: `github.com/mattn/go-sqlite3`
-    - MSSQL: `github.com/microsoft/go-mssqldb`
+   - PostgreSQL: `github.com/lib/pq`
+   - MySQL: `github.com/go-sql-driver/mysql`
+   - SQLite: `github.com/mattn/go-sqlite3`
+   - MSSQL: `github.com/microsoft/go-mssqldb`
 
 ### Why aren't my relations working?
 
 Check that you:
 
 1. Used the correct tag format:
-    ```go
-    Documents []Document `db:"documents" src:"id" dest:"userId" table:"documents" json:"-"`
-    ```
+   ```go
+   Documents []Document `db:"documents" src:"id" dest:"userId" table:"documents" json:"-"`
+   ```
 2. Set up the foreign key fields correctly
 3. Have proper database permissions
 
@@ -74,17 +74,17 @@ GET /users?limit=10&skip=0
 Follow these guidelines:
 
 1. Always define table name using the `_` field:
-    ```go
-    _    struct{} `db:"users" json:"-"`
-    ```
+   ```go
+   _    struct{} `db:"users" json:"-"`
+   ```
 2. Make ID fields pointers for proper null handling:
-    ```go
-    ID   *int    `db:"id" json:"id"`
-    ```
+   ```go
+   ID   *int    `db:"id" json:"id"`
+   ```
 3. Use appropriate tags for validation:
-    ```go
-    Age  *int    `db:"age" json:"age" minimum:"0" maximum:"120"`
-    ```
+   ```go
+   Age  *int    `db:"age" json:"age" minimum:"0" maximum:"120"`
+   ```
 
 ### How can I optimize performance?
 
@@ -96,14 +96,14 @@ Follow these guidelines:
 ### How should I handle errors?
 
 1. Use hooks for validation:
-    ```go
-    BeforePost: func(ctx context.Context, models *[]User) error {
-        if err := validate(models); err != nil {
-            return fmt.Errorf("validation failed: %w", err)
-        }
-        return nil
-    }
-    ```
+   ```go
+   BeforePost: func(ctx context.Context, models *[]User) error {
+       if err := validate(models); err != nil {
+           return fmt.Errorf("validation failed: %w", err)
+       }
+       return nil
+   }
+   ```
 2. Return specific error types
 3. Log errors appropriately
 
@@ -142,17 +142,17 @@ BeforePost: func(ctx context.Context, models *[]User) error {
 
 Transactions are handled automatically for:
 
--   Bulk updates
--   Bulk deletes
--   Operations with hooks
+- Bulk updates
+- Bulk deletes
+- Operations with hooks
 
 ### How do I implement custom filtering?
 
 1. Define custom operations on field types
 2. Use the operations in queries:
-    ```http
-    GET /users?where={"id":{"_regexp":"^10.*"}}
-    ```
+   ```http
+   GET /users?where={"id":{"_regexp":"^10.*"}}
+   ```
 
 ### Can I extend the default operations?
 
@@ -168,21 +168,21 @@ Yes, by:
 
 #### "entity not found"
 
--   Check if the resource exists
--   Verify the ID is correct
--   Ensure proper database permissions
+- Check if the resource exists
+- Verify the ID is correct
+- Ensure proper database permissions
 
 #### "invalid identifier type"
 
--   Check model field types
--   Ensure ID fields are properly defined
--   Verify query parameter types
+- Check model field types
+- Ensure ID fields are properly defined
+- Verify query parameter types
 
 #### "validation failed"
 
--   Check input data format
--   Verify field constraints
--   Look for missing required fields
+- Check input data format
+- Verify field constraints
+- Look for missing required fields
 
 ### Debug Tips
 
@@ -198,18 +198,18 @@ Yes, by:
 
 Check the examples directory in the repository:
 
--   Basic CRUD
--   Relations
--   Custom operations
--   Different databases
--   Hooks implementation
+- Basic CRUD
+- Relations
+- Custom operations
+- Different databases
+- Hooks implementation
 
 ### How do I report issues?
 
 1. Check existing issues on GitHub
 2. Provide minimal reproduction
 3. Include:
-    - Go version
-    - Database type and version
-    - Complete error message
-    - Example code
+   - Go version
+   - Database type and version
+   - Complete error message
+   - Example code

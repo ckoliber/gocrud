@@ -16,11 +16,11 @@ Response:
 
 ```json
 {
-    "body": {
-        "id": 1,
-        "name": "John Doe",
-        "age": 30
-    }
+  "body": {
+    "id": 1,
+    "name": "John Doe",
+    "age": 30
+  }
 }
 ```
 
@@ -36,42 +36,42 @@ Response:
 
 ```json
 {
-    "body": [
-        {
-            "id": 1,
-            "name": "Alice",
-            "age": 28
-        },
-        {
-            "id": 2,
-            "name": "Bob",
-            "age": 32
-        }
-    ]
+  "body": [
+    {
+      "id": 1,
+      "name": "Alice",
+      "age": 28
+    },
+    {
+      "id": 2,
+      "name": "Bob",
+      "age": 32
+    }
+  ]
 }
 ```
 
 #### Query Parameters
 
--   `where`: JSON object for filtering
--   `order`: JSON object for sorting
--   `limit`: Maximum number of items to return
--   `skip`: Number of items to skip
+- `where`: JSON object for filtering
+- `order`: JSON object for sorting
+- `limit`: Maximum number of items to return
+- `skip`: Number of items to skip
 
 #### Filtering Operators
 
--   `_eq`: Equal to
--   `_neq`: Not equal to
--   `_gt`: Greater than
--   `_gte`: Greater than or equal to
--   `_lt`: Less than
--   `_lte`: Less than or equal to
--   `_like`: LIKE pattern matching
--   `_nlike`: NOT LIKE pattern matching
--   `_ilike`: Case-insensitive LIKE
--   `_nilike`: Case-insensitive NOT LIKE
--   `_in`: In array
--   `_nin`: Not in array
+- `_eq`: Equal to
+- `_neq`: Not equal to
+- `_gt`: Greater than
+- `_gte`: Greater than or equal to
+- `_lt`: Less than
+- `_lte`: Less than or equal to
+- `_like`: LIKE pattern matching
+- `_nlike`: NOT LIKE pattern matching
+- `_ilike`: Case-insensitive LIKE
+- `_nilike`: Case-insensitive NOT LIKE
+- `_in`: In array
+- `_nin`: Not in array
 
 ## POST Operations
 
@@ -95,11 +95,11 @@ Response:
 
 ```json
 {
-    "body": {
-        "id": 1,
-        "name": "John Doe",
-        "age": 30
-    }
+  "body": {
+    "id": 1,
+    "name": "John Doe",
+    "age": 30
+  }
 }
 ```
 
@@ -129,18 +129,18 @@ Response:
 
 ```json
 {
-    "body": [
-        {
-            "id": 1,
-            "name": "John Doe",
-            "age": 30
-        },
-        {
-            "id": 2,
-            "name": "Jane Smith",
-            "age": 25
-        }
-    ]
+  "body": [
+    {
+      "id": 1,
+      "name": "John Doe",
+      "age": 30
+    },
+    {
+      "id": 2,
+      "name": "Jane Smith",
+      "age": 25
+    }
+  ]
 }
 ```
 
@@ -166,11 +166,11 @@ Response:
 
 ```json
 {
-    "body": {
-        "id": 1,
-        "name": "John Smith",
-        "age": 31
-    }
+  "body": {
+    "id": 1,
+    "name": "John Smith",
+    "age": 31
+  }
 }
 ```
 
@@ -202,18 +202,18 @@ Response:
 
 ```json
 {
-    "body": [
-        {
-            "id": 1,
-            "name": "John Smith",
-            "age": 31
-        },
-        {
-            "id": 2,
-            "name": "Jane Doe",
-            "age": 26
-        }
-    ]
+  "body": [
+    {
+      "id": 1,
+      "name": "John Smith",
+      "age": 31
+    },
+    {
+      "id": 2,
+      "name": "Jane Doe",
+      "age": 26
+    }
+  ]
 }
 ```
 
@@ -231,11 +231,11 @@ Response:
 
 ```json
 {
-    "body": {
-        "id": 1,
-        "name": "John Smith",
-        "age": 31
-    }
+  "body": {
+    "id": 1,
+    "name": "John Smith",
+    "age": 31
+  }
 }
 ```
 
@@ -251,18 +251,18 @@ Response:
 
 ```json
 {
-    "body": [
-        {
-            "id": 3,
-            "name": "Alice Young",
-            "age": 22
-        },
-        {
-            "id": 4,
-            "name": "Bob Junior",
-            "age": 21
-        }
-    ]
+  "body": [
+    {
+      "id": 3,
+      "name": "Alice Young",
+      "age": 22
+    },
+    {
+      "id": 4,
+      "name": "Bob Junior",
+      "age": 21
+    }
+  ]
 }
 ```
 
@@ -308,18 +308,18 @@ GET /users?where={"_not":{"age":{"_eq":30}}}
 
 Common error responses:
 
--   `400 Bad Request`: Invalid input data
--   `404 Not Found`: Resource not found
--   `422 Unprocessable Entity`: Validation error
--   `500 Internal Server Error`: Server error
+- `400 Bad Request`: Invalid input data
+- `404 Not Found`: Resource not found
+- `422 Unprocessable Entity`: Validation error
+- `500 Internal Server Error`: Server error
 
 Error response format:
 
 ```json
 {
-    "error": {
-        "code": "NOT_FOUND",
-        "message": "entity not found"
-    }
+  "error": {
+    "code": "NOT_FOUND",
+    "message": "entity not found"
+  }
 }
 ```
