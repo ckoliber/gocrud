@@ -11,6 +11,12 @@
       "automerge": true
     },
     {
+      "description": "Automerge all GitHub Actions updates after one week",
+      "matchManagers": ["github-actions"],
+      "minimumReleaseAge": "7 days",
+      "automerge": true
+    },
+    {
       "description": "Group all Go updates together (gomod)",
       "matchManagers": ["gomod"],
       "matchPackageNames": ["go"],
