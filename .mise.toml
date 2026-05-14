@@ -1,6 +1,11 @@
+[env]
+GIT_CLIFF_CONFIG = "{{ config_root }}/.github/cliff.toml"
+
 [tools]
 go = "1.25.5"
+gh = "2.92.0"
 uv = "0.11.14"
+git-cliff = "2.13.1"
 "pipx:mkdocs" = { version = "1.6.1", uvx_args = "--with mkdocs-material" }
 
 [tasks.init]
@@ -13,4 +18,16 @@ run = "go test ./..."
 run = "go build"
 
 [tasks.release]
-run = "semantic-release"
+file = ".github/release.sh"
+
+[tasks."docs:build"]
+dir = "{{ config_root }}/docs"
+run = "mkdocs build"
+
+[tasks."docs:start"]
+dir = "{{ config_root }}/docs"
+run = "mkdocs serve"
+
+[tasks."docs:deploy"]
+dir = "{{ config_root }}/docs"
+run = "mkdocs gh-deploy --force"
