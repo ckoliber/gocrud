@@ -33,5 +33,5 @@ if is_release || is_prerelease; then
   git cliff --unreleased --tag $VERSION --output CHANGELOG.md
   gh release create "$VERSION" --title "$VERSION" --target "$(git rev-parse HEAD)" --notes-file CHANGELOG.md
 else
-  echo "Not a release or pre-release branch, skipping GitHub release."
+  echo "Not a release or pre-release branch, skipping release."
 fi
