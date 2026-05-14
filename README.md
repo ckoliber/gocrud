@@ -1,6 +1,6 @@
 # GoCRUD
 
-![GoCRUD](./docs/icon.svg)
+![GoCRUD](./docs/docs/icon.svg)
 
 GoCRUD is a powerful Go module that extends [Huma](https://huma.rocks/) to automatically generate CRUD APIs with built-in support for input validation and customizable hooks. It simplifies API development by automating repetitive tasks, allowing you to focus on your business logic.
 
@@ -31,10 +31,10 @@ go get github.com/ckoliber/gocrud
 
 ```go
 type User struct {
-    _    struct{} `db:"users" json:"-"`
-    ID   *int     `db:"id" json:"id" required:"false"`
-    Name *string  `db:"name" json:"name" required:"false" maxLength:"30" example:"David" doc:"User name"`
-    Age  *int     `db:"age" json:"age" required:"false" minimum:"1" maximum:"120" example:"25" doc:"User age from 1 to 120"`
+	_    struct{} `db:"users" json:"-"`
+	ID   *int     `db:"id" json:"id" required:"false"`
+	Name *string  `db:"name" json:"name" required:"false" maxLength:"30" example:"David" doc:"User name"`
+	Age  *int     `db:"age" json:"age" required:"false" minimum:"1" maximum:"120" example:"25" doc:"User age from 1 to 120"`
 }
 ```
 
@@ -44,21 +44,23 @@ type User struct {
 package main
 
 import (
-    "github.com/danielgtaylor/huma/v2"
-    "github.com/ckoliber/gocrud"
-    "database/sql"
-    _ "github.com/lib/pq" // Example: PostgreSQL driver
+	"database/sql"
+
+	"github.com/ckoliber/gocrud"
+	"github.com/danielgtaylor/huma/v2"
+	_ "github.com/lib/pq" // Example: PostgreSQL driver
 )
 
 func main() {
-    db, _ := sql.Open("postgres", "your-dsn-here")
-    api := huma.New("My API", "1.0.0")
+	db, _ := sql.Open("postgres", "your-dsn-here")
+	api := huma.New("My API", "1.0.0")
 
-    repo := gocrud.NewSQLRepository[User](db)
-    gocrud.Register(api, repo, &gocrud.Config[User]{})
+	repo := gocrud.NewSQLRepository[User](db)
+	gocrud.Register(api, repo, &gocrud.Config[User]{})
 
-    api.Serve()
+	api.Serve()
 }
+
 ```
 
 3. **Run Your API**:
@@ -77,22 +79,22 @@ GoCRUD provides a flexible configuration system to customize API behavior:
 
 ```go
 type Config[Model any] struct {
-    GetMode    Mode // Configure GET behavior (e.g., single or bulk)
-    PutMode    Mode // Configure PUT behavior
-    PostMode   Mode // Configure POST behavior
-    DeleteMode Mode // Configure DELETE behavior
+	GetMode    Mode // Configure GET behavior (e.g., single or bulk)
+	PutMode    Mode // Configure PUT behavior
+	PostMode   Mode // Configure POST behavior
+	DeleteMode Mode // Configure DELETE behavior
 
-    // Add before hooks for custom logic
-    BeforeGet    func(ctx context.Context, where *map[string]any, order *map[string]any, limit *int, skip *int) error
-    BeforePut    func(ctx context.Context, models *[]Model) error
-    BeforePost   func(ctx context.Context, models *[]Model) error
-    BeforeDelete func(ctx context.Context, where *map[string]any) error
+	// Add before hooks for custom logic
+	BeforeGet    func(ctx context.Context, where *map[string]any, order *map[string]any, limit *int, skip *int) error
+	BeforePut    func(ctx context.Context, models *[]Model) error
+	BeforePost   func(ctx context.Context, models *[]Model) error
+	BeforeDelete func(ctx context.Context, where *map[string]any) error
 
-    // Add after hooks for custom logic
-    AfterGet    func(ctx context.Context, models *[]Model) error
-    AfterPut    func(ctx context.Context, models *[]Model) error
-    AfterPost   func(ctx context.Context, models *[]Model) error
-    AfterDelete func(ctx context.Context, models *[]Model) error
+	// Add after hooks for custom logic
+	AfterGet    func(ctx context.Context, models *[]Model) error
+	AfterPut    func(ctx context.Context, models *[]Model) error
+	AfterPost   func(ctx context.Context, models *[]Model) error
+	AfterDelete func(ctx context.Context, models *[]Model) error
 }
 ```
 
@@ -100,14 +102,14 @@ type Config[Model any] struct {
 
 ```go
 config := &gocrud.Config[User]{
-    BeforePost: func(ctx context.Context, models *[]User) error {
-        for _, user := range *models {
-            if user.Age < 18 {
-                return fmt.Errorf("user must be at least 18 years old")
-            }
-        }
-        return nil
-    },
+	BeforePost: func(ctx context.Context, models *[]User) error {
+		for _, user := range *models {
+			if user.Age < 18 {
+				return fmt.Errorf("user must be at least 18 years old")
+			}
+		}
+		return nil
+	},
 }
 ```
 
@@ -119,17 +121,17 @@ GoCRUD supports filtering through relationships. You can query parent entities b
 
 ```go
 type User struct {
-    _         struct{}   `db:"users" json:"-"`
-    ID        *int       `db:"id" json:"id"`
-    Name      *string    `db:"name" json:"name"`
-    Documents []Document `db:"documents" src:"id" dest:"userId" table:"documents" json:"-"`
+	_         struct{}   `db:"users" json:"-"`
+	ID        *int       `db:"id" json:"id"`
+	Name      *string    `db:"name" json:"name"`
+	Documents []Document `db:"documents" src:"id" dest:"userId" table:"documents" json:"-"`
 }
 
 type Document struct {
-    _      struct{} `db:"documents" json:"-"`
-    ID     *int     `db:"id" json:"id"`
-    Title  string   `db:"title" json:"title"`
-    UserID int      `db:"userId" json:"userId"`
+	_      struct{} `db:"documents" json:"-"`
+	ID     *int     `db:"id" json:"id"`
+	Title  string   `db:"title" json:"title"`
+	UserID int      `db:"userId" json:"userId"`
 }
 ```
 
@@ -149,20 +151,20 @@ You can define custom operations for your model fields by implementing the `Oper
 type ID int
 
 func (_ *ID) Operations() map[string]func(string, ...string) string {
-    return map[string]func(string, ...string) string{
-        "_regexp": func(key string, values ...string) string {
-            return fmt.Sprintf("%s REGEXP %s", key, values[0])
-        },
-        "_iregexp": func(key string, values ...string) string {
-            return fmt.Sprintf("%s IREGEXP %s", key, values[0])
-        },
-    }
+	return map[string]func(string, ...string) string{
+		"_regexp": func(key string, values ...string) string {
+			return fmt.Sprintf("%s REGEXP %s", key, values[0])
+		},
+		"_iregexp": func(key string, values ...string) string {
+			return fmt.Sprintf("%s IREGEXP %s", key, values[0])
+		},
+	}
 }
 
 type User struct {
-    _    struct{} `db:"users" json:"-"`
-    ID   *ID      `db:"id" json:"id"`
-    Name *string  `db:"name" json:"name"`
+	_    struct{} `db:"users" json:"-"`
+	ID   *ID      `db:"id" json:"id"`
+	Name *string  `db:"name" json:"name"`
 }
 ```
 

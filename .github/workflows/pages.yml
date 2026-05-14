@@ -1,28 +1,17 @@
 name: Pages Pipeline
 
 on:
-    push:
-        branches: [main]
-        paths: [docs/**/*, mkdocs.yml]
+  push:
+    branches: [main]
+    paths: [docs/**/*, mkdocs.yml]
 
 jobs:
-    pages:
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout repository
-              uses: actions/checkout@v6
+  pages:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v6
+      - uses: jdx/mise-action@v4
+        with:
+          version: 2026.5.7
 
-            - uses: actions/setup-python@v6
-              with:
-                  python-version: 3.x
-
-            - run: echo "cache_id=$(date --utc '+%V')" >> $GITHUB_ENV
-            - uses: actions/cache@v5
-              with:
-                  key: mkdocs-material-${{ env.cache_id }}
-                  path: .cache
-                  restore-keys: |
-                      mkdocs-material-
-
-            - run: pip install mkdocs-material
-            - run: mkdocs gh-deploy --force
+      - run: mise run docs:deploy
