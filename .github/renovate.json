@@ -19,7 +19,8 @@
     {
       "description": "Group all Go updates together",
       "matchManagers": ["mise", "gomod"],
-      "matchDepNames": ["go"],
+      "matchDepNames": ["go", "golang"],
+      "rangeStrategy": "bump",
       "groupName": "Go updates"
     },
     {
