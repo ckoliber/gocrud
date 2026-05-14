@@ -6,16 +6,16 @@ GoCRUD is a powerful Go module that extends [Huma](https://huma.rocks/) to autom
 
 ## 🚀 Features
 
--   **Seamless Huma Integration**: Works effortlessly with the Huma API framework.
--   **Automatic CRUD Generation**: Instantly generate RESTful endpoints for your models.
--   **Input Validation**: Automatically validates input data.
--   **Customizable Hooks**: Add custom logic before or after CRUD operations.
--   **Clean and Maintainable**: Keeps your codebase organized and easy to maintain.
+- **Seamless Huma Integration**: Works effortlessly with the Huma API framework.
+- **Automatic CRUD Generation**: Instantly generate RESTful endpoints for your models.
+- **Input Validation**: Automatically validates input data.
+- **Customizable Hooks**: Add custom logic before or after CRUD operations.
+- **Clean and Maintainable**: Keeps your codebase organized and easy to maintain.
 
 ## 📋 Prerequisites
 
--   Go 1.22 or higher
--   A project using [Huma](https://huma.rocks/)
+- Go 1.22 or higher
+- A project using [Huma](https://huma.rocks/)
 
 ## 🛠️ Installation
 
@@ -65,11 +65,11 @@ func main() {
 
 Start your application, and GoCRUD will generate the following endpoints for the `User` model:
 
--   `GET /users` - List all users
--   `POST /users` - Create a new user
--   `GET /users/{id}` - Get a specific user
--   `PUT /users/{id}` - Update a user
--   `DELETE /users/{id}` - Delete a user
+- `GET /users` - List all users
+- `POST /users` - Create a new user
+- `GET /users/{id}` - Get a specific user
+- `PUT /users/{id}` - Update a user
+- `DELETE /users/{id}` - Delete a user
 
 ## 🔧 Configuration Options
 
@@ -190,9 +190,9 @@ This project is licensed under the MIT License. See the [LICENSE](LICENSE.md) fi
 
 ## ✨ Acknowledgments
 
--   Built on top of the [Huma](https://huma.rocks/) framework.
--   Inspired by best practices in the Go community.
--   Thanks to all contributors who have helped shape GoCRUD.
+- Built on top of the [Huma](https://huma.rocks/) framework.
+- Inspired by best practices in the Go community.
+- Thanks to all contributors who have helped shape GoCRUD.
 
 ---
 
