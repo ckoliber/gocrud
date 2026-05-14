@@ -11,8 +11,14 @@
       "automerge": true
     },
     {
-      "description": "Group all Go updates together",
-      "matchManagers": ["mise", "gomod"],
+      "description": "Group all Go updates together (gomod)",
+      "matchManagers": ["gomod"],
+      "matchPackageNames": ["go"],
+      "groupName": "Go updates"
+    },
+    {
+      "description": "Group all Go updates together (mise)",
+      "matchManagers": ["mise"],
       "matchDepNames": ["go"],
       "groupName": "Go updates"
     },
