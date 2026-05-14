@@ -4,15 +4,15 @@
   "enabledManagers": ["mise", "gomod", "github-actions"],
   "packageRules": [
     {
-      "description": "Automerge minor and patch updates after one week",
+      "description": "Automerge minor and patch updates after one day",
       "matchUpdateTypes": ["minor", "patch"],
-      "minimumReleaseAge": "7 days",
+      "minimumReleaseAge": "1 days",
       "automerge": true
     },
     {
-      "description": "Automerge all GitHub Actions updates after one week",
+      "description": "Automerge all GitHub Actions updates after one day",
       "matchManagers": ["github-actions"],
-      "minimumReleaseAge": "7 days",
+      "minimumReleaseAge": "1 days",
       "automerge": true
     },
     {
