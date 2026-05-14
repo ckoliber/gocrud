@@ -1,0 +1,16 @@
+[tools]
+go = "1.25.5"
+uv = "0.11.14"
+"pipx:mkdocs" = { version = "1.6.1", uvx_args = "--with mkdocs-material" }
+
+[tasks.init]
+run = "go get"
+
+[tasks.test]
+run = "go test ./..."
+
+[tasks.build]
+run = "go build"
+
+[tasks.release]
+run = "semantic-release"

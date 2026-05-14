@@ -108,11 +108,11 @@ type User struct {
 
 GoCRUD uses the following core tags:
 
--   `db`: Database column name or table name (on the `_` field)
--   `json`: JSON field name and options (e.g., `-` or `omitempty`)
--   `src`: Source field name in relationships
--   `dest`: Destination field name in relationships
--   `table`: Related table name in relationships
+- `db`: Database column name or table name (on the `_` field)
+- `json`: JSON field name and options (e.g., `-` or `omitempty`)
+- `src`: Source field name in relationships
+- `dest`: Destination field name in relationships
+- `table`: Related table name in relationships
 
 Additional validation tags (like `required`, `minimum`, `maximum`, etc.) are available through the [Huma framework validation tags](https://huma.rocks/).
 
@@ -130,9 +130,9 @@ type User struct {
 
 Relation tags:
 
--   `src`: Source field name in the current table
--   `dest`: Destination field name in the related table
--   `table`: Related table name
+- `src`: Source field name in the current table
+- `dest`: Destination field name in the related table
+- `table`: Related table name
 
 ## Custom Field Operations
 
