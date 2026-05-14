@@ -76,4 +76,4 @@ This project is licensed under the MIT License. See the [LICENSE](https://github
 
 ---
 
-Made with ❤️ by KoLiBer
+Made with ❤️ by Hoomaan
