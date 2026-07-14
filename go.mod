@@ -4,7 +4,7 @@ go 1.26.5
 
 require (
 	github.com/danielgtaylor/huma/v2 v2.38.0
-	github.com/mattn/go-sqlite3 v1.14.47
+	github.com/mattn/go-sqlite3 v1.14.48
 	github.com/stretchr/testify v1.11.1
 )
 
