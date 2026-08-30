@@ -1,8 +1,7 @@
 {
   "$schema": "https://docs.renovatebot.com/renovate-schema.json",
-  "extends": ["config:recommended", ":dependencyDashboard"],
+  "extends": ["config:recommended", ":dependencyDashboard", "schedule:weekly"],
   "enabledManagers": ["mise", "gomod", "github-actions"],
-  "minimumReleaseAge": "1 days",
   "packageRules": [
     {
       "description": "Automerge minor and patch updates",
