@@ -7,7 +7,7 @@ replace github.com/ckoliber/gocrud => ../
 require (
 	github.com/ckoliber/gocrud v0.0.0
 	github.com/danielgtaylor/huma/v2 v2.39.1
-	github.com/go-sql-driver/mysql v1.10.0
+	github.com/go-sql-driver/mysql v1.10.1
 	github.com/lib/pq v1.12.3
 	github.com/mattn/go-sqlite3 v1.14.50
 	github.com/microsoft/go-mssqldb v1.11.0
