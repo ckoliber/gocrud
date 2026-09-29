@@ -10,7 +10,7 @@ require (
 	github.com/go-sql-driver/mysql v1.10.1
 	github.com/lib/pq v1.12.3
 	github.com/mattn/go-sqlite3 v1.14.52
-	github.com/microsoft/go-mssqldb v1.11.0
+	github.com/microsoft/go-mssqldb v1.11.2
 )
 
 require (
@@ -29,6 +29,6 @@ require (
 	github.com/spf13/pflag v1.0.10 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
 	golang.org/x/crypto v0.55.0 // indirect
-	golang.org/x/net v0.57.0 // indirect
+	golang.org/x/net v0.58.0 // indirect
 	golang.org/x/text v0.41.0 // indirect
 )
