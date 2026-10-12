@@ -2,7 +2,7 @@
 GIT_CLIFF_CONFIG = "{{ config_root }}/.github/cliff.toml"
 
 [tools]
-go = "1.27.1"
+go = "1.27.2"
 gh = "2.102.0"
 uv = "0.12.23"
 git-cliff = "2.13.1"
