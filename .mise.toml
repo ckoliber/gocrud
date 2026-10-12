@@ -5,7 +5,7 @@ GIT_CLIFF_CONFIG = "{{ config_root }}/.github/cliff.toml"
 go = "1.27.2"
 gh = "2.102.0"
 uv = "0.12.23"
-git-cliff = "2.13.1"
+git-cliff = "2.14.2"
 "pipx:mkdocs" = { version = "1.6.1", uvx_args = "--with mkdocs-material" }
 
 [tasks.init]
