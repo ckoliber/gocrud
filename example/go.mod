@@ -1,6 +1,6 @@
 module github.com/ckoliber/gocrud/examples
 
-go 1.27.2
+go 1.27.3
 
 replace github.com/ckoliber/gocrud => ../
 
