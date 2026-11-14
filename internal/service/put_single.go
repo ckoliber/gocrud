@@ -27,6 +27,9 @@ func (s *CRUDService[Model]) PutSingle(ctx context.Context, i *PutSingleInput[Mo
 	// Get the ID field by name
 	_field := reflect.ValueOf(&i.Body).Elem().FieldByName(s.key)
 	for _field.Kind() == reflect.Pointer {
+		if _field.IsNil() {
+			_field.Set(reflect.New(_field.Type().Elem()))
+		}
 		_field = _field.Elem()
 	}
 

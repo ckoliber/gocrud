@@ -71,4 +71,17 @@ func TestRegister(t *testing.T) {
 			assert.Equal(t, result[i].Age, users[i].Age)
 		}
 	})
+
+	t.Run("PUT single", func(t *testing.T) {
+		// Update a user without an ID in the body, the path ID must be used
+		user := User{Name: "Dave", Age: 26}
+		resp := api.Put("/user/1", &user)
+		assert.Equal(t, resp.Code, 200)
+
+		var result User
+		assert.Empty(t, json.Unmarshal(resp.Body.Bytes(), &result))
+		assert.Equal(t, *result.ID, 1)
+		assert.Equal(t, result.Name, user.Name)
+		assert.Equal(t, result.Age, user.Age)
+	})
 }
