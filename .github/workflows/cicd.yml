@@ -9,7 +9,7 @@ on:
 
 jobs:
   cicd:
-    uses: ckoliber/dotfiles/.github/workflows/mise.yml@main
+    uses: ckoliber/.github/.github/workflows/mise.yml@main
     permissions:
       contents: write
     with:
