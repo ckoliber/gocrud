@@ -19,16 +19,20 @@ type MySQLRepository[Model any] struct {
 func NewMySQLRepository[Model any](db *sql.DB) *MySQLRepository[Model] {
 	// Define SQL operators and helper functions for query building
 	operations := map[string]func(string, ...string) string{
-		"_eq":     func(key string, values ...string) string { return fmt.Sprintf("%s = %s", key, values[0]) },
-		"_neq":    func(key string, values ...string) string { return fmt.Sprintf("%s != %s", key, values[0]) },
-		"_gt":     func(key string, values ...string) string { return fmt.Sprintf("%s > %s", key, values[0]) },
-		"_gte":    func(key string, values ...string) string { return fmt.Sprintf("%s >= %s", key, values[0]) },
-		"_lt":     func(key string, values ...string) string { return fmt.Sprintf("%s < %s", key, values[0]) },
-		"_lte":    func(key string, values ...string) string { return fmt.Sprintf("%s <= %s", key, values[0]) },
-		"_like":   func(key string, values ...string) string { return fmt.Sprintf("%s LIKE %s", key, values[0]) },
-		"_nlike":  func(key string, values ...string) string { return fmt.Sprintf("%s NOT LIKE %s", key, values[0]) },
-		"_ilike":  func(key string, values ...string) string { return fmt.Sprintf("%s ILIKE %s", key, values[0]) },
-		"_nilike": func(key string, values ...string) string { return fmt.Sprintf("%s NOT ILIKE %s", key, values[0]) },
+		"_eq":    func(key string, values ...string) string { return fmt.Sprintf("%s = %s", key, values[0]) },
+		"_neq":   func(key string, values ...string) string { return fmt.Sprintf("%s != %s", key, values[0]) },
+		"_gt":    func(key string, values ...string) string { return fmt.Sprintf("%s > %s", key, values[0]) },
+		"_gte":   func(key string, values ...string) string { return fmt.Sprintf("%s >= %s", key, values[0]) },
+		"_lt":    func(key string, values ...string) string { return fmt.Sprintf("%s < %s", key, values[0]) },
+		"_lte":   func(key string, values ...string) string { return fmt.Sprintf("%s <= %s", key, values[0]) },
+		"_like":  func(key string, values ...string) string { return fmt.Sprintf("%s LIKE %s", key, values[0]) },
+		"_nlike": func(key string, values ...string) string { return fmt.Sprintf("%s NOT LIKE %s", key, values[0]) },
+		"_ilike": func(key string, values ...string) string {
+			return fmt.Sprintf("LOWER(%s) LIKE LOWER(%s)", key, values[0])
+		},
+		"_nilike": func(key string, values ...string) string {
+			return fmt.Sprintf("LOWER(%s) NOT LIKE LOWER(%s)", key, values[0])
+		},
 		"_in": func(key string, values ...string) string {
 			return fmt.Sprintf("%s IN (%s)", key, strings.Join(values, ","))
 		},
@@ -62,6 +66,9 @@ func (r *MySQLRepository[Model]) Get(ctx context.Context, where *map[string]any,
 	}
 	if limit != nil && *limit > 0 {
 		query += fmt.Sprintf(" LIMIT %d", *limit)
+	} else if skip != nil && *skip > 0 {
+		// OFFSET requires LIMIT, the maximum value means no limit
+		query += " LIMIT 18446744073709551615"
 	}
 	if skip != nil && *skip > 0 {
 		query += fmt.Sprintf(" OFFSET %d", *skip)
