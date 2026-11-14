@@ -7,11 +7,9 @@ on:
 
 jobs:
   pages:
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v7
-      - uses: jdx/mise-action@v4
-        with:
-          version: 2026.10.25
-
-      - run: mise run docs:deploy
+    uses: ckoliber/dotfiles/.github/workflows/mise.yml@main
+    permissions:
+      contents: write
+    with:
+      cache-tools: uv
+      script: mise run docs:deploy

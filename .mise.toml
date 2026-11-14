@@ -1,24 +1,16 @@
-[env]
-GIT_CLIFF_CONFIG = "{{ config_root }}/.github/cliff.toml"
-
 [tools]
 go = "1.27.3"
-gh = "2.102.0"
 uv = "0.13.7"
-git-cliff = "2.14.2"
-"pipx:mkdocs" = { version = "1.6.1", uvx_args = "--with mkdocs-material" }
+"pypi:mkdocs" = { version = "1.6.1", uvx_args = "--with mkdocs-material" }
 
-[tasks.init]
+[tasks."go:deps"]
 run = "go get"
 
-[tasks.test]
+[tasks."go:test"]
 run = "go test ./..."
 
-[tasks.build]
+[tasks."go:build"]
 run = "go build"
-
-[tasks.release]
-file = ".github/release.sh"
 
 [tasks."docs:build"]
 dir = "{{ config_root }}/docs"
