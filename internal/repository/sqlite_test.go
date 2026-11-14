@@ -6,27 +6,15 @@ import (
 	"testing"
 
 	_ "github.com/mattn/go-sqlite3"
+	"github.com/stretchr/testify/require"
 )
 
 func TestSQLiteRepository(t *testing.T) {
-	db, err := sql.Open("sqlite3", ":memory:?cache=shared")
-	if err != nil {
-		panic(err)
-	}
+	db, err := sql.Open("sqlite3", "file:repository?mode=memory&cache=shared")
+	require.NoError(t, err)
 	defer db.Close()
 
-	_, err = db.Exec(`
-		CREATE TABLE users (
-			id INTEGER PRIMARY KEY AUTOINCREMENT,
-			name TEXT,
-			age INTEGER
-		)
-	`)
-	if err != nil {
-		panic(err)
-	}
+	createUsersTable(t, db, `CREATE TABLE users (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, age INTEGER)`)
 
-	repo := NewSQLiteRepository[User](db)
-
-	UnitTests(context.Background(), t, repo)
+	UnitTests(context.Background(), t, NewSQLiteRepository[User](db))
 }

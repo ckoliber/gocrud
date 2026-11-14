@@ -22,7 +22,7 @@ type User struct {
 
 func TestRegister(t *testing.T) {
 	// Create a new in-memory SQLite database
-	db, err := sql.Open("sqlite3", ":memory:?cache=shared")
+	db, err := sql.Open("sqlite3", "file:api?mode=memory&cache=shared")
 	if err != nil {
 		panic(err)
 	}

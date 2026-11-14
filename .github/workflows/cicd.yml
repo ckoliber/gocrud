@@ -14,7 +14,7 @@ jobs:
       contents: write
     with:
       fetch-depth: 0
-      cache-tools: uv
+      cache-tools: uv,go
       script: |
         mise run go:deps
         mise run go:test
