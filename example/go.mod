@@ -8,7 +8,6 @@ require (
 	github.com/ckoliber/gocrud v0.0.0
 	github.com/danielgtaylor/huma/v2 v2.39.1
 	github.com/go-sql-driver/mysql v1.10.1
-	github.com/golang-migrate/migrate/v4 v4.20.1
 	github.com/lib/pq v1.12.3
 	github.com/mattn/go-sqlite3 v1.14.53
 	github.com/microsoft/go-mssqldb v1.11.2
@@ -25,6 +24,6 @@ require (
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/x448/float16 v0.8.4 // indirect
-	golang.org/x/crypto v0.55.0 // indirect
-	golang.org/x/text v0.41.0 // indirect
+	golang.org/x/crypto v0.58.0 // indirect
+	golang.org/x/text v0.43.0 // indirect
 )
