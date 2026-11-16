@@ -1,4 +1,4 @@
-include = ["git::https://github.com/ckoliber/.github.git//always.toml?ref=main"]
+include = ["git::https://github.com/ckoliber/.github.git//default.toml?ref=main"]
 task_config.includes = [
   "git::https://github.com/ckoliber/.github.git//tasks?ref=main",
 ]
