@@ -5,7 +5,7 @@ task_config.includes = [
 
 [tools]
 go = "1.27.4"
-uv = "0.13.7"
+uv = "0.13.9"
 "pypi:mkdocs" = { version = "1.6.1", uvx_args = "--with mkdocs-material" }
 
 [tasks."go:deps"]
