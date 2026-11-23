@@ -4,7 +4,7 @@ task_config.includes = [
 ]
 
 [tools]
-go = "1.27.3"
+go = "1.27.4"
 uv = "0.13.7"
 "pypi:mkdocs" = { version = "1.6.1", uvx_args = "--with mkdocs-material" }
 
